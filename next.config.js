@@ -1,4 +1,4 @@
-const bsconfig = require('./bsconfig.json');
+const bsconfig = require("./bsconfig.json");
 const fs = require("fs");
 
 const transpileModules = ["rescript"].concat(bsconfig["bs-dependencies"]);
@@ -33,14 +33,12 @@ const config = {
         type: "javascript/auto",
         resolve: {
           fullySpecified: false,
-        }
+        },
       });
     }
-    return config
+    return config;
   },
-  future: {
-    webpack5: isWebpack5
-  }
+  webpack5: isWebpack5,
 };
 
 module.exports = withTM(config);
