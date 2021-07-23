@@ -1,13 +1,10 @@
 {
-  "name": "rescript-nextjs-template",
+  "name": "rescript-nextjs-mongodb-app",
   "namespace": false,
   "reason": { "react-jsx": 3 },
-  "refmt": 3,
   "bs-dependencies": ["@rescript/react"],
   "ppx-flags": [],
-  "sources": [
-    { "dir": "src", "subdirs": true }
-  ],
+  "sources": [{ "dir": "src", "subdirs": true }],
   "package-specs": {
     "module": "es6",
     "in-source": true
