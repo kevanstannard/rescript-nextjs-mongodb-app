@@ -3,7 +3,7 @@
 import * as React from "react";
 import Link from "next/link";
 
-function MainLayout$Navigation(Props) {
+function Layout_Main$Navigation(Props) {
   return React.createElement("nav", {
               className: "p-2 h-12 flex border-b border-gray-200 justify-between items-center text-sm"
             }, React.createElement(Link, {
@@ -37,7 +37,7 @@ function MainLayout$Navigation(Props) {
                     }, "Github")));
 }
 
-function MainLayout(Props) {
+function Layout_Main(Props) {
   var children = Props.children;
   var minWidth = {
     minWidth: "20rem"
@@ -47,12 +47,12 @@ function MainLayout(Props) {
               style: minWidth
             }, React.createElement("div", {
                   className: "max-w-5xl w-full lg:w-3/4 text-gray-900 font-base"
-                }, React.createElement(MainLayout$Navigation, {}), React.createElement("main", {
+                }, React.createElement(Layout_Main$Navigation, {}), React.createElement("main", {
                       className: "mt-4 mx-4"
                     }, children)));
 }
 
-var make = MainLayout;
+var make = Layout_Main;
 
 export {
   make ,

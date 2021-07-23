@@ -1,11 +1,11 @@
-import 'styles/main.css'
+import "styles/main.css";
 
 // Note:
 // Just renaming $$default to ResApp alone
 // doesn't help FastRefresh to detect the
 // React component, since an alias isn't attached
 // to the original React component function name.
-import ResApp from "src/App.mjs"
+import ResApp from "src/pages/Page_App.mjs";
 
 // Note:
 // We need to wrap the make call with
@@ -15,5 +15,5 @@ import ResApp from "src/App.mjs"
 // If you don't do this, your Fast-Refresh will
 // not work!
 export default function App(props) {
-  return <ResApp {...props}/>;
+  return <ResApp {...props} />;
 }

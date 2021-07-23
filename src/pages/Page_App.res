@@ -1,3 +1,5 @@
+module Main = Layout_Main
+
 // This type is based on the getInitialProps return value.
 // If you are using getServerSideProps or getStaticProps, you probably
 // will never need this
@@ -14,7 +16,6 @@ type props = {
   pageProps: pageProps,
 }
 
-
 // We are not using `@react.component` since we will never
 // use <App/> within our ReScript code.
 // It's only used within `pages/_app.js`
@@ -27,9 +28,9 @@ let default = (props: props): React.element => {
 
   switch router.route {
   | "/examples" =>
-    <MainLayout>
+    <Main>
       <h1 className="font-bold"> {React.string("Examples Section")} </h1> <div> content </div>
-    </MainLayout>
-  | _ => <MainLayout> content </MainLayout>
+    </Main>
+  | _ => <Main> content </Main>
   }
 }
