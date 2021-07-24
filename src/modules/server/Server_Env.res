@@ -1,0 +1,18 @@
+let env = Node.Process.process["env"]
+
+let getString = (name: string): string => {
+  let value = Js.Dict.get(env, name)
+  switch value {
+  | None => Js.Exn.raiseError("Environment variable " ++ name ++ " is missing")
+  | Some(value) => value
+  }
+}
+
+let getInt = (name: string): int => {
+  let value = getString(name)
+  let valueInt = Belt.Int.fromString(value)
+  switch valueInt {
+  | None => Js.Exn.raiseError("Environment variable " ++ name ++ " is invalid")
+  | Some(value) => value
+  }
+}

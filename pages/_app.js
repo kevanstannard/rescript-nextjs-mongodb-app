@@ -5,7 +5,7 @@ import "styles/main.css";
 // doesn't help FastRefresh to detect the
 // React component, since an alias isn't attached
 // to the original React component function name.
-import ResApp from "src/pages/Page_App.mjs";
+import ResApp from "src/pages/app/Page_App.mjs";
 
 // Note:
 // We need to wrap the make call with

@@ -21,8 +21,27 @@ module GetServerSideProps = {
     res: Res.t,
   }
 
+  // See: https://github.com/zeit/next.js/blob/canary/packages/next/types/index.d.ts
+  // export type GetServerSidePropsResult<P> =
+  // | { props: P }
+  // | { redirect: Redirect }
+  // | { notFound: true }
+
+  type redirect = {
+    destination: string,
+    permanent: bool,
+  }
+
+  type result<'props> = {
+    props: option<'props>,
+    redirect: option<redirect>,
+    notFound: option<bool>,
+  }
+
   // The definition of a getServerSideProps function
-  type t<'props, 'params, 'previewData> = context<'props, 'params, 'previewData> => Js.Promise.t<{"props": 'props}>
+  type t<'props, 'params, 'previewData> = context<'props, 'params, 'previewData> => Js.Promise.t<
+    result<'props>,
+  >
 }
 
 module GetStaticProps = {

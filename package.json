@@ -4,6 +4,7 @@
   "author": "Kevan Stannard <kevanstannard@users.noreply.github.com>",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ryyppy/rescript-promise": "^2.1.0",
     "next": "11.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2"
@@ -24,6 +25,7 @@
     "@rescript/react": "0.10.3",
     "autoprefixer": "10.3.1",
     "cssnano": "5.0.7",
+    "dotenv": "^10.0.0",
     "gentype": "4.1",
     "next-transpile-modules": "8.0.0",
     "postcss": "8.3.6",

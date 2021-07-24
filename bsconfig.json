@@ -1,21 +1,9 @@
 {
   "name": "rescript-nextjs-mongodb-app",
   "namespace": false,
-  "reason": { "react-jsx": 3 },
-  "bs-dependencies": ["@rescript/react"],
-  "ppx-flags": [],
   "sources": [{ "dir": "src", "subdirs": true }],
-  "package-specs": {
-    "module": "es6",
-    "in-source": true
-  },
+  "package-specs": { "module": "es6", "in-source": true },
   "suffix": ".mjs",
-  "warnings": {
-    "number": "-3",
-    "error": "+101+8"
-  },
-  "gentypeconfig": {
-    "language": "untyped",
-    "shims": []
-  }
+  "bs-dependencies": ["@rescript/react", "@ryyppy/rescript-promise"],
+  "reason": { "react-jsx": 3 }
 }

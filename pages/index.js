@@ -1,4 +1,7 @@
-import IndexRes from "src/pages/Page_Index.mjs";
+import IndexRes from "src/pages/index/Page_Index.mjs";
+
+// This can be re-exported as is (no Fast-Refresh issues)
+export { getServerSideProps } from "src/pages/index/Page_Index_Server.mjs";
 
 // Note:
 // We need to wrap the make call with

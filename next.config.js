@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const bsconfig = require("./bsconfig.json");
 const fs = require("fs");
 
