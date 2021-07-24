@@ -1,16 +1,31 @@
+module Req = {
+  type t
+
+  @set_index
+  external set: (t, string, 'a) => unit = ""
+
+  @get_index
+  external get: (t, string) => option<'a> = ""
+
+  @get_index
+  external get_UNSAFE: (t, string) => 'a = ""
+
+  @get
+  external body: t => Js.Nullable.t<Js.Json.t> = "body"
+
+  @get
+  external url: t => string = "url"
+}
+
+module Res = {
+  type t
+
+  @send external setHeader: (t, string, string) => unit = "setHeader"
+  @send external write: (t, string) => unit = "write"
+  @send external end: t => unit = "end"
+}
+
 module GetServerSideProps = {
-  module Req = {
-    type t
-  }
-
-  module Res = {
-    type t
-
-    @send external setHeader: (t, string, string) => unit = "setHeader"
-    @send external write: (t, string) => unit = "write"
-    @send external end: t => unit = "end"
-  }
-
   // See: https://github.com/zeit/next.js/blob/canary/packages/next/types/index.d.ts
   type context<'props, 'params, 'previewData> = {
     params: 'params,

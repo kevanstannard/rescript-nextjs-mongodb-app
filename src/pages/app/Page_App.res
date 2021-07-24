@@ -26,11 +26,8 @@ let default = (props: props): React.element => {
 
   let content = React.createElement(component, pageProps)
 
+  // Specify layouts here to avoid re-rendering layouts on page changes
   switch router.route {
-  | "/examples" =>
-    <Main>
-      <h1 className="font-bold"> {React.string("Examples Section")} </h1> <div> content </div>
-    </Main>
   | _ => <Main> content </Main>
   }
 }

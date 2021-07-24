@@ -1,1 +1,5 @@
-type props = {env: string}
+type props = {
+  env: string,
+  connected: bool,
+  count: int,
+}

@@ -3,7 +3,12 @@
 import * as React from "react";
 
 function $$default(props) {
-  return React.createElement("div", undefined, "Env is ", props.env);
+  var envMessage = "Env is " + props.env;
+  var connectedMessage = "Connected is " + (
+    props.connected ? "true" : "false"
+  );
+  var countMessage = "Count is " + String(props.count);
+  return React.createElement("div", undefined, envMessage, React.createElement("br", undefined), connectedMessage, React.createElement("br", undefined), countMessage);
 }
 
 export {

@@ -7,20 +7,11 @@ import * as Router from "next/router";
 var PageComponent = {};
 
 function $$default(props) {
-  var router = Router.useRouter();
+  Router.useRouter();
   var content = React.createElement(props.Component, props.pageProps);
-  var match = router.route;
-  if (match === "/examples") {
-    return React.createElement(Layout_Main.make, {
-                children: null
-              }, React.createElement("h1", {
-                    className: "font-bold"
-                  }, "Examples Section"), React.createElement("div", undefined, content));
-  } else {
-    return React.createElement(Layout_Main.make, {
-                children: content
-              });
-  }
+  return React.createElement(Layout_Main.make, {
+              children: content
+            });
 }
 
 var Main;
