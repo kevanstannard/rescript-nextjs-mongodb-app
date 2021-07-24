@@ -1,27 +1,35 @@
 module Req = {
   type t
 
-  @set_index
-  external set: (t, string, 'a) => unit = ""
-
-  @get_index
-  external get: (t, string) => option<'a> = ""
-
-  @get_index
-  external get_UNSAFE: (t, string) => 'a = ""
-
-  @get
-  external body: t => Js.Nullable.t<Js.Json.t> = "body"
-
-  @get
-  external url: t => string = "url"
+  @set_index external set: (t, string, 'a) => unit = ""
+  @get_index external get: (t, string) => Js.Nullable.t<'a> = ""
+  @get_index external get_UNSAFE: (t, string) => 'a = ""
+  @get external body: t => Js.Nullable.t<'a> = "body"
+  @get external url: t => string = "url"
 }
 
 module Res = {
   type t
 
+  // https://en.wikipedia.org/wiki/List_of_HTTP_status_codes
+  @set
+  external statusCode: (
+    t,
+    @int
+    [
+      | @as(200) #Success
+      | @as(400) #BadRequest
+      | @as(403) #Forbidden
+      | @as(404) #NotFound
+      | @as(500) #ServerError
+    ],
+  ) => unit = "statusCode"
+
   @send external setHeader: (t, string, string) => unit = "setHeader"
-  @send external write: (t, string) => unit = "write"
+  @send external sendJson: (t, {..}) => unit = "send"
+  @send external sendString: (t, string) => unit = "send"
+  @send external writeString: (t, string) => unit = "write"
+  @send external endString: (t, string) => unit = "end"
   @send external end: t => unit = "end"
 }
 

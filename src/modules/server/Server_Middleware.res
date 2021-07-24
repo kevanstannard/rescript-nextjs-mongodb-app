@@ -19,13 +19,13 @@ module Mongo = {
   }
 }
 
-let defaultMiddleware = () => {
-  NextConnect.nc()->NextConnect.useAsync(Mongo.middlewareAsync())
+let all = () => {
+  NextConnect.nc()->NextConnect.useMiddlewareAsync(Mongo.middlewareAsync())
 }
 
-type requestData = {client: MongoDb.MongoClient.t}
-
 let run = NextConnect.run
+
+type requestData = {client: MongoDb.MongoClient.t}
 
 let getRequestData = req => {
   let client = Mongo.getClient(req)

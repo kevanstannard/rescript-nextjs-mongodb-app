@@ -20,7 +20,7 @@ function makeResult(count) {
 
 function getServerSideProps(context) {
   var req = context.req;
-  return Server_Middleware.run(Server_Middleware.defaultMiddleware(undefined), req, context.res).then(function (param) {
+  return Server_Middleware.run(Server_Middleware.all(undefined), req, context.res).then(function (param) {
               var match = Server_Middleware.getRequestData(req);
               return Server_Test.getStats(match.client).then(function (stats) {
                           return Promise.resolve(makeResult(stats.count));

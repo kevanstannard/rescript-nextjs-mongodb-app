@@ -31,7 +31,7 @@ var Mongo = {
   middlewareAsync: middlewareAsync
 };
 
-function defaultMiddleware(param) {
+function all(param) {
   return NextConnect().use(function (param, param$1, param$2) {
               return middlewareAsync(undefined, param, param$1, param$2);
             });
@@ -50,7 +50,7 @@ function getRequestData(req) {
 
 export {
   Mongo ,
-  defaultMiddleware ,
+  all ,
   run ,
   getRequestData ,
   
