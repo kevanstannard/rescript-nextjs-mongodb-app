@@ -26,6 +26,11 @@ function Layout_Main$Navigation(Props) {
                             className: "px-3"
                           }, "Home")
                     }), React.createElement(Link, {
+                      href: "/signup",
+                      children: React.createElement("a", {
+                            className: "px-3"
+                          }, "Signup")
+                    }), React.createElement(Link, {
                       href: "/examples",
                       children: React.createElement("a", {
                             className: "px-3"
