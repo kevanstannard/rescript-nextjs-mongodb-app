@@ -1,44 +1,42 @@
-module ObjectID = {
+// MongoDB v4.4.7
+
+module ObjectID: {
+  type t
+  let make: unit => t
+  let toString: t => string
+  let fromString: string => result<t, string>
+} = {
   type t
 
-  @module("mongodb") @scope("ObjectID")
-  external isValid: 'a => bool = "isValid"
+  @module("mongodb") @new external make: unit => t = "ObjectID"
+
+  @send external toString: t => string = "toHexString"
 
   // Unsafe because it can throw a runtime error
   @module("mongodb") @scope("ObjectID")
-  external createFromHexString_UNSAFE: string => t = "createFromHexString"
+  external fromString_UNSAFE: string => t = "createFromHexString"
 
-  let createFromHexString = value => {
+  let fromString = (value: string) => {
     try {
-      Some(createFromHexString_UNSAFE(value))
+      Ok(fromString_UNSAFE(value))
     } catch {
-    | _ => None
+    | Js.Exn.Error(obj) =>
+      switch Js.Exn.message(obj) {
+      | Some(reason) => Error(reason)
+      | None => Error("Unknown")
+      }
+    | _ => Error("Unknown")
     }
   }
-
-  @send
-  external toHexString: t => string = "toHexString"
-
-  @module("mongodb") @new
-  external make: unit => t = "ObjectID"
-
-  let makeAsString = (): string => make()->toHexString
 }
 
 module Cursor = {
   type t
 
-  @send
-  external close: t => t = "close"
-
-  @send
-  external limit: (t, int) => t = "limit"
-
-  @send
-  external sort: (t, {..}) => t = "sort"
-
-  @send
-  external toArray: t => Js.Promise.t<Js.Json.t> = "toArray"
+  @send external close: t => t = "close"
+  @send external limit: (t, int) => t = "limit"
+  @send external sort: (t, {..}) => t = "sort"
+  @send external toArray: t => Js.Promise.t<array<'a>> = "toArray"
 }
 
 module Collection = {
@@ -52,9 +50,8 @@ module Collection = {
   }
 
   type insertOneResult = {
-    insertedCount: int,
+    acknowledged: bool,
     insertedId: ObjectID.t,
-    ops: array<Js.Json.t>,
   }
 
   type updateOneResult = {
@@ -62,23 +59,12 @@ module Collection = {
     upsertedId: ObjectID.t,
   }
 
-  @send
-  external stats: t => Js.Promise.t<statsResult> = "stats"
-
-  @send
-  external find: (t, {..}) => Cursor.t = "find"
-
-  @send
-  external findWithOptions: (t, {..}, {..}) => Cursor.t = "find"
-
-  @send
-  external findOne: (t, {..}) => Js.Promise.t<Js.Nullable.t<Js.Json.t>> = "findOne"
-
-  @send
-  external insertOne: (t, Js.Json.t) => Js.Promise.t<insertOneResult> = "insertOne"
-
-  @send
-  external updateOne_INTERNAL: (t, {..}, {..}) => Js.Promise.t<updateOneResult> = "updateOne"
+  @send external stats: t => Js.Promise.t<statsResult> = "stats"
+  @send external find: (t, {..}) => Cursor.t = "find"
+  @send external findWithOptions: (t, {..}, {..}) => Cursor.t = "find"
+  @send external findOne: (t, {..}) => Js.Promise.t<Js.Undefined.t<'a>> = "findOne"
+  @send external insertOne: (t, 'a) => Js.Promise.t<insertOneResult> = "insertOne"
+  @send external updateOne_INTERNAL: (t, {..}, {..}) => Js.Promise.t<updateOneResult> = "updateOne"
 
   let updateOneWithSet = (collection, id: ObjectID.t, update: {..}): Js.Promise.t<
     updateOneResult,
@@ -89,21 +75,16 @@ module Db = {
   type t
   type collectionName = string
 
-  @send
-  external collection: (t, collectionName) => Collection.t = "collection"
+  @send external collection: (t, collectionName) => Collection.t = "collection"
 }
 
 module MongoClient = {
   type t
+  type dbName = string
 
-  @send
-  external close: (t, bool) => Js.Promise.t<unit> = "close"
-
-  @send
-  external db: t => Db.t = "db"
-
-  @send
-  external dbWithName: (t, string) => Db.t = "db"
+  @send external close: (t, bool) => Js.Promise.t<unit> = "close"
+  @send external db: t => Db.t = "db"
+  @send external dbWithName: (t, dbName) => Db.t = "db"
 }
 
 type connectURI = string
