@@ -5,6 +5,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ryyppy/rescript-promise": "2.1.0",
+    "bcrypt": "5.0.1",
     "mongodb": "4.0.1",
     "nanoid": "3.1.23",
     "next": "11.0.1",

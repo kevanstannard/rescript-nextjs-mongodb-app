@@ -2,42 +2,10 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Js_exn from "rescript/lib/es6/js_exn.js";
+import * as Bcrypt from "bcrypt";
+import * as Nanoid from "nanoid";
 import * as MongoDb from "../../bindings/MongoDb.mjs";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
-
-function toDbUser(user) {
-  var objectId = MongoDb.ObjectID.fromString(user._id);
-  if (objectId.TAG !== /* Ok */0) {
-    return {
-            TAG: /* Error */1,
-            _0: objectId._0
-          };
-  }
-  var user__id = objectId._0;
-  var user_email = user.email;
-  var user_emailVerified = user.emailVerified;
-  var user_password = user.password;
-  var user$1 = {
-    _id: user__id,
-    email: user_email,
-    emailVerified: user_emailVerified,
-    password: user_password
-  };
-  return {
-          TAG: /* Ok */0,
-          _0: user$1
-        };
-}
-
-function toCommonUser(user) {
-  return {
-          _id: Curry._1(MongoDb.ObjectID.toString, user._id),
-          email: user.email,
-          emailVerified: user.emailVerified,
-          password: user.password
-        };
-}
 
 function getCollection(client) {
   var db = client.db();
@@ -48,34 +16,97 @@ function getStats(client) {
   return getCollection(client).stats();
 }
 
-function insertUser(client, user) {
-  var dbUser = toDbUser(user);
-  return getCollection(client).insertOne(dbUser);
+function hashPassword(password) {
+  return Bcrypt.genSalt(10).then(function (salt) {
+              return Bcrypt.hash(password, salt);
+            });
+}
+
+function comparePasswords(password, passwordHash) {
+  return Bcrypt.compare(password, passwordHash);
+}
+
+function makeActivationKey(param) {
+  return Curry._1(Nanoid.nanoid, undefined);
+}
+
+function makeResetPasswordKey(param) {
+  return Curry._1(Nanoid.nanoid, undefined);
+}
+
+function makeEmailChangeKey(param) {
+  return Curry._1(Nanoid.nanoid, undefined);
+}
+
+function signupToDbUser(signup) {
+  var now = new Date();
+  return hashPassword(signup.password).then(function (passwordHash) {
+              return Promise.resolve({
+                          _id: Curry._1(MongoDb.ObjectId.make, undefined),
+                          email: signup.email,
+                          emailVerified: false,
+                          passwordHash: passwordHash,
+                          created: now,
+                          updated: now,
+                          activationKey: Curry._1(Nanoid.nanoid, undefined),
+                          isActivated: false,
+                          resetPasswordKey: undefined,
+                          resetPasswordExpiry: undefined
+                        });
+            });
+}
+
+function findUserByObjectId(client, objectId) {
+  return getCollection(client).findOne({
+                _id: objectId
+              }).then(function (prim) {
+              if (prim === undefined) {
+                return ;
+              } else {
+                return Caml_option.some(prim);
+              }
+            });
 }
 
 function findUserById(client, userId) {
-  var userId$1 = MongoDb.ObjectID.fromString(userId);
+  var userId$1 = MongoDb.ObjectId.fromString(userId);
   if (userId$1.TAG === /* Ok */0) {
     return getCollection(client).findOne({
                   _id: userId$1._0
-                }).then(function (dbUser) {
-                return Belt_Option.map(dbUser === undefined ? undefined : Caml_option.some(dbUser), toCommonUser);
+                }).then(function (prim) {
+                if (prim === undefined) {
+                  return ;
+                } else {
+                  return Caml_option.some(prim);
+                }
               });
   } else {
     return Promise.resolve(undefined);
   }
 }
 
+function signupUser(client, signup) {
+  return signupToDbUser(signup).then(function (dbUser) {
+              return getCollection(client).insertOne(dbUser).then(function (insertResult) {
+                          return findUserByObjectId(client, insertResult.insertedId);
+                        });
+            });
+}
+
 function findUserByEmail(client, email) {
   return getCollection(client).findOne({
                 email: email
-              }).then(function (dbUser) {
-              return Belt_Option.map(dbUser === undefined ? undefined : Caml_option.some(dbUser), toCommonUser);
+              }).then(function (prim) {
+              if (prim === undefined) {
+                return ;
+              } else {
+                return Caml_option.some(prim);
+              }
             });
 }
 
 function updateUserPassword(client, userId, password) {
-  var userId$1 = MongoDb.ObjectID.fromString(userId);
+  var userId$1 = MongoDb.ObjectId.fromString(userId);
   if (userId$1.TAG === /* Ok */0) {
     return MongoDb.Collection.updateOneWithSet(getCollection(client), userId$1._0, {
                 password: password
@@ -86,7 +117,7 @@ function updateUserPassword(client, userId, password) {
 }
 
 function updateEmailVerified(client, userId, emailVerified) {
-  var userId$1 = MongoDb.ObjectID.fromString(userId);
+  var userId$1 = MongoDb.ObjectId.fromString(userId);
   if (userId$1.TAG === /* Ok */0) {
     return MongoDb.Collection.updateOneWithSet(getCollection(client), userId$1._0, {
                 emailVerified: emailVerified
@@ -97,15 +128,20 @@ function updateEmailVerified(client, userId, emailVerified) {
 }
 
 export {
-  toDbUser ,
-  toCommonUser ,
   getCollection ,
   getStats ,
-  insertUser ,
+  hashPassword ,
+  comparePasswords ,
+  makeActivationKey ,
+  makeResetPasswordKey ,
+  makeEmailChangeKey ,
+  signupToDbUser ,
+  findUserByObjectId ,
   findUserById ,
+  signupUser ,
   findUserByEmail ,
   updateUserPassword ,
   updateEmailVerified ,
   
 }
-/* MongoDb Not a pure module */
+/* bcrypt Not a pure module */

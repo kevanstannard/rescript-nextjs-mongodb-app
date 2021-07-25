@@ -1,6 +1,6 @@
 // MongoDB v4.4.7
 
-module ObjectID: {
+module ObjectId: {
   type t
   let make: unit => t
   let toString: t => string
@@ -8,12 +8,12 @@ module ObjectID: {
 } = {
   type t
 
-  @module("mongodb") @new external make: unit => t = "ObjectID"
+  @module("mongodb") @new external make: unit => t = "ObjectId"
 
   @send external toString: t => string = "toHexString"
 
   // Unsafe because it can throw a runtime error
-  @module("mongodb") @scope("ObjectID")
+  @module("mongodb") @scope("ObjectId")
   external fromString_UNSAFE: string => t = "createFromHexString"
 
   let fromString = (value: string) => {
@@ -51,12 +51,12 @@ module Collection = {
 
   type insertOneResult = {
     acknowledged: bool,
-    insertedId: ObjectID.t,
+    insertedId: ObjectId.t,
   }
 
   type updateOneResult = {
     upsertedCount: int,
-    upsertedId: ObjectID.t,
+    upsertedId: ObjectId.t,
   }
 
   @send external stats: t => Js.Promise.t<statsResult> = "stats"
@@ -66,7 +66,7 @@ module Collection = {
   @send external insertOne: (t, 'a) => Js.Promise.t<insertOneResult> = "insertOne"
   @send external updateOne_INTERNAL: (t, {..}, {..}) => Js.Promise.t<updateOneResult> = "updateOne"
 
-  let updateOneWithSet = (collection, id: ObjectID.t, update: {..}): Js.Promise.t<
+  let updateOneWithSet = (collection, id: ObjectId.t, update: {..}): Js.Promise.t<
     updateOneResult,
   > => updateOne_INTERNAL(collection, {"_id": id}, {"$set": update})
 }

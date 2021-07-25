@@ -23,9 +23,15 @@ function getServerSideProps(context) {
   return Server_Middleware.run(Server_Middleware.all(undefined), req, context.res).then(function (param) {
               var match = Server_Middleware.getRequestData(req);
               var client = match.client;
-              return Server_User.findUserById(client, "123").then(function (user) {
-                          console.log(user);
-                          return Server_User.getStats(client).then(function (stats) {
+              return Server_User.getStats(client).then(function (stats) {
+                          var signup = {
+                            email: "hello@example.com",
+                            password: "abc123",
+                            reCaptcha: undefined
+                          };
+                          return Server_User.signupUser(client, signup).then(function (dbUser) {
+                                      console.log(signup);
+                                      console.log(dbUser);
                                       return Promise.resolve(makeResult(stats.count));
                                     });
                         });

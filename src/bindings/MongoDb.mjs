@@ -8,7 +8,7 @@ function fromString(value) {
   try {
     return {
             TAG: /* Ok */0,
-            _0: Mongodb.ObjectID.createFromHexString(value)
+            _0: Mongodb.ObjectId.createFromHexString(value)
           };
   }
   catch (raw_obj){
@@ -34,17 +34,17 @@ function fromString(value) {
   }
 }
 
-function ObjectID_make(prim) {
-  return new Mongodb.ObjectID();
+function ObjectId_make(prim) {
+  return new Mongodb.ObjectId();
 }
 
-function ObjectID_toString(prim) {
+function ObjectId_toString(prim) {
   return prim.toHexString();
 }
 
-var ObjectID = {
-  make: ObjectID_make,
-  toString: ObjectID_toString,
+var ObjectId = {
+  make: ObjectId_make,
+  toString: ObjectId_toString,
   fromString: fromString
 };
 
@@ -67,7 +67,7 @@ var Db = {};
 var MongoClient = {};
 
 export {
-  ObjectID ,
+  ObjectId ,
   Cursor ,
   Collection ,
   Db ,
