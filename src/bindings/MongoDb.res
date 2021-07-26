@@ -59,7 +59,11 @@ module Collection = {
     upsertedId: ObjectId.t,
   }
 
+  type indexName = string
+
   @send external stats: t => Js.Promise.t<statsResult> = "stats"
+  @send external createIndex: (t, {..}) => Promise.t<indexName> = "createIndex"
+  @send external createIndexWithOptions: (t, {..}, {..}) => Promise.t<indexName> = "createIndex"
   @send external find: (t, {..}) => Cursor.t = "find"
   @send external findWithOptions: (t, {..}, {..}) => Cursor.t = "find"
   @send external findOne: (t, {..}) => Js.Promise.t<Js.Undefined.t<'a>> = "findOne"

@@ -4,6 +4,27 @@ import * as Mongodb from "mongodb";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Server_NodeCache from "./Server_NodeCache.mjs";
 
+function getCollection(client, name) {
+  var db = client.db();
+  return db.collection(name);
+}
+
+function create(client) {
+  var promises = [getCollection(client, "users").createIndex({
+          email: 1
+        }, {
+          unique: true
+        })];
+  return Promise.all(promises).then(function (param) {
+              
+            });
+}
+
+var Indexes = {
+  getCollection: getCollection,
+  create: create
+};
+
 var key = "mongodb";
 
 function setClientPromise(clientPromise) {
@@ -30,10 +51,13 @@ function connect(config) {
         useNewUrlParser: true
       });
   Server_NodeCache.set(key, Caml_option.some(clientPromise$1));
-  return clientPromise$1;
+  return clientPromise$1.then(create).then(function (param) {
+              return clientPromise$1;
+            });
 }
 
 export {
+  Indexes ,
   Cache ,
   connect ,
   
