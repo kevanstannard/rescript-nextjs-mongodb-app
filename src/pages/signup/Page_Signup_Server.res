@@ -1,10 +1,11 @@
-open Page_Index_Types
+open Page_Signup_Types
 
 let makeResult = (count: int): Next.GetServerSideProps.result<props> => {
   let props: props = {
-    env: Server_Env.getString("NODE_ENV"),
+    env: Server_Env.getNodeEnv(),
     connected: true,
     count: count,
+    config: Server_Config.getClientConfig(),
   }
   {
     props: Some(props),
@@ -23,20 +24,23 @@ let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
     client
     ->Server_User.getStats
     ->Promise.then((stats: MongoDb.Collection.statsResult) => {
-      let signup: Common_User.Signup.signup = {
-        email: "hello@example.com",
-        password: "abc123",
-        reCaptcha: None,
-      }
+      let {count} = stats
+      makeResult(count)->Promise.resolve
 
-      client
-      ->Server_User.signupUser(signup)
-      ->Promise.then(dbUser => {
-        Js.log(signup)
-        Js.log(dbUser)
-        let {count} = stats
-        makeResult(count)->Promise.resolve
-      })
+      // let signup: Common_User.Signup.signup = {
+      //   email: "hello@example.com",
+      //   password: "abc123",
+      //   reCaptcha: None,
+      // }
+
+      // client
+      // ->Server_User.signupUser(signup)
+      // ->Promise.then(dbUser => {
+      //   Js.log(signup)
+      //   Js.log(dbUser)
+      //   let {count} = stats
+      //   makeResult(count)->Promise.resolve
+      // })
     })
   })
 }

@@ -26,10 +26,15 @@ function getInt(name) {
   }
 }
 
+function getNodeEnv(param) {
+  return getString("NODE_ENV");
+}
+
 export {
   env ,
   getString ,
   getInt ,
+  getNodeEnv ,
   
 }
 /* env Not a pure module */

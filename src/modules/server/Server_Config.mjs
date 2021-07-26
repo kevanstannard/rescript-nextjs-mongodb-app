@@ -6,13 +6,30 @@ function get(param) {
   var mongoDb = {
     uri: Server_Env.getString("MONGODB_URI")
   };
+  var reCaptcha_secretKey = Server_Env.getString("RECAPTCHA_SECRET_KEY");
+  var reCaptcha_siteKey = Server_Env.getString("RECAPTCHA_SITE_KEY");
+  var reCaptcha = {
+    secretKey: reCaptcha_secretKey,
+    siteKey: reCaptcha_siteKey
+  };
   return {
-          mongoDb: mongoDb
+          mongoDb: mongoDb,
+          reCaptcha: reCaptcha
+        };
+}
+
+function getClientConfig(param) {
+  var serverConfig = get(undefined);
+  return {
+          reCaptcha: {
+            siteKey: serverConfig.reCaptcha.siteKey
+          }
         };
 }
 
 export {
   get ,
+  getClientConfig ,
   
 }
 /* Server_Env Not a pure module */

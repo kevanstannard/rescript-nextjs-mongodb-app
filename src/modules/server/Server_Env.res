@@ -16,3 +16,5 @@ let getInt = (name: string): int => {
   | Some(value) => value
   }
 }
+
+let getNodeEnv = () => getString("NODE_ENV")

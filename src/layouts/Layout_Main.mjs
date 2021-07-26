@@ -15,9 +15,7 @@ function Layout_Main$Navigation(Props) {
                             src: "/static/zeit-black-triangle.svg"
                           }), React.createElement("span", {
                             className: "text-xl ml-2 align-middle font-semibold"
-                          }, "Next", React.createElement("span", {
-                                className: "text-orange-800"
-                              }, " + ReScript")))
+                          }, "Next + MongoDB + ReScript"))
                 }), React.createElement("div", {
                   className: "flex w-2/3 justify-end"
                 }, React.createElement(Link, {

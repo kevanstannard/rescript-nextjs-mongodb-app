@@ -2,14 +2,17 @@
 
 import * as Server_Env from "../../modules/server/Server_Env.mjs";
 import * as Server_User from "../../modules/server/Server_User.mjs";
+import * as Server_Config from "../../modules/server/Server_Config.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
 function makeResult(count) {
-  var props_env = Server_Env.getString("NODE_ENV");
+  var props_env = Server_Env.getNodeEnv(undefined);
+  var props_config = Server_Config.getClientConfig(undefined);
   var props = {
     env: props_env,
     connected: true,
-    count: count
+    count: count,
+    config: props_config
   };
   return {
           props: props,
@@ -22,18 +25,8 @@ function getServerSideProps(context) {
   var req = context.req;
   return Server_Middleware.run(Server_Middleware.all(undefined), req, context.res).then(function (param) {
               var match = Server_Middleware.getRequestData(req);
-              var client = match.client;
-              return Server_User.getStats(client).then(function (stats) {
-                          var signup = {
-                            email: "hello@example.com",
-                            password: "abc123",
-                            reCaptcha: undefined
-                          };
-                          return Server_User.signupUser(client, signup).then(function (dbUser) {
-                                      console.log(signup);
-                                      console.log(dbUser);
-                                      return Promise.resolve(makeResult(stats.count));
-                                    });
+              return Server_User.getStats(match.client).then(function (stats) {
+                          return Promise.resolve(makeResult(stats.count));
                         });
             });
 }
