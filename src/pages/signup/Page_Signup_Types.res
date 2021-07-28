@@ -1,7 +1,5 @@
 type props = {
   env: string,
-  connected: bool,
-  count: int,
   config: Common_ClientConfig.t,
 }
 
