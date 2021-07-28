@@ -13,7 +13,10 @@ yarn-error.log
 .merlin
 lib/
 
+temp
+
 .env
 .env.local
+
 
 
