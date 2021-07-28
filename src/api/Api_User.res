@@ -25,9 +25,7 @@ let handleGet = (_req: Next.Req.t, res: Next.Res.t) => {
   // })
 }
 
-// let default =
-//   NextConnect.nc()
-//   ->NextConnect.useHandlerAsync(Server_Middleware.all())
-//   ->NextConnect.getAsync(handleGet)
-
-let default = NextConnect.nc()->NextConnect.getAsync(handleGet)
+let default =
+  NextConnect.nc()
+  ->NextConnect.useHandlerAsync(Server_Middleware.all())
+  ->NextConnect.getAsync(handleGet)
