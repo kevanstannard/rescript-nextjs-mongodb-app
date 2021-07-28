@@ -2,7 +2,6 @@
 
 import * as Server_Api from "../modules/server/Server_Api.mjs";
 import * as NextConnect from "next-connect";
-import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
 function handleGet(_req, res) {
   Server_Api.sendJson(res, "Success", {
@@ -11,7 +10,7 @@ function handleGet(_req, res) {
   return Promise.resolve(undefined);
 }
 
-var $$default = NextConnect().use(Server_Middleware.all(undefined)).get(handleGet);
+var $$default = NextConnect().get(handleGet);
 
 export {
   handleGet ,
