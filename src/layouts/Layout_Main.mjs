@@ -9,7 +9,7 @@ function Layout_Main$Navigation(Props) {
             }, React.createElement(Link, {
                   href: "/",
                   children: React.createElement("a", {
-                        className: "flex items-center w-1/3"
+                        className: "flex items-center"
                       }, React.createElement("img", {
                             className: "w-5",
                             src: "/static/zeit-black-triangle.svg"
@@ -17,7 +17,7 @@ function Layout_Main$Navigation(Props) {
                             className: "text-xl ml-2 align-middle font-semibold"
                           }, "Next + MongoDB + ReScript"))
                 }), React.createElement("div", {
-                  className: "flex w-2/3 justify-end"
+                  className: "flex justify-end"
                 }, React.createElement(Link, {
                       href: "/",
                       children: React.createElement("a", {

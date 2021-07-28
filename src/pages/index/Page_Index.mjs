@@ -12,9 +12,10 @@ function useCurrentUser(param) {
 
 function $$default(props) {
   var envMessage = "Env is " + props.env;
+  var countMessage = "Count is " + String(props.count);
   var user = useCurrentUser(undefined);
   var userMessage = user !== undefined ? "User id is " + String(user.id) : "User is not loaded";
-  return React.createElement("div", undefined, envMessage, React.createElement("br", undefined), userMessage);
+  return React.createElement("div", undefined, envMessage, React.createElement("br", undefined), userMessage, React.createElement("br", undefined), countMessage);
 }
 
 export {

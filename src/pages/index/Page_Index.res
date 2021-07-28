@@ -8,8 +8,9 @@ let useCurrentUser = () => {
 type user = {id: int}
 
 let default = (props: props): React.element => {
-  let {env} = props
+  let {env, count} = props
   let envMessage = "Env is " ++ env
+  let countMessage = "Count is " ++ Belt.Int.toString(count)
 
   let user: option<user> = useCurrentUser()
 
@@ -18,5 +19,11 @@ let default = (props: props): React.element => {
   | Some(user) => "User id is " ++ Belt.Int.toString(user.id)
   }
 
-  <div> {envMessage->React.string} <br /> {userMessage->React.string} </div>
+  <div>
+    {envMessage->React.string}
+    <br />
+    {userMessage->React.string}
+    <br />
+    {countMessage->React.string}
+  </div>
 }
