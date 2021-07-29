@@ -24,7 +24,8 @@ let make = (
   ~passwordError,
   ~reCaptchaError,
   ~isSubmitting,
-  ~error,
+  ~signupError,
+  ~signupAttemptCount,
   ~onEmailChange,
   ~onPasswordChange,
   ~onReCaptchaChange,
@@ -32,7 +33,7 @@ let make = (
 ) => {
   <FormContainer>
     <Title text="Sign Up" size=#Primary />
-    <ErrorMessage error />
+    <ErrorMessage error={signupError} />
     <TextField label="Email" value={email} onChange={onEmailChange} error={emailError} />
     <PasswordField
       label="Password"
@@ -42,7 +43,10 @@ let make = (
       showPasswordStrength=true
     />
     <ReCaptchaField
-      reCaptchaSiteKey={reCaptchaSiteKey} onChange={onReCaptchaChange} error={reCaptchaError}
+      key={"recaptcha-" ++ Belt.Int.toString(signupAttemptCount)}
+      reCaptchaSiteKey={reCaptchaSiteKey}
+      onChange={onReCaptchaChange}
+      error={reCaptchaError}
     />
     <Button
       color=#Green full=true onClick=onSignupClick state={isSubmitting ? #Processing : #Ready}>

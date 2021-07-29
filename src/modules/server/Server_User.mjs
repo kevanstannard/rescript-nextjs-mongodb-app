@@ -2,10 +2,13 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as Js_exn from "rescript/lib/es6/js_exn.js";
+import * as $$String from "rescript/lib/es6/string.js";
 import * as Bcrypt from "bcrypt";
 import * as Nanoid from "nanoid";
 import * as MongoDb from "../../bindings/MongoDb.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Common_User from "../common/Common_User.mjs";
+import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
 function getCollection(client) {
   var db = client.db();
@@ -68,7 +71,7 @@ function findUserByObjectId(client, objectId) {
             });
 }
 
-function findUserById(client, userId) {
+function findUserByStringId(client, userId) {
   var userId$1 = MongoDb.ObjectId.fromString(userId);
   if (userId$1.TAG === /* Ok */0) {
     return getCollection(client).findOne({
@@ -85,11 +88,9 @@ function findUserById(client, userId) {
   }
 }
 
-function signupUser(client, signup) {
-  return signupToDbUser(signup).then(function (dbUser) {
-              return getCollection(client).insertOne(dbUser).then(function (insertResult) {
-                          return findUserByObjectId(client, insertResult.insertedId);
-                        });
+function insertUser(client, dbUser) {
+  return getCollection(client).insertOne(dbUser).then(function (insertResult) {
+              return findUserByObjectId(client, insertResult.insertedId);
             });
 }
 
@@ -127,6 +128,81 @@ function updateEmailVerified(client, userId, emailVerified) {
   }
 }
 
+function checkIfEmailIsTaken(client, email) {
+  return getCollection(client).find({
+                  $or: [
+                    {
+                      email: email
+                    },
+                    {
+                      emailChange: email
+                    }
+                  ]
+                }).toArray().then(function (dbUsers) {
+              return Promise.resolve(dbUsers.length > 0);
+            });
+}
+
+function validateEmailIsAvailable(client, email) {
+  var emailTrimmed = $$String.trim(email);
+  return checkIfEmailIsTaken(client, emailTrimmed).then(function (isTaken) {
+              return Promise.resolve(isTaken ? "EmailNotAvailable" : undefined);
+            });
+}
+
+function validateReCaptchaToken(token) {
+  if (token !== undefined) {
+    return Server_ReCaptcha.verifyToken(token).then(function (result) {
+                if (result.TAG === /* Ok */0) {
+                  return Promise.resolve(undefined);
+                } else {
+                  return Promise.resolve("ReCaptchaInvalid");
+                }
+              });
+  } else {
+    return Promise.resolve("ReCaptchaEmpty");
+  }
+}
+
+function validateSignup(client, signup) {
+  var validation = Common_User.Signup.validateSignup(signup);
+  if (Common_User.Signup.hasErrors(validation)) {
+    return Promise.resolve(validation);
+  }
+  var emailTrimmed = $$String.trim(signup.email);
+  var emailPromise = validateEmailIsAvailable(client, emailTrimmed);
+  var reCaptchaPromise = validateReCaptchaToken(signup.reCaptcha);
+  return emailPromise.then(function (emailError) {
+              return reCaptchaPromise.then(function (reCaptchaError) {
+                          return Promise.resolve({
+                                      email: emailError,
+                                      password: undefined,
+                                      reCaptcha: reCaptchaError
+                                    });
+                        });
+            });
+}
+
+function signup(client, signup$1) {
+  return validateSignup(client, signup$1).then(function (validation) {
+              if (Common_User.Signup.isValid(validation)) {
+                return signupToDbUser(signup$1).then(function (param) {
+                              return insertUser(client, param);
+                            }).then(function (param) {
+                            return Promise.resolve({
+                                        TAG: /* Ok */0,
+                                        _0: validation
+                                      });
+                          });
+              } else {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: validation
+                          });
+              }
+            });
+}
+
 export {
   getCollection ,
   getStats ,
@@ -137,11 +213,16 @@ export {
   makeEmailChangeKey ,
   signupToDbUser ,
   findUserByObjectId ,
-  findUserById ,
-  signupUser ,
+  findUserByStringId ,
+  insertUser ,
   findUserByEmail ,
   updateUserPassword ,
   updateEmailVerified ,
+  checkIfEmailIsTaken ,
+  validateEmailIsAvailable ,
+  validateReCaptchaToken ,
+  validateSignup ,
+  signup ,
   
 }
 /* bcrypt Not a pure module */

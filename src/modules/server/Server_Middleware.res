@@ -1,3 +1,10 @@
+// Default Next.js middleware helpers
+module NextRequest = {
+  let getBody = (req: Next.Req.t) => {
+    req->Next.Req.body->Js.Nullable.toOption
+  }
+}
+
 module Mongo = {
   type t = MongoDb.MongoClient.t
   let key = "mongodb"

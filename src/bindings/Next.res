@@ -26,7 +26,7 @@ module Res = {
   ) => unit = "statusCode"
 
   @send external setHeader: (t, string, string) => unit = "setHeader"
-  @send external sendJson: (t, {..}) => unit = "send"
+  @send external sendJson: (t, Js.Json.t) => unit = "send"
   @send external sendString: (t, string) => unit = "send"
   @send external writeString: (t, string) => unit = "write"
   @send external endString: (t, string) => unit = "end"

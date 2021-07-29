@@ -1,5 +1,8 @@
 open MongoDb
 
+type opaque
+external opaque: 'a => opaque = "%identity"
+
 type dbUser = {
   _id: ObjectId.t,
   email: string,
@@ -63,7 +66,7 @@ let findUserByObjectId = (client: MongoClient.t, objectId: ObjectId.t): Promise.
   ->Promise.thenResolve(Js.Undefined.toOption)
 }
 
-let findUserById = (client: MongoClient.t, userId: string): Promise.t<option<dbUser>> => {
+let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<dbUser>> => {
   switch ObjectId.fromString(userId) {
   | Ok(userId) =>
     getCollection(client)
@@ -73,13 +76,11 @@ let findUserById = (client: MongoClient.t, userId: string): Promise.t<option<dbU
   }
 }
 
-let signupUser = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
-  signupToDbUser(signup)->Promise.then(dbUser => {
-    getCollection(client)
-    ->Collection.insertOne(dbUser)
-    ->Promise.then(insertResult => {
-      client->findUserByObjectId(insertResult.insertedId)
-    })
+let insertUser = (client: MongoClient.t, dbUser: dbUser) => {
+  getCollection(client)
+  ->Collection.insertOne(dbUser)
+  ->Promise.then(insertResult => {
+    client->findUserByObjectId(insertResult.insertedId)
   })
 }
 
@@ -102,4 +103,83 @@ let updateEmailVerified = (client: MongoClient.t, userId: string, emailVerified:
     getCollection(client)->Collection.updateOneWithSet(userId, {"emailVerified": emailVerified})
   | Error(reason) => Js.Exn.raiseError(reason) // Return rejected promise
   }
+}
+
+let checkIfEmailIsTaken = (client: MongoClient.t, email: string) => {
+  getCollection(client)
+  ->Collection.find({
+    "$or": [opaque({"email": email}), opaque({"emailChange": email})],
+  })
+  ->Cursor.toArray
+  ->Promise.then((dbUsers: array<dbUser>) => {
+    let exists = Js.Array2.length(dbUsers) > 0
+    Promise.resolve(exists)
+  })
+}
+
+let validateEmailIsAvailable = (client: MongoClient.t, email: string): Promise.t<
+  option<Common_User.Signup.emailError>,
+> => {
+  let emailTrimmed = String.trim(email)
+  client
+  ->checkIfEmailIsTaken(emailTrimmed)
+  ->Promise.then(isTaken => {
+    let result = isTaken ? Some(#EmailNotAvailable) : None
+    Promise.resolve(result)
+  })
+}
+
+let validateReCaptchaToken = token => {
+  switch token {
+  | None => Promise.resolve(Some(#ReCaptchaEmpty))
+  | Some(token) =>
+    Server_ReCaptcha.verifyToken(token)->Promise.then(result => {
+      switch result {
+      | Error() => Promise.resolve(Some(#ReCaptchaInvalid))
+      | Ok() => Promise.resolve(None)
+      }
+    })
+  }
+}
+
+let validateSignup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup): Promise.t<
+  Common_User.Signup.validation,
+> => {
+  let validation: Common_User.Signup.validation = Common_User.Signup.validateSignup(signup)
+  switch Common_User.Signup.hasErrors(validation) {
+  | true => Promise.resolve(validation)
+  | false => {
+      let {email, reCaptcha} = signup
+      let emailTrimmed = String.trim(email)
+      let emailPromise = client->validateEmailIsAvailable(emailTrimmed)
+      let reCaptchaPromise = validateReCaptchaToken(reCaptcha)
+      emailPromise->Promise.then(emailError => {
+        reCaptchaPromise->Promise.then(reCaptchaError => {
+          let validation: Common_User.Signup.validation = {
+            email: emailError,
+            password: None,
+            reCaptcha: reCaptchaError,
+          }
+          Promise.resolve(validation)
+        })
+      })
+    }
+  }
+}
+
+let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) => {
+  validateSignup(client, signup)->Promise.then(validation => {
+    if Common_User.Signup.isValid(validation) {
+      signupToDbUser(signup)
+      ->Promise.then(insertUser(client))
+      ->Promise.then(_ => {
+        // Server_Email.sendActivationEmail(user)->Promise.then(_ => {
+        //   Promise.resolve(Ok())
+        // })
+        Promise.resolve(Ok(validation))
+      })
+    } else {
+      Promise.resolve(Error(validation))
+    }
+  })
 }

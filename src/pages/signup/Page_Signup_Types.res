@@ -7,9 +7,10 @@ type state = {
   email: string,
   password: string,
   reCaptcha: option<string>,
-  // validation: Common_User.Signup.signupValidation,
+  validation: Common_User.Signup.validation,
   isSubmitting: bool,
-  // error: option<error>,
+  signupError: option<Common_User.Signup.signupError>,
+  signupAttemptCount: int,
 }
 
 type action =
@@ -17,5 +18,6 @@ type action =
   | SetPassword(string)
   | SetReCaptcha(string)
   | SetIsSubmitting(bool)
-// | SetError(option<error>)
-// | SetValidation(Common_User.Signup.signupValidation)
+  | SetSignupError(option<Common_User.Signup.signupError>)
+  | SetValidation(Common_User.Signup.validation)
+  | IncrementSignupAttemptCount

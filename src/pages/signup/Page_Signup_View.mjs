@@ -30,7 +30,8 @@ function Page_Signup_View(Props) {
   var passwordError = Props.passwordError;
   var reCaptchaError = Props.reCaptchaError;
   var isSubmitting = Props.isSubmitting;
-  var error = Props.error;
+  var signupError = Props.signupError;
+  var signupAttemptCount = Props.signupAttemptCount;
   var onEmailChange = Props.onEmailChange;
   var onPasswordChange = Props.onPasswordChange;
   var onReCaptchaChange = Props.onReCaptchaChange;
@@ -41,7 +42,7 @@ function Page_Signup_View(Props) {
                   text: "Sign Up",
                   size: "Primary"
                 }), React.createElement(Page_Signup_View$ErrorMessage, {
-                  error: error
+                  error: signupError
                 }), React.createElement(Component_Form.TextField.make, {
                   label: "Email",
                   value: email,
@@ -56,7 +57,8 @@ function Page_Signup_View(Props) {
                 }), React.createElement(Component_Form.ReCaptchaField.make, {
                   reCaptchaSiteKey: reCaptchaSiteKey,
                   onChange: onReCaptchaChange,
-                  error: reCaptchaError
+                  error: reCaptchaError,
+                  key: "recaptcha-" + String(signupAttemptCount)
                 }), React.createElement(Component_Button.Button.make, {
                   state: isSubmitting ? "Processing" : "Ready",
                   onClick: onSignupClick,

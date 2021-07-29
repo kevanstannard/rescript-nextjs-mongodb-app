@@ -21,8 +21,16 @@ function sendJson(res, code, payload) {
   
 }
 
+function sendError(res, code, error) {
+  var payload = {
+    error: error
+  };
+  return sendJson(res, code, payload);
+}
+
 export {
   sendJson ,
+  sendError ,
   
 }
 /* No side effect */
