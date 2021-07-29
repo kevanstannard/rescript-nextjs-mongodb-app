@@ -1,5 +1,14 @@
 // MongoDB v4.4.7
 
+// NextJS and MongoDB
+// https://docs.atlas.mongodb.com/best-practices-connecting-from-aws-lambda/
+// https://developer.mongodb.com/how-to/nextjs-with-mongodb/
+// https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
+
+// Creating a separate node service for the API
+// https://github.com/vercel/next.js/discussions/12229#discussioncomment-93027
+// https://github.com/mattcarlotta/next-issg-example
+
 module ObjectId: {
   type t
   let make: unit => t
@@ -13,6 +22,7 @@ module ObjectId: {
   @send external toString: t => string = "toHexString"
 
   // Unsafe because it can throw a runtime error
+  // if the object id string is not a true ObjectId value
   @module("mongodb") @scope("ObjectId")
   external fromString_UNSAFE: string => t = "createFromHexString"
 
