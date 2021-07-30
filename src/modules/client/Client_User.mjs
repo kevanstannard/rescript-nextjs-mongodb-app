@@ -9,8 +9,16 @@ function signup(signup$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function login(login$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/login", {
+              TAG: /* Json */0,
+              _0: login$1
+            }, onSuccess, onError, undefined);
+}
+
 export {
   signup ,
+  login ,
   
 }
 /* No side effect */

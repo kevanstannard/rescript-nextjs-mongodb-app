@@ -85,8 +85,73 @@ var Signup = {
   reCaptchaErrorToString: reCaptchaErrorToString
 };
 
+function isValid$1(validation) {
+  if (Belt_Option.isNone(validation.email)) {
+    return Belt_Option.isNone(validation.password);
+  } else {
+    return false;
+  }
+}
+
+function hasErrors$1(validation) {
+  return !isValid$1(validation);
+}
+
+function validateEmail$1(email) {
+  var emailTrimmed = $$String.trim(email);
+  if (Validator.isEmpty(emailTrimmed)) {
+    return "EmailEmpty";
+  } else if (!Validator.isEmail(emailTrimmed)) {
+    return "EmailInvalid";
+  } else {
+    return ;
+  }
+}
+
+function validatePassword$1(password) {
+  if (Validator.isEmpty(password)) {
+    return "PasswordEmpty";
+  }
+  
+}
+
+function validateLogin(param) {
+  return {
+          email: validateEmail$1(param.email),
+          password: validatePassword$1(param.password)
+        };
+}
+
+function loginErrorToString(error) {
+  return "There was a problem logging in, please try again";
+}
+
+function emailErrorToString$1(error) {
+  if (error === "EmailInvalid") {
+    return "Enter a valid email address";
+  } else {
+    return "Enter your email address";
+  }
+}
+
+function passwordErrorToString$1(error) {
+  return "Enter a password";
+}
+
+var Login = {
+  isValid: isValid$1,
+  hasErrors: hasErrors$1,
+  validateEmail: validateEmail$1,
+  validatePassword: validatePassword$1,
+  validateLogin: validateLogin,
+  loginErrorToString: loginErrorToString,
+  emailErrorToString: emailErrorToString$1,
+  passwordErrorToString: passwordErrorToString$1
+};
+
 export {
   Signup ,
+  Login ,
   
 }
 /* validator Not a pure module */
