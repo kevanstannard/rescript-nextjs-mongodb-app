@@ -1,3 +1,7 @@
+module User = {
+  type t = {id: string}
+}
+
 module Signup = {
   type signup = {
     email: string,
@@ -99,8 +103,7 @@ module Login = {
     password: string,
   }
 
-  type loginError = [#RequestFailed | #UnknownError]
-
+  type loginError = [#LoginFailed | #AccountInactive | #RequestFailed | #UnknownError]
   type emailError = [#EmailEmpty | #EmailInvalid]
   type passwordError = [#PasswordEmpty]
 
@@ -111,7 +114,8 @@ module Login = {
 
   type loginResult = {
     result: [#Ok | #Error],
-    validation: validation,
+    error: option<loginError>,
+    nextUrl: option<string>,
   }
 
   external asLoginResult: Js.Json.t => loginResult = "%identity"
@@ -148,8 +152,10 @@ module Login = {
 
   let loginErrorToString = (error: loginError): string => {
     switch error {
-    | #RequestFailed => "There was a problem logging in, please try again"
-    | #UnknownError => "There was a problem logging in, please try again"
+    | #RequestFailed => "There was a problem logging in, please try again."
+    | #UnknownError => "There was a problem logging in, please try again."
+    | #LoginFailed => "Your email or password is not correct."
+    | #AccountInactive => "Your account has not been activated."
     }
   }
 
@@ -165,4 +171,8 @@ module Login = {
     | #PasswordEmpty => "Enter a password"
     }
   }
+}
+
+module Logout = {
+  type logoutResult = {result: [#Ok]}
 }

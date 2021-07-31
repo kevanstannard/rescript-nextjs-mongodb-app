@@ -10,6 +10,12 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Common_User from "../common/Common_User.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
+function toCommonUser(dbUser) {
+  return {
+          id: Curry._1(MongoDb.ObjectId.toString, dbUser._id)
+        };
+}
+
 function getCollection(client) {
   var db = client.db();
   return db.collection("users");
@@ -203,7 +209,36 @@ function signup(client, signup$1) {
             });
 }
 
+function login(client, login$1) {
+  return findUserByEmail(client, login$1.email).then(function (optUser) {
+              if (optUser !== undefined) {
+                if (optUser.isActivated) {
+                  return Bcrypt.compare(login$1.password, optUser.passwordHash).then(function (compareResult) {
+                              return Promise.resolve(compareResult ? ({
+                                              TAG: /* Ok */0,
+                                              _0: optUser
+                                            }) : ({
+                                              TAG: /* Error */1,
+                                              _0: "PasswordInvalid"
+                                            }));
+                            });
+                } else {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: "AccountInactive"
+                            });
+                }
+              } else {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "UserNotFound"
+                          });
+              }
+            });
+}
+
 export {
+  toCommonUser ,
   getCollection ,
   getStats ,
   hashPassword ,
@@ -223,6 +258,7 @@ export {
   validateReCaptchaToken ,
   validateSignup ,
   signup ,
+  login ,
   
 }
 /* bcrypt Not a pure module */

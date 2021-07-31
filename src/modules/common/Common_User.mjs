@@ -4,6 +4,8 @@ import * as $$String from "rescript/lib/es6/string.js";
 import * as Validator from "validator";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
+var User = {};
+
 function isValid(validation) {
   if (Belt_Option.isNone(validation.email) && Belt_Option.isNone(validation.password)) {
     return Belt_Option.isNone(validation.reCaptcha);
@@ -123,7 +125,15 @@ function validateLogin(param) {
 }
 
 function loginErrorToString(error) {
-  return "There was a problem logging in, please try again";
+  if (error === "RequestFailed") {
+    return "There was a problem logging in, please try again.";
+  } else if (error === "LoginFailed") {
+    return "Your email or password is not correct.";
+  } else if (error === "AccountInactive") {
+    return "Your account has not been activated.";
+  } else {
+    return "There was a problem logging in, please try again.";
+  }
 }
 
 function emailErrorToString$1(error) {
@@ -149,9 +159,13 @@ var Login = {
   passwordErrorToString: passwordErrorToString$1
 };
 
+var Logout = {};
+
 export {
+  User ,
   Signup ,
   Login ,
+  Logout ,
   
 }
 /* validator Not a pure module */

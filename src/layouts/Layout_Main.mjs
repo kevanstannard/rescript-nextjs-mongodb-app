@@ -2,8 +2,41 @@
 
 import * as React from "react";
 import Link from "next/link";
+import * as Belt_Array from "rescript/lib/es6/belt_Array.js";
+import * as Common_Url from "../modules/common/Common_Url.mjs";
+
+function getHeaderLinks(user) {
+  if (user !== undefined) {
+    return [
+            [
+              "Home",
+              Common_Url.home(undefined)
+            ],
+            [
+              "Log out",
+              Common_Url.logout(undefined)
+            ]
+          ];
+  } else {
+    return [
+            [
+              "Home",
+              Common_Url.home(undefined)
+            ],
+            [
+              "Sign up",
+              Common_Url.signup(undefined)
+            ],
+            [
+              "Log in",
+              Common_Url.login(undefined)
+            ]
+          ];
+  }
+}
 
 function Layout_Main$Navigation(Props) {
+  var user = Props.user;
   return React.createElement("nav", {
               className: "p-2 h-12 flex border-b border-gray-200 justify-between items-center text-sm"
             }, React.createElement(Link, {
@@ -18,25 +51,24 @@ function Layout_Main$Navigation(Props) {
                           }, "Next + MongoDB + ReScript"))
                 }), React.createElement("div", {
                   className: "flex justify-end"
-                }, React.createElement(Link, {
-                      href: "/",
-                      children: React.createElement("a", {
-                            className: "px-3"
-                          }, "Home")
-                    }), React.createElement(Link, {
-                      href: "/login",
-                      children: React.createElement("a", {
-                            className: "px-3"
-                          }, "Login")
-                    }), React.createElement(Link, {
-                      href: "/signup",
-                      children: React.createElement("a", {
-                            className: "px-3"
-                          }, "Signup")
-                    })));
+                }, Belt_Array.map(getHeaderLinks(user), (function (param) {
+                        var url = param[1];
+                        return React.createElement(Link, {
+                                    href: url,
+                                    children: React.createElement("a", {
+                                          className: "px-3"
+                                        }, param[0]),
+                                    key: url
+                                  });
+                      }))));
 }
 
+var Navigation = {
+  make: Layout_Main$Navigation
+};
+
 function Layout_Main(Props) {
+  var user = Props.user;
   var children = Props.children;
   var minWidth = {
     minWidth: "20rem"
@@ -46,14 +78,21 @@ function Layout_Main(Props) {
               style: minWidth
             }, React.createElement("div", {
                   className: "max-w-5xl w-full lg:w-3/4 text-gray-900 font-base"
-                }, React.createElement(Layout_Main$Navigation, {}), React.createElement("main", {
+                }, React.createElement(Layout_Main$Navigation, {
+                      user: user
+                    }), React.createElement("main", {
                       className: "mt-4 mx-4"
                     }, children)));
 }
 
+var Link$1;
+
 var make = Layout_Main;
 
 export {
+  Link$1 as Link,
+  getHeaderLinks ,
+  Navigation ,
   make ,
   
 }

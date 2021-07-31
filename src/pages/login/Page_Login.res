@@ -54,10 +54,17 @@ let renderPage = () => {
       let onSuccess = (json: Js.Json.t) => {
         let loginResult = json->Common_User.Login.asLoginResult
         switch loginResult.result {
-        | #Ok => Common_Url.home()->Location.assign
+        | #Ok =>
+          switch loginResult.nextUrl {
+          | Some(nextUrl) => Location.assign(nextUrl)
+          | None => Common_Url.home()->Location.assign
+          }
         | #Error => {
-            dispatch(SetValidation(loginResult.validation))
-            dispatch(SetLoginError(None))
+            let error = switch loginResult.error {
+            | Some(error) => error
+            | None => #UnknownError
+            }
+            dispatch(SetLoginError(Some(error)))
             dispatch(SetIsSubmitting(false))
           }
         }

@@ -26,8 +26,7 @@ let default = (props: props): React.element => {
 
   let content = React.createElement(component, pageProps)
 
-  // Specify layouts here to avoid re-rendering layouts on page changes
   switch router.route {
-  | _ => <Main> content </Main>
+  | _ => content
   }
 }

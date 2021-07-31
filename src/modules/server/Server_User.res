@@ -16,6 +16,10 @@ type dbUser = {
   resetPasswordExpiry: option<Js.Date.t>,
 }
 
+let toCommonUser = (dbUser: dbUser): Common_User.User.t => {
+  id: ObjectId.toString(dbUser._id),
+}
+
 let getCollection = (client: MongoClient.t) => {
   let db = MongoClient.db(client)
   Db.collection(db, "users")
@@ -180,6 +184,28 @@ let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) 
       })
     } else {
       Promise.resolve(Error(validation))
+    }
+  })
+}
+
+let login = (client: MongoDb.MongoClient.t, login: Common_User.Login.login) => {
+  client
+  ->findUserByEmail(login.email)
+  ->Promise.then(optUser => {
+    switch optUser {
+    | None => Promise.resolve(Error(#UserNotFound))
+    | Some(user) =>
+      if !user.isActivated {
+        Promise.resolve(Error(#AccountInactive))
+      } else {
+        comparePasswords(login.password, user.passwordHash)->Promise.then(compareResult => {
+          let result = switch compareResult {
+          | true => Ok(user)
+          | false => Error(#PasswordInvalid)
+          }
+          Promise.resolve(result)
+        })
+      }
     }
   })
 }

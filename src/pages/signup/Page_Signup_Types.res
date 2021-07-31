@@ -1,3 +1,4 @@
+// Important: The props must only contain valid JSON types
 type props = {
   env: string,
   config: Common_ClientConfig.t,

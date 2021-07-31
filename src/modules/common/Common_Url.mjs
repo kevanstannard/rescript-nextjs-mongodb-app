@@ -5,8 +5,23 @@ function home(param) {
   return "/";
 }
 
+function signup(param) {
+  return "/signup";
+}
+
+function login(param) {
+  return "/login";
+}
+
+function logout(param) {
+  return "/logout";
+}
+
 export {
   home ,
+  signup ,
+  login ,
+  logout ,
   
 }
 /* No side effect */

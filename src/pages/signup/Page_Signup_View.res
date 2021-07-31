@@ -31,26 +31,28 @@ let make = (
   ~onReCaptchaChange,
   ~onSignupClick,
 ) => {
-  <FormContainer>
-    <Title text="Sign Up" size=#Primary />
-    <ErrorMessage error={signupError} />
-    <TextField label="Email" value={email} onChange={onEmailChange} error={emailError} />
-    <PasswordField
-      label="Password"
-      value={password}
-      onChange={onPasswordChange}
-      error={passwordError}
-      showPasswordStrength=true
-    />
-    <ReCaptchaField
-      key={"recaptcha-" ++ Belt.Int.toString(signupAttemptCount)}
-      reCaptchaSiteKey={reCaptchaSiteKey}
-      onChange={onReCaptchaChange}
-      error={reCaptchaError}
-    />
-    <Button
-      color=#Green full=true onClick=onSignupClick state={isSubmitting ? #Processing : #Ready}>
-      {React.string("Sign Up")}
-    </Button>
-  </FormContainer>
+  <Layout_Main user={None}>
+    <FormContainer>
+      <Title text="Sign Up" size=#Primary />
+      <ErrorMessage error={signupError} />
+      <TextField label="Email" value={email} onChange={onEmailChange} error={emailError} />
+      <PasswordField
+        label="Password"
+        value={password}
+        onChange={onPasswordChange}
+        error={passwordError}
+        showPasswordStrength=true
+      />
+      <ReCaptchaField
+        key={"recaptcha-" ++ Belt.Int.toString(signupAttemptCount)}
+        reCaptchaSiteKey={reCaptchaSiteKey}
+        onChange={onReCaptchaChange}
+        error={reCaptchaError}
+      />
+      <Button
+        color=#Green full=true onClick=onSignupClick state={isSubmitting ? #Processing : #Ready}>
+        {React.string("Sign Up")}
+      </Button>
+    </FormContainer>
+  </Layout_Main>
 }

@@ -124,22 +124,24 @@ function renderPage(param) {
     var onSuccess = function (json) {
       var match = json.result;
       if (match === "Error") {
-        Curry._1(dispatch, {
-              TAG: /* SetValidation */4,
-              _0: json.validation
-            });
+        var error = json.error;
+        var error$1 = error !== undefined ? error : "UnknownError";
         Curry._1(dispatch, {
               TAG: /* SetLoginError */3,
-              _0: undefined
+              _0: error$1
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */2,
                     _0: false
                   });
+      }
+      var nextUrl = json.nextUrl;
+      if (nextUrl !== undefined) {
+        document.location.assign(nextUrl);
       } else {
         document.location.assign(Common_Url.home(undefined));
-        return ;
       }
+      
     };
     Client_User.login(login, onSuccess, onError);
     
