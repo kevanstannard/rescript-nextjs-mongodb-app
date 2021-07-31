@@ -4,6 +4,8 @@ let contact = () => "/contact"
 
 let signup = () => "/signup"
 
+let signupSuccess = () => "/signup-success"
+
 let login = () => "/login"
 
 let logout = () => "/logout"

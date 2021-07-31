@@ -13,6 +13,10 @@ function signup(param) {
   return "/signup";
 }
 
+function signupSuccess(param) {
+  return "/signup-success";
+}
+
 function login(param) {
   return "/login";
 }
@@ -37,6 +41,7 @@ export {
   home ,
   contact ,
   signup ,
+  signupSuccess ,
   login ,
   logout ,
   activate ,

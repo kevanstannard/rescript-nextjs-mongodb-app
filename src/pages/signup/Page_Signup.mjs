@@ -177,7 +177,7 @@ function renderPage(config) {
             });
         return Curry._1(dispatch, /* IncrementSignupAttemptCount */0);
       } else {
-        document.location.assign(Common_Url.home(undefined));
+        document.location.assign(Common_Url.signupSuccess(undefined));
         return ;
       }
     };

@@ -60,7 +60,7 @@ let renderPage = (config: Common_ClientConfig.t) => {
       let onSuccess = (json: Js.Json.t) => {
         let signupResult = json->Common_User.Signup.asSignupResult
         switch signupResult.result {
-        | #Ok => Common_Url.home()->Location.assign
+        | #Ok => Common_Url.signupSuccess()->Location.assign
         | #Error => {
             dispatch(SetValidation(signupResult.validation))
             dispatch(SetSignupError(None))
