@@ -1,7 +1,7 @@
-import LoginRes from "src/pages/login/Page_Login.mjs";
+import LoginRes from "src/pages/login/Page_Login";
 
 // This can be re-exported as is (no Fast-Refresh issues)
-export { getServerSideProps } from "src/pages/login/Page_Login_Server.mjs";
+export { getServerSideProps } from "src/pages/login/Page_Login_Server";
 
 // Note:
 // We need to wrap the make call with

@@ -17,3 +17,13 @@ let login = (login: Common_User.Login.login, onSuccess, onError) => {
     (),
   )
 }
+
+let contact = (contact: Common_Contact.contact, onSuccess, onError) => {
+  Client_Xhr.post(
+    ~url="/api/contact",
+    ~body=Json(contact->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}

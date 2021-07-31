@@ -13,6 +13,10 @@ function getHeaderLinks(user) {
               Common_Url.home(undefined)
             ],
             [
+              "Contact",
+              Common_Url.contact(undefined)
+            ],
+            [
               "Log out",
               Common_Url.logout(undefined)
             ]
@@ -22,6 +26,10 @@ function getHeaderLinks(user) {
             [
               "Home",
               Common_Url.home(undefined)
+            ],
+            [
+              "Contact",
+              Common_Url.contact(undefined)
             ],
             [
               "Sign up",

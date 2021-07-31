@@ -16,9 +16,17 @@ function login(login$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function contact(contact$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/contact", {
+              TAG: /* Json */0,
+              _0: contact$1
+            }, onSuccess, onError, undefined);
+}
+
 export {
   signup ,
   login ,
+  contact ,
   
 }
 /* No side effect */

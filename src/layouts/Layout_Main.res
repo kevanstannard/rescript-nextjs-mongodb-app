@@ -4,10 +4,15 @@ let getHeaderLinks = user => {
   switch user {
   | None => [
       ("Home", Common_Url.home()),
+      ("Contact", Common_Url.contact()),
       ("Sign up", Common_Url.signup()),
       ("Log in", Common_Url.login()),
     ]
-  | Some(_) => [("Home", Common_Url.home()), ("Log out", Common_Url.logout())]
+  | Some(_) => [
+      ("Home", Common_Url.home()),
+      ("Contact", Common_Url.contact()),
+      ("Log out", Common_Url.logout()),
+    ]
   }
 }
 

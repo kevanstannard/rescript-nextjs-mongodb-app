@@ -1,7 +1,7 @@
-import LogoutRes from "src/pages/logout/Page_Logout.mjs";
+import LogoutRes from "src/pages/logout/Page_Logout";
 
 // This can be re-exported as is (no Fast-Refresh issues)
-export { getServerSideProps } from "src/pages/logout/Page_Logout_Server.mjs";
+export { getServerSideProps } from "src/pages/logout/Page_Logout_Server";
 
 // Note:
 // We need to wrap the make call with

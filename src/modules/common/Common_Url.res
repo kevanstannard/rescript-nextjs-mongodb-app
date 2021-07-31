@@ -2,6 +2,8 @@ let home = () => "/"
 
 let contact = () => "/contact"
 
+let contactSuccess = () => "/contact-success"
+
 let signup = () => "/signup"
 
 let signupSuccess = () => "/signup-success"

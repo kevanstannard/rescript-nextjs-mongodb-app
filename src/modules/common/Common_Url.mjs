@@ -9,6 +9,10 @@ function contact(param) {
   return "/contact";
 }
 
+function contactSuccess(param) {
+  return "/contact-success";
+}
+
 function signup(param) {
   return "/signup";
 }
@@ -40,6 +44,7 @@ function changeEmailConfirm(userId, emailChangeKey) {
 export {
   home ,
   contact ,
+  contactSuccess ,
   signup ,
   signupSuccess ,
   login ,

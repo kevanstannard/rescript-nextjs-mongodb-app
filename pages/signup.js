@@ -1,7 +1,7 @@
-import SignupRes from "src/pages/signup/Page_Signup.mjs";
+import SignupRes from "src/pages/signup/Page_Signup";
 
 // This can be re-exported as is (no Fast-Refresh issues)
-export { getServerSideProps } from "src/pages/signup/Page_Signup_Server.mjs";
+export { getServerSideProps } from "src/pages/signup/Page_Signup_Server";
 
 // Note:
 // We need to wrap the make call with
