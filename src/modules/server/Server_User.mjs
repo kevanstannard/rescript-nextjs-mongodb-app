@@ -8,6 +8,7 @@ import * as Nanoid from "nanoid";
 import * as MongoDb from "../../bindings/MongoDb.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Common_User from "../common/Common_User.mjs";
+import * as Server_Email from "./Server_Email.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
 function toCommonUser(dbUser) {
@@ -54,6 +55,9 @@ function signupToDbUser(signup) {
                           _id: Curry._1(MongoDb.ObjectId.make, undefined),
                           email: signup.email,
                           emailVerified: false,
+                          emailChange: undefined,
+                          emailChangeKey: undefined,
+                          emailChangeKeyExpiry: undefined,
                           passwordHash: passwordHash,
                           created: now,
                           updated: now,
@@ -96,7 +100,13 @@ function findUserByStringId(client, userId) {
 
 function insertUser(client, dbUser) {
   return getCollection(client).insertOne(dbUser).then(function (insertResult) {
-              return findUserByObjectId(client, insertResult.insertedId);
+              return findUserByObjectId(client, insertResult.insertedId).then(function (dbUser) {
+                          if (dbUser !== undefined) {
+                            return Promise.resolve(dbUser);
+                          } else {
+                            return Js_exn.raiseError("User not found after insert");
+                          }
+                        });
             });
 }
 
@@ -194,10 +204,17 @@ function signup(client, signup$1) {
               if (Common_User.Signup.isValid(validation)) {
                 return signupToDbUser(signup$1).then(function (param) {
                               return insertUser(client, param);
-                            }).then(function (param) {
-                            return Promise.resolve({
-                                        TAG: /* Ok */0,
-                                        _0: validation
+                            }).then(function (dbUser) {
+                            var activationKey = dbUser.activationKey;
+                            if (activationKey === undefined) {
+                              return Js_exn.raiseError("Activation key not found after signup");
+                            }
+                            var userId = Curry._1(MongoDb.ObjectId.toString, dbUser._id);
+                            return Server_Email.sendActivationEmail(userId, dbUser.email, activationKey).then(function (param) {
+                                        return Promise.resolve({
+                                                    TAG: /* Ok */0,
+                                                    _0: validation
+                                                  });
                                       });
                           });
               } else {
@@ -210,13 +227,13 @@ function signup(client, signup$1) {
 }
 
 function login(client, login$1) {
-  return findUserByEmail(client, login$1.email).then(function (optUser) {
-              if (optUser !== undefined) {
-                if (optUser.isActivated) {
-                  return Bcrypt.compare(login$1.password, optUser.passwordHash).then(function (compareResult) {
+  return findUserByEmail(client, login$1.email).then(function (user) {
+              if (user !== undefined) {
+                if (user.isActivated) {
+                  return Bcrypt.compare(login$1.password, user.passwordHash).then(function (compareResult) {
                               return Promise.resolve(compareResult ? ({
                                               TAG: /* Ok */0,
-                                              _0: optUser
+                                              _0: user
                                             }) : ({
                                               TAG: /* Error */1,
                                               _0: "PasswordInvalid"
@@ -232,6 +249,51 @@ function login(client, login$1) {
                 return Promise.resolve({
                             TAG: /* Error */1,
                             _0: "UserNotFound"
+                          });
+              }
+            });
+}
+
+function setIsActivated(client, userId) {
+  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, {
+              isActivated: true,
+              activationKey: null
+            });
+}
+
+function activate(client, userId, activationKey) {
+  return findUserByObjectId(client, userId).then(function (user) {
+              if (user === undefined) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "UserNotFound"
+                          });
+              }
+              if (user.isActivated) {
+                return Promise.resolve({
+                            TAG: /* Ok */0,
+                            _0: undefined
+                          });
+              }
+              var userActivationKey = user.activationKey;
+              if (userActivationKey !== undefined) {
+                if (userActivationKey === activationKey) {
+                  return setIsActivated(client, userId).then(function (_updateResult) {
+                              return Promise.resolve({
+                                          TAG: /* Ok */0,
+                                          _0: undefined
+                                        });
+                            });
+                } else {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: "IncorrectActivationKey"
+                            });
+                }
+              } else {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "ActivationKeyMissing"
                           });
               }
             });
@@ -259,6 +321,8 @@ export {
   validateSignup ,
   signup ,
   login ,
+  setIsActivated ,
+  activate ,
   
 }
 /* bcrypt Not a pure module */

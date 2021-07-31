@@ -5,6 +5,10 @@ function home(param) {
   return "/";
 }
 
+function contact(param) {
+  return "/contact";
+}
+
 function signup(param) {
   return "/signup";
 }
@@ -17,11 +21,27 @@ function logout(param) {
   return "/logout";
 }
 
+function activate(userId, activationKey) {
+  return "/activate/" + userId + "/" + activationKey;
+}
+
+function resetPassword(userId, resetPasswordKey) {
+  return "/reset-password/" + userId + "/" + resetPasswordKey;
+}
+
+function changeEmailConfirm(userId, emailChangeKey) {
+  return "/change-email-confirm/" + userId + "/" + emailChangeKey;
+}
+
 export {
   home ,
+  contact ,
   signup ,
   login ,
   logout ,
+  activate ,
+  resetPassword ,
+  changeEmailConfirm ,
   
 }
 /* No side effect */

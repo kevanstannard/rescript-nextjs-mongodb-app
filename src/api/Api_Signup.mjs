@@ -10,20 +10,14 @@ function handlePost(req, res) {
   if (body !== undefined) {
     var match = Server_Middleware.getRequestData(req);
     return Server_User.signup(match.client, body).then(function (signupResult) {
-                var match;
-                match = signupResult.TAG === /* Ok */0 ? [
-                    "Ok",
-                    signupResult._0
-                  ] : [
-                    "Error",
-                    signupResult._0
-                  ];
-                var result_result = match[0];
-                var result_validation = match[1];
-                var result = {
-                  result: result_result,
-                  validation: result_validation
-                };
+                var result;
+                result = signupResult.TAG === /* Ok */0 ? ({
+                      result: "Ok",
+                      validation: signupResult._0
+                    }) : ({
+                      result: "Error",
+                      validation: signupResult._0
+                    });
                 Server_Api.sendJson(res, "Success", result);
                 return Promise.resolve(undefined);
               });

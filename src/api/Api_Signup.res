@@ -10,13 +10,15 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
       client
       ->Server_User.signup(signup)
       ->Promise.then(signupResult => {
-        let (result, validation) = switch signupResult {
-        | Ok(validation) => (#Ok, validation)
-        | Error(validation) => (#Error, validation)
-        }
-        let result: Common_User.Signup.signupResult = {
-          result: result,
-          validation: validation,
+        let result: Common_User.Signup.signupResult = switch signupResult {
+        | Ok(validation) => {
+            result: #Ok,
+            validation: validation,
+          }
+        | Error(validation) => {
+            result: #Error,
+            validation: validation,
+          }
         }
         Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
         Promise.resolve()

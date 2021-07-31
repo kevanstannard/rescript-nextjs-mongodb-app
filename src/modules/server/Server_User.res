@@ -7,6 +7,9 @@ type dbUser = {
   _id: ObjectId.t,
   email: string,
   emailVerified: bool,
+  emailChange: option<string>,
+  emailChangeKey: option<string>,
+  emailChangeKeyExpiry: option<Js.Date.t>,
   passwordHash: string,
   created: Js.Date.t,
   updated: Js.Date.t,
@@ -50,6 +53,9 @@ let signupToDbUser = (signup: Common_User.Signup.signup): Promise.t<dbUser> => {
       _id: ObjectId.make(),
       email: signup.email,
       emailVerified: false,
+      emailChange: None,
+      emailChangeKey: None,
+      emailChangeKeyExpiry: None,
       passwordHash: passwordHash,
       created: now,
       updated: now,
@@ -84,10 +90,16 @@ let insertUser = (client: MongoClient.t, dbUser: dbUser) => {
   getCollection(client)
   ->Collection.insertOne(dbUser)
   ->Promise.then(insertResult => {
-    client->findUserByObjectId(insertResult.insertedId)
+    client
+    ->findUserByObjectId(insertResult.insertedId)
+    ->Promise.then(dbUser => {
+      switch dbUser {
+      | None => Js.Exn.raiseError("User not found after insert")
+      | Some(dbUser) => Promise.resolve(dbUser)
+      }
+    })
   })
 }
-
 let findUserByEmail = (client: MongoClient.t, email: string): Js.Promise.t<option<dbUser>> => {
   getCollection(client)
   ->Collection.findOne({"email": email})
@@ -176,11 +188,17 @@ let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) 
     if Common_User.Signup.isValid(validation) {
       signupToDbUser(signup)
       ->Promise.then(insertUser(client))
-      ->Promise.then(_ => {
-        // Server_Email.sendActivationEmail(user)->Promise.then(_ => {
-        //   Promise.resolve(Ok())
-        // })
-        Promise.resolve(Ok(validation))
+      ->Promise.then(dbUser => {
+        let {_id, email, activationKey} = dbUser
+        switch activationKey {
+        | None => Js.Exn.raiseError("Activation key not found after signup")
+        | Some(activationKey) => {
+            let userId = MongoDb.ObjectId.toString(_id)
+            Server_Email.sendActivationEmail(userId, email, activationKey)->Promise.then(_ => {
+              Promise.resolve(Ok(validation))
+            })
+          }
+        }
       })
     } else {
       Promise.resolve(Error(validation))
@@ -191,8 +209,8 @@ let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) 
 let login = (client: MongoDb.MongoClient.t, login: Common_User.Login.login) => {
   client
   ->findUserByEmail(login.email)
-  ->Promise.then(optUser => {
-    switch optUser {
+  ->Promise.then(user => {
+    switch user {
     | None => Promise.resolve(Error(#UserNotFound))
     | Some(user) =>
       if !user.isActivated {
@@ -206,6 +224,48 @@ let login = (client: MongoDb.MongoClient.t, login: Common_User.Login.login) => {
           Promise.resolve(result)
         })
       }
+    }
+  })
+}
+
+let setIsActivated = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t) => {
+  getCollection(client)->Collection.updateOneWithSet(
+    userId,
+    {
+      "isActivated": true,
+      "activationKey": Js.Null.empty,
+    },
+  )
+}
+
+let activate = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  activationKey: string,
+) => {
+  client
+  ->findUserByObjectId(userId)
+  ->Promise.then(user => {
+    switch user {
+    | Some(user) =>
+      if user.isActivated {
+        Promise.resolve(Ok())
+      } else {
+        switch user.activationKey {
+        | None => Promise.resolve(Error(#ActivationKeyMissing))
+        | Some(userActivationKey) =>
+          if userActivationKey === activationKey {
+            client
+            ->setIsActivated(userId)
+            ->Promise.then(_updateResult => {
+              Promise.resolve(Ok())
+            })
+          } else {
+            Promise.resolve(Error(#IncorrectActivationKey))
+          }
+        }
+      }
+    | None => Promise.resolve(Error(#UserNotFound))
     }
   })
 }

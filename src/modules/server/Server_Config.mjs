@@ -18,10 +18,21 @@ function get(param) {
     secretKey: reCaptcha_secretKey,
     siteKey: reCaptcha_siteKey
   };
+  var sendGrid = {
+    apiKey: Server_Env.getString("SENDGRID_API_KEY")
+  };
+  var system_emailName = Server_Env.getString("SYSTEM_EMAIL_NAME");
+  var system_emailAddress = Server_Env.getString("SYSTEM_EMAIL_ADDRESS");
+  var system = {
+    emailName: system_emailName,
+    emailAddress: system_emailAddress
+  };
   return {
           mongoDb: mongoDb,
           session: session,
-          reCaptcha: reCaptcha
+          reCaptcha: reCaptcha,
+          sendGrid: sendGrid,
+          system: system
         };
 }
 
