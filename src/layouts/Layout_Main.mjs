@@ -17,6 +17,10 @@ function getHeaderLinks(user) {
               Common_Url.contact(undefined)
             ],
             [
+              "Account",
+              Common_Url.account(undefined)
+            ],
+            [
               "Log out",
               Common_Url.logout(undefined)
             ]

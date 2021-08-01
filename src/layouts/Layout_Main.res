@@ -11,6 +11,7 @@ let getHeaderLinks = user => {
   | Some(_) => [
       ("Home", Common_Url.home()),
       ("Contact", Common_Url.contact()),
+      ("Account", Common_Url.account()),
       ("Log out", Common_Url.logout()),
     ]
   }

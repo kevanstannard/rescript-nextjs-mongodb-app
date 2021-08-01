@@ -6,6 +6,7 @@ import * as Common_Url from "../../modules/common/Common_Url.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
+import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Common_Contact from "../../modules/common/Common_Contact.mjs";
 import * as Page_Contact_View from "./Page_Contact_View.mjs";
 
@@ -235,7 +236,7 @@ function renderPage(user, config) {
 }
 
 function $$default(param) {
-  var user = Caml_option.null_to_opt(param.user);
+  var user = Belt_Option.map(Caml_option.null_to_opt(param.user), Common_User.User.fromDto);
   return renderPage(user, param.config);
 }
 

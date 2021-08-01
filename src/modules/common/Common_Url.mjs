@@ -29,6 +29,10 @@ function logout(param) {
   return "/logout";
 }
 
+function account(param) {
+  return "/account";
+}
+
 function activate(userId, activationKey) {
   return "/activate/" + userId + "/" + activationKey;
 }
@@ -37,8 +41,16 @@ function resetPassword(userId, resetPasswordKey) {
   return "/reset-password/" + userId + "/" + resetPasswordKey;
 }
 
+function changeEmail(param) {
+  return "/change-email";
+}
+
 function changeEmailConfirm(userId, emailChangeKey) {
   return "/change-email-confirm/" + userId + "/" + emailChangeKey;
+}
+
+function changePassword(param) {
+  return "/change-password";
 }
 
 export {
@@ -49,9 +61,12 @@ export {
   signupSuccess ,
   login ,
   logout ,
+  account ,
   activate ,
   resetPassword ,
+  changeEmail ,
   changeEmailConfirm ,
+  changePassword ,
   
 }
 /* No side effect */

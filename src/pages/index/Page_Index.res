@@ -13,7 +13,7 @@ let default = (props: props): React.element => {
   let envMessage = "Env is " ++ env
   let countMessage = "Count is " ++ Belt.Int.toString(count)
 
-  let user = Js.Null.toOption(user)
+  let user = Js.Null.toOption(user)->Belt.Option.map(Common_User.User.fromDto)
 
   let userMessage = switch user {
   | None => "None"

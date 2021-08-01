@@ -13,8 +13,14 @@ import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
 function toCommonUser(dbUser) {
   return {
-          id: Curry._1(MongoDb.ObjectId.toString, dbUser._id)
+          id: Curry._1(MongoDb.ObjectId.toString, dbUser._id),
+          email: dbUser.email,
+          emailChange: dbUser.emailChange
         };
+}
+
+function toCommonUserDto(dbUser) {
+  return Common_User.User.toDto(toCommonUser(dbUser));
 }
 
 function getCollection(client) {
@@ -301,6 +307,7 @@ function activate(client, userId, activationKey) {
 
 export {
   toCommonUser ,
+  toCommonUserDto ,
   getCollection ,
   getStats ,
   hashPassword ,

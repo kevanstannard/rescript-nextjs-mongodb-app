@@ -112,6 +112,6 @@ let renderPage = (user: option<Common_User.User.t>, config: Common_ClientConfig.
 }
 
 let default = ({user, config}: props) => {
-  let user = Js.Null.toOption(user)
+  let user = Js.Null.toOption(user)->Belt.Option.map(Common_User.User.fromDto)
   renderPage(user, config)
 }

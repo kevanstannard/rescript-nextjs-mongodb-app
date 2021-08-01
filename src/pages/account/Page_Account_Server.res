@@ -1,10 +1,8 @@
-open Page_Contact_Types
+open Page_Account_Types
 
 let makeResult = (user): Next.GetServerSideProps.result<props> => {
-  let config = Server_Config.getClientConfig()
   let props: props = {
     user: user,
-    config: config,
   }
   {
     props: Some(props),

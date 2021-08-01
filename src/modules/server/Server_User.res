@@ -21,6 +21,12 @@ type dbUser = {
 
 let toCommonUser = (dbUser: dbUser): Common_User.User.t => {
   id: ObjectId.toString(dbUser._id),
+  email: dbUser.email,
+  emailChange: dbUser.emailChange,
+}
+
+let toCommonUserDto = (dbUser: dbUser): Common_User.User.dto => {
+  dbUser->toCommonUser->Common_User.User.toDto
 }
 
 let getCollection = (client: MongoClient.t) => {

@@ -12,9 +12,15 @@ let login = () => "/login"
 
 let logout = () => "/logout"
 
+let account = () => "/account"
+
 let activate = (userId, activationKey) => `/activate/${userId}/${activationKey}`
 
 let resetPassword = (userId, resetPasswordKey) => `/reset-password/${userId}/${resetPasswordKey}`
 
+let changeEmail = () => "/change-email"
+
 let changeEmailConfirm = (userId, emailChangeKey) =>
   `/change-email-confirm/${userId}/${emailChangeKey}`
+
+let changePassword = () => "/change-password"

@@ -165,9 +165,19 @@ module Head = {
   external make: (~children: React.element) => React.element = "default"
 }
 
+// https://nextjs.org/docs/advanced-features/custom-error-page#reusing-the-built-in-error-page
 module Error = {
   @module("next/error") @react.component
-  external make: (~statusCode: int, ~children: React.element) => React.element = "default"
+  external make: (
+    ~statusCode: @int
+    [
+      | @as(400) #BadRequest
+      | @as(403) #Forbidden
+      | @as(404) #NotFound
+      | @as(500) #ServerError
+    ],
+    ~title: string=?,
+  ) => React.element = "default"
 }
 
 module Dynamic = {

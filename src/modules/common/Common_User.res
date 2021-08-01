@@ -1,5 +1,31 @@
 module User = {
-  type t = {id: string}
+  type t = {
+    id: string,
+    email: string,
+    emailChange: option<string>,
+  }
+
+  type dto = {
+    id: string,
+    email: string,
+    emailChange: Js.Null.t<string>,
+  }
+
+  let toDto = (user: t): dto => {
+    {
+      id: user.id,
+      email: user.email,
+      emailChange: Js.Null.fromOption(user.emailChange),
+    }
+  }
+
+  let fromDto = (dto: dto): t => {
+    {
+      id: dto.id,
+      email: dto.email,
+      emailChange: Js.Null.toOption(dto.emailChange),
+    }
+  }
 }
 
 module Signup = {
@@ -175,4 +201,67 @@ module Login = {
 
 module Logout = {
   type logoutResult = {result: [#Ok]}
+}
+
+module ChangeEmail = {
+  type changeEmail = {email: string}
+
+  type changeEmailError = [
+    | #RequestFailed
+    | #UserNotFound
+    | #AccountNotActivated
+    | #SameAsCurrentEmail
+    | #EmailNotAvailable
+  ]
+
+  type emailError = [#EmailEmpty | #EmailInvalid]
+
+  type changeEmailErrors = {
+    changeEmail: option<changeEmailError>,
+    email: option<emailError>,
+  }
+
+  type changeEmailResult = {
+    result: [#Ok | #Error],
+    errors: option<changeEmailErrors>,
+  }
+
+  let hasErrors = (errors: changeEmailErrors): bool => {
+    Belt.Option.isSome(errors.changeEmail) || Belt.Option.isSome(errors.email)
+  }
+
+  let validateEmail = (email): option<emailError> => {
+    let emailTrimmed = String.trim(email)
+    if Validator.isEmpty(emailTrimmed) {
+      Some(#EmailEmpty)
+    } else if !Validator.isEmail(emailTrimmed) {
+      Some(#EmailInvalid)
+    } else {
+      None
+    }
+  }
+
+  let validateChangeEmail = ({email}: changeEmail): changeEmailErrors => {
+    changeEmail: None,
+    email: validateEmail(email),
+  }
+
+  let generalError = "An error occurred when trying to change your email. Please try again."
+
+  let changeEmailErrorToString = (error: changeEmailError): string => {
+    switch error {
+    | #RequestFailed => generalError
+    | #UserNotFound => generalError
+    | #AccountNotActivated => generalError
+    | #SameAsCurrentEmail => "The email address you provided is the same as your current email address."
+    | #EmailNotAvailable => "That email address is not available."
+    }
+  }
+
+  let emailValidationErrorToString = (error: emailError): string => {
+    switch error {
+    | #EmailEmpty => "Enter an email address"
+    | #EmailInvalid => "Enter a valid email address"
+    }
+  }
 }
