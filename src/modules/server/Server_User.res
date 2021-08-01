@@ -4,27 +4,55 @@ type opaque
 external opaque: 'a => opaque = "%identity"
 
 module User = {
+  // Note 1: Use convention of null rather than undefined for missing values.
+  // Note 2: If you add or modify fields, also update the field functions below.
   type t = {
     _id: ObjectId.t,
     email: string,
     emailVerified: bool,
-    emailChange: option<string>,
-    emailChangeKey: option<string>,
-    emailChangeKeyExpiry: option<Js.Date.t>,
+    emailChange: Js.Null.t<string>,
+    emailChangeKey: Js.Null.t<string>,
+    emailChangeKeyExpiry: Js.Null.t<Js.Date.t>,
     passwordHash: string,
     created: Js.Date.t,
     updated: Js.Date.t,
-    activationKey: option<string>,
+    activationKey: Js.Null.t<string>,
     isActivated: bool,
-    resetPasswordKey: option<string>,
-    resetPasswordExpiry: option<Js.Date.t>,
+    resetPasswordKey: Js.Null.t<string>,
+    resetPasswordExpiry: Js.Null.t<Js.Date.t>,
   }
+
+  let idField = (id: ObjectId.t) => {"_id": id}
+
+  let emailField = (email: string) => {"email": email}
+
+  let emailQuery = (email: string) =>
+    {
+      "$or": [opaque({"email": email}), opaque({"emailChange": email})],
+    }
+
+  let activationFields = (~isActivated: bool, ~activationKey: Js.Null.t<string>) =>
+    {
+      "isActivated": isActivated,
+      "activationKey": activationKey,
+    }
+
+  let passwordFields = (
+    ~passwordHash: string,
+    ~resetPasswordKey: Js.Null.t<string>,
+    ~resetPasswordExpiry: Js.Null.t<Js.Date.t>,
+  ) =>
+    {
+      "passwordHash": passwordHash,
+      "resetPasswordKey": resetPasswordKey,
+      "resetPasswordExpiry": resetPasswordExpiry,
+    }
 }
 
 let toCommonUser = (user: User.t): Common_User.User.t => {
   id: ObjectId.toString(user._id),
   email: user.email,
-  emailChange: user.emailChange,
+  emailChange: user.emailChange->Js.Null.toOption,
 }
 
 let toCommonUserDto = (user: User.t): Common_User.User.dto => {
@@ -50,9 +78,9 @@ let comparePasswords = (password, passwordHash) => {
   Bcrypt.comparePromise(password, passwordHash)
 }
 
-let makeActivationKey = () => NanoId.generate()
-let makeResetPasswordKey = () => NanoId.generate()
-let makeEmailChangeKey = () => NanoId.generate()
+let makeActivationKey = NanoId.generate
+let makeResetPasswordKey = NanoId.generate
+let makeEmailChangeKey = NanoId.generate
 
 let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
@@ -61,16 +89,16 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
       _id: ObjectId.make(),
       email: signup.email,
       emailVerified: false,
-      emailChange: None,
-      emailChangeKey: None,
-      emailChangeKeyExpiry: None,
+      emailChange: Js.Null.empty,
+      emailChangeKey: Js.Null.empty,
+      emailChangeKeyExpiry: Js.Null.empty,
       passwordHash: passwordHash,
       created: now,
       updated: now,
-      activationKey: Some(makeActivationKey()),
+      activationKey: Js.Null.return(makeActivationKey()),
       isActivated: false,
-      resetPasswordKey: None,
-      resetPasswordExpiry: None,
+      resetPasswordKey: Js.Null.empty,
+      resetPasswordExpiry: Js.Null.empty,
     }
     Promise.resolve(user)
   })
@@ -79,19 +107,8 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
 let findUserByObjectId = (client: MongoClient.t, objectId: ObjectId.t): Promise.t<
   option<User.t>,
 > => {
-  getCollection(client)
-  ->Collection.findOne({"_id": objectId})
-  ->Promise.thenResolve(Js.Undefined.toOption)
-}
-
-let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<User.t>> => {
-  switch ObjectId.fromString(userId) {
-  | Ok(userId) =>
-    getCollection(client)
-    ->Collection.findOne({"_id": userId})
-    ->Promise.thenResolve(Js.Undefined.toOption)
-  | Error(_) => Promise.resolve(None) // If parsing the object id fails, treat as a not found
-  }
+  let query = User.idField(objectId)
+  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Undefined.toOption)
 }
 
 let insertUser = (client: MongoClient.t, user: User.t) => {
@@ -110,31 +127,13 @@ let insertUser = (client: MongoClient.t, user: User.t) => {
 }
 
 let findUserByEmail = (client: MongoClient.t, email: string): Js.Promise.t<option<User.t>> => {
-  getCollection(client)
-  ->Collection.findOne({"email": email})
-  ->Promise.thenResolve(Js.Undefined.toOption)
-}
-
-let updateUserPassword = (client: MongoClient.t, userId: string, password: string) => {
-  switch ObjectId.fromString(userId) {
-  | Ok(userId) => getCollection(client)->Collection.updateOneWithSet(userId, {"password": password})
-  | Error(reason) => Js.Exn.raiseError(reason) // Return rejected promise
-  }
-}
-
-let updateEmailVerified = (client: MongoClient.t, userId: string, emailVerified: bool) => {
-  switch ObjectId.fromString(userId) {
-  | Ok(userId) =>
-    getCollection(client)->Collection.updateOneWithSet(userId, {"emailVerified": emailVerified})
-  | Error(reason) => Js.Exn.raiseError(reason) // Return rejected promise
-  }
+  let query = User.emailField(email)
+  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Undefined.toOption)
 }
 
 let checkIfEmailIsTaken = (client: MongoClient.t, email: string) => {
   getCollection(client)
-  ->Collection.find({
-    "$or": [opaque({"email": email}), opaque({"emailChange": email})],
-  })
+  ->Collection.find(User.emailQuery(email))
   ->Cursor.toArray
   ->Promise.then((users: array<User.t>) => {
     let exists = Js.Array2.length(users) > 0
@@ -167,7 +166,7 @@ let validateReCaptchaToken = token => {
   }
 }
 
-let validateSignup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup): Promise.t<
+let validateSignup = (client: MongoClient.t, signup: Common_User.Signup.signup): Promise.t<
   Common_User.Signup.validation,
 > => {
   let validation: Common_User.Signup.validation = Common_User.Signup.validateSignup(signup)
@@ -192,17 +191,17 @@ let validateSignup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.
   }
 }
 
-let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) => {
+let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
   validateSignup(client, signup)->Promise.then(validation => {
     if Common_User.Signup.isValid(validation) {
       signupToUser(signup)
       ->Promise.then(insertUser(client))
       ->Promise.then(user => {
         let {_id, email, activationKey} = user
-        switch activationKey {
+        switch activationKey->Js.Null.toOption {
         | None => Js.Exn.raiseError("Activation key not found after signup")
         | Some(activationKey) => {
-            let userId = MongoDb.ObjectId.toString(_id)
+            let userId = ObjectId.toString(_id)
             Server_Email.sendActivationEmail(userId, email, activationKey)->Promise.then(_ => {
               Promise.resolve(Ok(validation))
             })
@@ -215,7 +214,7 @@ let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) 
   })
 }
 
-let login = (client: MongoDb.MongoClient.t, login: Common_User.Login.login) => {
+let login = (client: MongoClient.t, login: Common_User.Login.login) => {
   client
   ->findUserByEmail(login.email)
   ->Promise.then(user => {
@@ -237,21 +236,12 @@ let login = (client: MongoDb.MongoClient.t, login: Common_User.Login.login) => {
   })
 }
 
-let setIsActivated = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t) => {
-  getCollection(client)->Collection.updateOneWithSet(
-    userId,
-    {
-      "isActivated": true,
-      "activationKey": Js.Null.empty,
-    },
-  )
+let setIsActivated = (client: MongoClient.t, userId: ObjectId.t) => {
+  let update = User.activationFields(~isActivated=true, ~activationKey=Js.Null.empty)
+  getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
 
-let activate = (
-  client: MongoDb.MongoClient.t,
-  userId: MongoDb.ObjectId.t,
-  activationKey: string,
-) => {
+let activate = (client: MongoClient.t, userId: ObjectId.t, activationKey: string) => {
   client
   ->findUserByObjectId(userId)
   ->Promise.then(user => {
@@ -260,7 +250,7 @@ let activate = (
       if user.isActivated {
         Promise.resolve(Ok())
       } else {
-        switch user.activationKey {
+        switch user.activationKey->Js.Null.toOption {
         | None => Promise.resolve(Error(#ActivationKeyMissing))
         | Some(userActivationKey) =>
           if userActivationKey === activationKey {
@@ -279,24 +269,22 @@ let activate = (
   })
 }
 
-let setPassword = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t, password: string) => {
+let setPassword = (client: MongoClient.t, userId: ObjectId.t, password: string) => {
   password
   ->hashPassword
   ->Promise.then(passwordHash => {
-    getCollection(client)->Collection.updateOneWithSet(
-      userId,
-      {
-        "passwordHash": passwordHash,
-        "resetPasswordKey": Js.Null.empty,
-        "resetPasswordExpiry": Js.Null.empty,
-      },
+    let update = User.passwordFields(
+      ~passwordHash,
+      ~resetPasswordKey=Js.Null.empty,
+      ~resetPasswordExpiry=Js.Null.empty,
     )
+    getCollection(client)->Collection.updateOneWithSet(userId, update)
   })
 }
 
 let changePassword = (
-  client: MongoDb.MongoClient.t,
-  userId: MongoDb.ObjectId.t,
+  client: MongoClient.t,
+  userId: ObjectId.t,
   changePassword: Common_User.ChangePassword.changePassword,
 ): Promise.t<
   result<

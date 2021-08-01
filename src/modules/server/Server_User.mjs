@@ -11,13 +11,59 @@ import * as Common_User from "../common/Common_User.mjs";
 import * as Server_Email from "./Server_Email.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
-var User = {};
+function idField(id) {
+  return {
+          _id: id
+        };
+}
+
+function emailField(email) {
+  return {
+          email: email
+        };
+}
+
+function emailQuery(email) {
+  return {
+          $or: [
+            {
+              email: email
+            },
+            {
+              emailChange: email
+            }
+          ]
+        };
+}
+
+function activationFields(isActivated, activationKey) {
+  return {
+          isActivated: isActivated,
+          activationKey: activationKey
+        };
+}
+
+function passwordFields(passwordHash, resetPasswordKey, resetPasswordExpiry) {
+  return {
+          passwordHash: passwordHash,
+          resetPasswordKey: resetPasswordKey,
+          resetPasswordExpiry: resetPasswordExpiry
+        };
+}
+
+var User = {
+  idField: idField,
+  emailField: emailField,
+  emailQuery: emailQuery,
+  activationFields: activationFields,
+  passwordFields: passwordFields
+};
 
 function toCommonUser(user) {
   return {
           id: Curry._1(MongoDb.ObjectId.toString, user._id),
           email: user.email,
-          emailChange: user.emailChange
+          emailChange: Caml_option.null_to_opt(user.emailChange)
         };
 }
 
@@ -44,17 +90,11 @@ function comparePasswords(password, passwordHash) {
   return Bcrypt.compare(password, passwordHash);
 }
 
-function makeActivationKey(param) {
-  return Curry._1(Nanoid.nanoid, undefined);
-}
+var makeActivationKey = Nanoid.nanoid;
 
-function makeResetPasswordKey(param) {
-  return Curry._1(Nanoid.nanoid, undefined);
-}
+var makeResetPasswordKey = Nanoid.nanoid;
 
-function makeEmailChangeKey(param) {
-  return Curry._1(Nanoid.nanoid, undefined);
-}
+var makeEmailChangeKey = Nanoid.nanoid;
 
 function signupToUser(signup) {
   var now = new Date();
@@ -63,47 +103,31 @@ function signupToUser(signup) {
                           _id: Curry._1(MongoDb.ObjectId.make, undefined),
                           email: signup.email,
                           emailVerified: false,
-                          emailChange: undefined,
-                          emailChangeKey: undefined,
-                          emailChangeKeyExpiry: undefined,
+                          emailChange: null,
+                          emailChangeKey: null,
+                          emailChangeKeyExpiry: null,
                           passwordHash: passwordHash,
                           created: now,
                           updated: now,
-                          activationKey: Curry._1(Nanoid.nanoid, undefined),
+                          activationKey: Curry._1(makeActivationKey, undefined),
                           isActivated: false,
-                          resetPasswordKey: undefined,
-                          resetPasswordExpiry: undefined
+                          resetPasswordKey: null,
+                          resetPasswordExpiry: null
                         });
             });
 }
 
 function findUserByObjectId(client, objectId) {
-  return getCollection(client).findOne({
-                _id: objectId
-              }).then(function (prim) {
+  var query = {
+    _id: objectId
+  };
+  return getCollection(client).findOne(query).then(function (prim) {
               if (prim === undefined) {
                 return ;
               } else {
                 return Caml_option.some(prim);
               }
             });
-}
-
-function findUserByStringId(client, userId) {
-  var userId$1 = MongoDb.ObjectId.fromString(userId);
-  if (userId$1.TAG === /* Ok */0) {
-    return getCollection(client).findOne({
-                  _id: userId$1._0
-                }).then(function (prim) {
-                if (prim === undefined) {
-                  return ;
-                } else {
-                  return Caml_option.some(prim);
-                }
-              });
-  } else {
-    return Promise.resolve(undefined);
-  }
 }
 
 function insertUser(client, user) {
@@ -119,9 +143,10 @@ function insertUser(client, user) {
 }
 
 function findUserByEmail(client, email) {
-  return getCollection(client).findOne({
-                email: email
-              }).then(function (prim) {
+  var query = {
+    email: email
+  };
+  return getCollection(client).findOne(query).then(function (prim) {
               if (prim === undefined) {
                 return ;
               } else {
@@ -130,39 +155,8 @@ function findUserByEmail(client, email) {
             });
 }
 
-function updateUserPassword(client, userId, password) {
-  var userId$1 = MongoDb.ObjectId.fromString(userId);
-  if (userId$1.TAG === /* Ok */0) {
-    return MongoDb.Collection.updateOneWithSet(getCollection(client), userId$1._0, {
-                password: password
-              });
-  } else {
-    return Js_exn.raiseError(userId$1._0);
-  }
-}
-
-function updateEmailVerified(client, userId, emailVerified) {
-  var userId$1 = MongoDb.ObjectId.fromString(userId);
-  if (userId$1.TAG === /* Ok */0) {
-    return MongoDb.Collection.updateOneWithSet(getCollection(client), userId$1._0, {
-                emailVerified: emailVerified
-              });
-  } else {
-    return Js_exn.raiseError(userId$1._0);
-  }
-}
-
 function checkIfEmailIsTaken(client, email) {
-  return getCollection(client).find({
-                  $or: [
-                    {
-                      email: email
-                    },
-                    {
-                      emailChange: email
-                    }
-                  ]
-                }).toArray().then(function (users) {
+  return getCollection(client).find(emailQuery(email)).toArray().then(function (users) {
               return Promise.resolve(users.length > 0);
             });
 }
@@ -214,7 +208,7 @@ function signup(client, signup$1) {
                               return insertUser(client, param);
                             }).then(function (user) {
                             var activationKey = user.activationKey;
-                            if (activationKey === undefined) {
+                            if (activationKey === null) {
                               return Js_exn.raiseError("Activation key not found after signup");
                             }
                             var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
@@ -263,10 +257,11 @@ function login(client, login$1) {
 }
 
 function setIsActivated(client, userId) {
-  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, {
-              isActivated: true,
-              activationKey: null
-            });
+  var update = {
+    isActivated: true,
+    activationKey: null
+  };
+  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
 }
 
 function activate(client, userId, activationKey) {
@@ -284,7 +279,7 @@ function activate(client, userId, activationKey) {
                           });
               }
               var userActivationKey = user.activationKey;
-              if (userActivationKey !== undefined) {
+              if (userActivationKey !== null) {
                 if (userActivationKey === activationKey) {
                   return setIsActivated(client, userId).then(function (_updateResult) {
                               return Promise.resolve({
@@ -309,11 +304,8 @@ function activate(client, userId, activationKey) {
 
 function setPassword(client, userId, password) {
   return hashPassword(password).then(function (passwordHash) {
-              return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, {
-                          passwordHash: passwordHash,
-                          resetPasswordKey: null,
-                          resetPasswordExpiry: null
-                        });
+              var update = passwordFields(passwordHash, null, null);
+              return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
             });
 }
 
@@ -387,11 +379,8 @@ export {
   makeEmailChangeKey ,
   signupToUser ,
   findUserByObjectId ,
-  findUserByStringId ,
   insertUser ,
   findUserByEmail ,
-  updateUserPassword ,
-  updateEmailVerified ,
   checkIfEmailIsTaken ,
   validateEmailIsAvailable ,
   validateReCaptchaToken ,
@@ -404,4 +393,4 @@ export {
   changePassword ,
   
 }
-/* bcrypt Not a pure module */
+/* makeActivationKey Not a pure module */
