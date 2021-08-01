@@ -11,16 +11,18 @@ import * as Common_User from "../common/Common_User.mjs";
 import * as Server_Email from "./Server_Email.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
 
-function toCommonUser(dbUser) {
+var User = {};
+
+function toCommonUser(user) {
   return {
-          id: Curry._1(MongoDb.ObjectId.toString, dbUser._id),
-          email: dbUser.email,
-          emailChange: dbUser.emailChange
+          id: Curry._1(MongoDb.ObjectId.toString, user._id),
+          email: user.email,
+          emailChange: user.emailChange
         };
 }
 
-function toCommonUserDto(dbUser) {
-  return Common_User.User.toDto(toCommonUser(dbUser));
+function toCommonUserDto(user) {
+  return Common_User.User.toDto(toCommonUser(user));
 }
 
 function getCollection(client) {
@@ -54,7 +56,7 @@ function makeEmailChangeKey(param) {
   return Curry._1(Nanoid.nanoid, undefined);
 }
 
-function signupToDbUser(signup) {
+function signupToUser(signup) {
   var now = new Date();
   return hashPassword(signup.password).then(function (passwordHash) {
               return Promise.resolve({
@@ -104,11 +106,11 @@ function findUserByStringId(client, userId) {
   }
 }
 
-function insertUser(client, dbUser) {
-  return getCollection(client).insertOne(dbUser).then(function (insertResult) {
-              return findUserByObjectId(client, insertResult.insertedId).then(function (dbUser) {
-                          if (dbUser !== undefined) {
-                            return Promise.resolve(dbUser);
+function insertUser(client, user) {
+  return getCollection(client).insertOne(user).then(function (insertResult) {
+              return findUserByObjectId(client, insertResult.insertedId).then(function (user) {
+                          if (user !== undefined) {
+                            return Promise.resolve(user);
                           } else {
                             return Js_exn.raiseError("User not found after insert");
                           }
@@ -160,8 +162,8 @@ function checkIfEmailIsTaken(client, email) {
                       emailChange: email
                     }
                   ]
-                }).toArray().then(function (dbUsers) {
-              return Promise.resolve(dbUsers.length > 0);
+                }).toArray().then(function (users) {
+              return Promise.resolve(users.length > 0);
             });
 }
 
@@ -208,15 +210,15 @@ function validateSignup(client, signup) {
 function signup(client, signup$1) {
   return validateSignup(client, signup$1).then(function (validation) {
               if (Common_User.Signup.isValid(validation)) {
-                return signupToDbUser(signup$1).then(function (param) {
+                return signupToUser(signup$1).then(function (param) {
                               return insertUser(client, param);
-                            }).then(function (dbUser) {
-                            var activationKey = dbUser.activationKey;
+                            }).then(function (user) {
+                            var activationKey = user.activationKey;
                             if (activationKey === undefined) {
                               return Js_exn.raiseError("Activation key not found after signup");
                             }
-                            var userId = Curry._1(MongoDb.ObjectId.toString, dbUser._id);
-                            return Server_Email.sendActivationEmail(userId, dbUser.email, activationKey).then(function (param) {
+                            var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+                            return Server_Email.sendActivationEmail(userId, user.email, activationKey).then(function (param) {
                                         return Promise.resolve({
                                                     TAG: /* Ok */0,
                                                     _0: validation
@@ -373,6 +375,7 @@ function changePassword(client, userId, changePassword$1) {
 }
 
 export {
+  User ,
   toCommonUser ,
   toCommonUserDto ,
   getCollection ,
@@ -382,7 +385,7 @@ export {
   makeActivationKey ,
   makeResetPasswordKey ,
   makeEmailChangeKey ,
-  signupToDbUser ,
+  signupToUser ,
   findUserByObjectId ,
   findUserByStringId ,
   insertUser ,

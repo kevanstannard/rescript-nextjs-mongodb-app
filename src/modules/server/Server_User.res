@@ -3,30 +3,32 @@ open MongoDb
 type opaque
 external opaque: 'a => opaque = "%identity"
 
-type dbUser = {
-  _id: ObjectId.t,
-  email: string,
-  emailVerified: bool,
-  emailChange: option<string>,
-  emailChangeKey: option<string>,
-  emailChangeKeyExpiry: option<Js.Date.t>,
-  passwordHash: string,
-  created: Js.Date.t,
-  updated: Js.Date.t,
-  activationKey: option<string>,
-  isActivated: bool,
-  resetPasswordKey: option<string>,
-  resetPasswordExpiry: option<Js.Date.t>,
+module User = {
+  type t = {
+    _id: ObjectId.t,
+    email: string,
+    emailVerified: bool,
+    emailChange: option<string>,
+    emailChangeKey: option<string>,
+    emailChangeKeyExpiry: option<Js.Date.t>,
+    passwordHash: string,
+    created: Js.Date.t,
+    updated: Js.Date.t,
+    activationKey: option<string>,
+    isActivated: bool,
+    resetPasswordKey: option<string>,
+    resetPasswordExpiry: option<Js.Date.t>,
+  }
 }
 
-let toCommonUser = (dbUser: dbUser): Common_User.User.t => {
-  id: ObjectId.toString(dbUser._id),
-  email: dbUser.email,
-  emailChange: dbUser.emailChange,
+let toCommonUser = (user: User.t): Common_User.User.t => {
+  id: ObjectId.toString(user._id),
+  email: user.email,
+  emailChange: user.emailChange,
 }
 
-let toCommonUserDto = (dbUser: dbUser): Common_User.User.dto => {
-  dbUser->toCommonUser->Common_User.User.toDto
+let toCommonUserDto = (user: User.t): Common_User.User.dto => {
+  user->toCommonUser->Common_User.User.toDto
 }
 
 let getCollection = (client: MongoClient.t) => {
@@ -52,10 +54,10 @@ let makeActivationKey = () => NanoId.generate()
 let makeResetPasswordKey = () => NanoId.generate()
 let makeEmailChangeKey = () => NanoId.generate()
 
-let signupToDbUser = (signup: Common_User.Signup.signup): Promise.t<dbUser> => {
+let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
   hashPassword(signup.password)->Promise.then(passwordHash => {
-    let user: dbUser = {
+    let user: User.t = {
       _id: ObjectId.make(),
       email: signup.email,
       emailVerified: false,
@@ -75,14 +77,14 @@ let signupToDbUser = (signup: Common_User.Signup.signup): Promise.t<dbUser> => {
 }
 
 let findUserByObjectId = (client: MongoClient.t, objectId: ObjectId.t): Promise.t<
-  option<dbUser>,
+  option<User.t>,
 > => {
   getCollection(client)
   ->Collection.findOne({"_id": objectId})
   ->Promise.thenResolve(Js.Undefined.toOption)
 }
 
-let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<dbUser>> => {
+let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<User.t>> => {
   switch ObjectId.fromString(userId) {
   | Ok(userId) =>
     getCollection(client)
@@ -92,21 +94,22 @@ let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<opti
   }
 }
 
-let insertUser = (client: MongoClient.t, dbUser: dbUser) => {
+let insertUser = (client: MongoClient.t, user: User.t) => {
   getCollection(client)
-  ->Collection.insertOne(dbUser)
+  ->Collection.insertOne(user)
   ->Promise.then(insertResult => {
     client
     ->findUserByObjectId(insertResult.insertedId)
-    ->Promise.then(dbUser => {
-      switch dbUser {
+    ->Promise.then(user => {
+      switch user {
       | None => Js.Exn.raiseError("User not found after insert")
-      | Some(dbUser) => Promise.resolve(dbUser)
+      | Some(user) => Promise.resolve(user)
       }
     })
   })
 }
-let findUserByEmail = (client: MongoClient.t, email: string): Js.Promise.t<option<dbUser>> => {
+
+let findUserByEmail = (client: MongoClient.t, email: string): Js.Promise.t<option<User.t>> => {
   getCollection(client)
   ->Collection.findOne({"email": email})
   ->Promise.thenResolve(Js.Undefined.toOption)
@@ -133,8 +136,8 @@ let checkIfEmailIsTaken = (client: MongoClient.t, email: string) => {
     "$or": [opaque({"email": email}), opaque({"emailChange": email})],
   })
   ->Cursor.toArray
-  ->Promise.then((dbUsers: array<dbUser>) => {
-    let exists = Js.Array2.length(dbUsers) > 0
+  ->Promise.then((users: array<User.t>) => {
+    let exists = Js.Array2.length(users) > 0
     Promise.resolve(exists)
   })
 }
@@ -192,10 +195,10 @@ let validateSignup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.
 let signup = (client: MongoDb.MongoClient.t, signup: Common_User.Signup.signup) => {
   validateSignup(client, signup)->Promise.then(validation => {
     if Common_User.Signup.isValid(validation) {
-      signupToDbUser(signup)
+      signupToUser(signup)
       ->Promise.then(insertUser(client))
-      ->Promise.then(dbUser => {
-        let {_id, email, activationKey} = dbUser
+      ->Promise.then(user => {
+        let {_id, email, activationKey} = user
         switch activationKey {
         | None => Js.Exn.raiseError("Activation key not found after signup")
         | Some(activationKey) => {

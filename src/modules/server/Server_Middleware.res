@@ -49,10 +49,10 @@ module User = {
   let userKey = "user"
   let userIdKey = "userId"
 
-  let setUser = (req: Next.Req.t, value: option<Server_User.dbUser>): unit =>
+  let setUser = (req: Next.Req.t, value: option<Server_User.User.t>): unit =>
     Server_Request.set(req, userKey, value)
 
-  let getUser = (req: Next.Req.t): option<Server_User.dbUser> => Server_Request.get(req, userKey)
+  let getUser = (req: Next.Req.t): option<Server_User.User.t> => Server_Request.get(req, userKey)
 
   let setUserId = (req: Next.Req.t, value: option<MongoDb.ObjectId.t>): unit =>
     Server_Request.set(req, userIdKey, value)
@@ -60,7 +60,7 @@ module User = {
   let getUserId = (req: Next.Req.t): option<MongoDb.ObjectId.t> =>
     Server_Request.get(req, userIdKey)
 
-  let get = (req: Next.Req.t): option<(MongoDb.ObjectId.t, Server_User.dbUser)> => {
+  let get = (req: Next.Req.t): option<(MongoDb.ObjectId.t, Server_User.User.t)> => {
     switch (getUserId(req), getUser(req)) {
     | (Some(userId), Some(user)) => Some(userId, user)
     | _ => None
@@ -111,7 +111,7 @@ type requestData = {
   client: MongoDb.MongoClient.t,
   currentUserId: option<MongoDb.ObjectId.t>,
   currentUserIdString: option<string>,
-  currentUser: option<Server_User.dbUser>,
+  currentUser: option<Server_User.User.t>,
 }
 
 let getRequestData = req => {
