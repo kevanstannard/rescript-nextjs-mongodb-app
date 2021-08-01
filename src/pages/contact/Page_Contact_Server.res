@@ -18,8 +18,8 @@ let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
   Server_Middleware.all()
   ->Server_Middleware.run(req, res)
   ->Promise.then(_ => {
-    let {user} = Server_Middleware.getRequestData(req)
-    let commonUser = switch Belt.Option.map(user, Server_User.toCommonUserDto) {
+    let {currentUser} = Server_Middleware.getRequestData(req)
+    let commonUser = switch Belt.Option.map(currentUser, Server_User.toCommonUserDto) {
     | None => Js.Null.empty
     | Some(commonUser) => Js.Null.return(commonUser)
     }

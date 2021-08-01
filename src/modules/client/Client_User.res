@@ -27,3 +27,17 @@ let contact = (contact: Common_Contact.contact, onSuccess, onError) => {
     (),
   )
 }
+
+let changePassword = (
+  changePassword: Common_User.ChangePassword.changePassword,
+  onSuccess,
+  onError,
+) => {
+  Client_Xhr.post(
+    ~url="/api/change-password",
+    ~body=Json(changePassword->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}

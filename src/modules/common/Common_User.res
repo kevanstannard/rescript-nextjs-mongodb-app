@@ -265,3 +265,107 @@ module ChangeEmail = {
     }
   }
 }
+
+module ChangePassword = {
+  type changePassword = {
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirm: string,
+  }
+
+  type changePasswordError = [
+    | #UnknownError
+    | #UserNotFound
+    | #AccountNotActivated
+    | #CurrentPasswordInvalid
+  ]
+  type currentPasswordError = [#CurrentPasswordEmpty]
+  type newPasswordError = [#NewPasswordEmpty]
+  type newPasswordConfirmError = [#NewPasswordConfirmEmpty | #NewPasswordConfirmMismatch]
+
+  type changePasswordValidation = {
+    changePassword: option<changePasswordError>,
+    currentPassword: option<currentPasswordError>,
+    newPassword: option<newPasswordError>,
+    newPasswordConfirm: option<newPasswordConfirmError>,
+  }
+
+  type changePasswordResult = {
+    result: [#Ok | #Error],
+    validation: changePasswordValidation,
+  }
+
+  external asChangePasswordResult: Js.Json.t => changePasswordResult = "%identity"
+
+  let hasErrors = (validation: changePasswordValidation): bool => {
+    Belt.Option.isSome(validation.changePassword) ||
+    Belt.Option.isSome(validation.currentPassword) ||
+    Belt.Option.isSome(validation.newPassword) ||
+    Belt.Option.isSome(validation.newPasswordConfirm)
+  }
+
+  let validateCurrentPassword = (currentPassword): option<currentPasswordError> => {
+    if Validator.isEmpty(currentPassword) {
+      Some(#CurrentPasswordEmpty)
+    } else {
+      None
+    }
+  }
+
+  let validateNewPassword = (newPassword): option<newPasswordError> => {
+    if Validator.isEmpty(newPassword) {
+      Some(#NewPasswordEmpty)
+    } else {
+      None
+    }
+  }
+
+  let validateNewPasswordConfirm = (newPassword, newPasswordConfirm): option<
+    newPasswordConfirmError,
+  > => {
+    if Validator.isEmpty(newPasswordConfirm) {
+      Some(#NewPasswordConfirmEmpty)
+    } else if newPassword != newPasswordConfirm {
+      Some(#NewPasswordConfirmMismatch)
+    } else {
+      None
+    }
+  }
+
+  let validateChangePassword = (
+    {currentPassword, newPassword, newPasswordConfirm}: changePassword,
+  ): changePasswordValidation => {
+    changePassword: None,
+    currentPassword: validateCurrentPassword(currentPassword),
+    newPassword: validateNewPassword(newPassword),
+    newPasswordConfirm: validateNewPasswordConfirm(newPassword, newPasswordConfirm),
+  }
+
+  let changePasswordValidationErrorToString = (error: changePasswordError): string => {
+    switch error {
+    | #UnknownError => "An error occurred when trying to change your password. Please try again."
+    | #UserNotFound => "An error occurred when trying to change your password. Please try again."
+    | #AccountNotActivated => "An error occurred when trying to change your password. Please try again."
+    | #CurrentPasswordInvalid => "The current password you entered is not correct. Please try again."
+    }
+  }
+
+  let currentPasswordValidationErrorToString = (error: currentPasswordError): string => {
+    switch error {
+    | #CurrentPasswordEmpty => "Enter your current password"
+    }
+  }
+
+  let newPasswordValidationErrorToString = (error: newPasswordError): string => {
+    switch error {
+    | #NewPasswordEmpty => "Enter your new password"
+    }
+  }
+
+  let newPasswordConfirmValidationErrorToString = (error: newPasswordConfirmError): string => {
+    switch error {
+    | #NewPasswordConfirmEmpty => "Re-enter your new password"
+    | #NewPasswordConfirmMismatch => "This does not match the password above"
+    }
+  }
+}

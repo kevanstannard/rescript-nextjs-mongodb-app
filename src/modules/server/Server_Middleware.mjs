@@ -153,9 +153,9 @@ function getRequestData(req) {
   var userIdString = Belt_Option.map(userId, MongoDb.ObjectId.toString);
   return {
           client: client,
-          userId: userId,
-          userIdString: userIdString,
-          user: user
+          currentUserId: userId,
+          currentUserIdString: userIdString,
+          currentUser: user
         };
 }
 

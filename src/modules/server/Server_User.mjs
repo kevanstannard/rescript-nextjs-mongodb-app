@@ -305,6 +305,73 @@ function activate(client, userId, activationKey) {
             });
 }
 
+function setPassword(client, userId, password) {
+  return hashPassword(password).then(function (passwordHash) {
+              return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, {
+                          passwordHash: passwordHash,
+                          resetPasswordKey: null,
+                          resetPasswordExpiry: null
+                        });
+            });
+}
+
+function changePassword(client, userId, changePassword$1) {
+  var validation = Common_User.ChangePassword.validateChangePassword(changePassword$1);
+  if (Common_User.ChangePassword.hasErrors(validation)) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: validation
+              });
+  } else {
+    return findUserByObjectId(client, userId).then(function (user) {
+                if (user !== undefined) {
+                  if (user.isActivated) {
+                    return Bcrypt.compare(changePassword$1.currentPassword, user.passwordHash).then(function (compareResult) {
+                                if (compareResult) {
+                                  return setPassword(client, userId, changePassword$1.newPassword).then(function (param) {
+                                              return Promise.resolve({
+                                                          TAG: /* Ok */0,
+                                                          _0: validation
+                                                        });
+                                            });
+                                } else {
+                                  return Promise.resolve({
+                                              TAG: /* Error */1,
+                                              _0: {
+                                                changePassword: "CurrentPasswordInvalid",
+                                                currentPassword: undefined,
+                                                newPassword: undefined,
+                                                newPasswordConfirm: undefined
+                                              }
+                                            });
+                                }
+                              });
+                  } else {
+                    return Promise.resolve({
+                                TAG: /* Error */1,
+                                _0: {
+                                  changePassword: "AccountNotActivated",
+                                  currentPassword: undefined,
+                                  newPassword: undefined,
+                                  newPasswordConfirm: undefined
+                                }
+                              });
+                  }
+                } else {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: {
+                                changePassword: "UserNotFound",
+                                currentPassword: undefined,
+                                newPassword: undefined,
+                                newPasswordConfirm: undefined
+                              }
+                            });
+                }
+              });
+  }
+}
+
 export {
   toCommonUser ,
   toCommonUserDto ,
@@ -330,6 +397,8 @@ export {
   login ,
   setIsActivated ,
   activate ,
+  setPassword ,
+  changePassword ,
   
 }
 /* bcrypt Not a pure module */

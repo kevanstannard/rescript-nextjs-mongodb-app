@@ -24,3 +24,5 @@ let changeEmailConfirm = (userId, emailChangeKey) =>
   `/change-email-confirm/${userId}/${emailChangeKey}`
 
 let changePassword = () => "/change-password"
+
+let changePasswordSuccess = () => "/change-password-success"

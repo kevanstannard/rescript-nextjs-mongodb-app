@@ -237,12 +237,91 @@ var ChangeEmail = {
   emailValidationErrorToString: emailValidationErrorToString
 };
 
+function hasErrors$3(validation) {
+  if (Belt_Option.isSome(validation.changePassword) || Belt_Option.isSome(validation.currentPassword) || Belt_Option.isSome(validation.newPassword)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(validation.newPasswordConfirm);
+  }
+}
+
+function validateCurrentPassword(currentPassword) {
+  if (Validator.isEmpty(currentPassword)) {
+    return "CurrentPasswordEmpty";
+  }
+  
+}
+
+function validateNewPassword(newPassword) {
+  if (Validator.isEmpty(newPassword)) {
+    return "NewPasswordEmpty";
+  }
+  
+}
+
+function validateNewPasswordConfirm(newPassword, newPasswordConfirm) {
+  if (Validator.isEmpty(newPasswordConfirm)) {
+    return "NewPasswordConfirmEmpty";
+  } else if (newPassword !== newPasswordConfirm) {
+    return "NewPasswordConfirmMismatch";
+  } else {
+    return ;
+  }
+}
+
+function validateChangePassword(param) {
+  var newPassword = param.newPassword;
+  return {
+          changePassword: undefined,
+          currentPassword: validateCurrentPassword(param.currentPassword),
+          newPassword: validateNewPassword(newPassword),
+          newPasswordConfirm: validateNewPasswordConfirm(newPassword, param.newPasswordConfirm)
+        };
+}
+
+function changePasswordValidationErrorToString(error) {
+  if (error === "UserNotFound" || error !== "CurrentPasswordInvalid") {
+    return "An error occurred when trying to change your password. Please try again.";
+  } else {
+    return "The current password you entered is not correct. Please try again.";
+  }
+}
+
+function currentPasswordValidationErrorToString(error) {
+  return "Enter your current password";
+}
+
+function newPasswordValidationErrorToString(error) {
+  return "Enter your new password";
+}
+
+function newPasswordConfirmValidationErrorToString(error) {
+  if (error === "NewPasswordConfirmEmpty") {
+    return "Re-enter your new password";
+  } else {
+    return "This does not match the password above";
+  }
+}
+
+var ChangePassword = {
+  hasErrors: hasErrors$3,
+  validateCurrentPassword: validateCurrentPassword,
+  validateNewPassword: validateNewPassword,
+  validateNewPasswordConfirm: validateNewPasswordConfirm,
+  validateChangePassword: validateChangePassword,
+  changePasswordValidationErrorToString: changePasswordValidationErrorToString,
+  currentPasswordValidationErrorToString: currentPasswordValidationErrorToString,
+  newPasswordValidationErrorToString: newPasswordValidationErrorToString,
+  newPasswordConfirmValidationErrorToString: newPasswordConfirmValidationErrorToString
+};
+
 export {
   User ,
   Signup ,
   Login ,
   Logout ,
   ChangeEmail ,
+  ChangePassword ,
   
 }
 /* validator Not a pure module */

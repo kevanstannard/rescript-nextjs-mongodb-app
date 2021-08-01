@@ -109,9 +109,9 @@ let run = NextConnect.run
 
 type requestData = {
   client: MongoDb.MongoClient.t,
-  userId: option<MongoDb.ObjectId.t>,
-  userIdString: option<string>,
-  user: option<Server_User.dbUser>,
+  currentUserId: option<MongoDb.ObjectId.t>,
+  currentUserIdString: option<string>,
+  currentUser: option<Server_User.dbUser>,
 }
 
 let getRequestData = req => {
@@ -121,9 +121,9 @@ let getRequestData = req => {
   let userIdString = userId->Belt.Option.map(MongoDb.ObjectId.toString)
   let requestData: requestData = {
     client: client,
-    userId: userId,
-    userIdString: userIdString,
-    user: user,
+    currentUserId: userId,
+    currentUserIdString: userIdString,
+    currentUser: user,
   }
   requestData
 }

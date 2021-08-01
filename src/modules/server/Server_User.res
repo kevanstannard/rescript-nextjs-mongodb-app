@@ -275,3 +275,81 @@ let activate = (
     }
   })
 }
+
+let setPassword = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t, password: string) => {
+  password
+  ->hashPassword
+  ->Promise.then(passwordHash => {
+    getCollection(client)->Collection.updateOneWithSet(
+      userId,
+      {
+        "passwordHash": passwordHash,
+        "resetPasswordKey": Js.Null.empty,
+        "resetPasswordExpiry": Js.Null.empty,
+      },
+    )
+  })
+}
+
+let changePassword = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  changePassword: Common_User.ChangePassword.changePassword,
+): Promise.t<
+  result<
+    Common_User.ChangePassword.changePasswordValidation,
+    Common_User.ChangePassword.changePasswordValidation,
+  >,
+> => {
+  let validation: Common_User.ChangePassword.changePasswordValidation = Common_User.ChangePassword.validateChangePassword(
+    changePassword,
+  )
+  if Common_User.ChangePassword.hasErrors(validation) {
+    Promise.resolve(Error(validation))
+  } else {
+    client
+    ->findUserByObjectId(userId)
+    ->Promise.then(user => {
+      switch user {
+      | None => {
+          let validation: Common_User.ChangePassword.changePasswordValidation = {
+            changePassword: Some(#UserNotFound),
+            currentPassword: None,
+            newPassword: None,
+            newPasswordConfirm: None,
+          }
+          Promise.resolve(Error(validation))
+        }
+      | Some(user) =>
+        if !user.isActivated {
+          let validation: Common_User.ChangePassword.changePasswordValidation = {
+            changePassword: Some(#AccountNotActivated),
+            currentPassword: None,
+            newPassword: None,
+            newPasswordConfirm: None,
+          }
+          Promise.resolve(Error(validation))
+        } else {
+          comparePasswords(
+            changePassword.currentPassword,
+            user.passwordHash,
+          )->Promise.then(compareResult => {
+            if !compareResult {
+              let validation: Common_User.ChangePassword.changePasswordValidation = {
+                changePassword: Some(#CurrentPasswordInvalid),
+                currentPassword: None,
+                newPassword: None,
+                newPasswordConfirm: None,
+              }
+              Promise.resolve(Error(validation))
+            } else {
+              setPassword(client, userId, changePassword.newPassword)->Promise.then(_ => {
+                Promise.resolve(Ok(validation))
+              })
+            }
+          })
+        }
+      }
+    })
+  }
+}

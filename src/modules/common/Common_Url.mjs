@@ -53,6 +53,10 @@ function changePassword(param) {
   return "/change-password";
 }
 
+function changePasswordSuccess(param) {
+  return "/change-password-success";
+}
+
 export {
   home ,
   contact ,
@@ -67,6 +71,7 @@ export {
   changeEmail ,
   changeEmailConfirm ,
   changePassword ,
+  changePasswordSuccess ,
   
 }
 /* No side effect */

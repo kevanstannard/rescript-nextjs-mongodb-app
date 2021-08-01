@@ -23,10 +23,18 @@ function contact(contact$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function changePassword(changePassword$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/change-password", {
+              TAG: /* Json */0,
+              _0: changePassword$1
+            }, onSuccess, onError, undefined);
+}
+
 export {
   signup ,
   login ,
   contact ,
+  changePassword ,
   
 }
 /* No side effect */
