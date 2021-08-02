@@ -27,6 +27,7 @@ function getServerSideProps(context) {
               var match = Server_Middleware.getRequestData(req);
               var commonUser = Belt_Option.map(match.currentUser, Server_User.toCommonUserDto);
               var commonUser$1 = commonUser !== undefined ? commonUser : null;
+              console.log(commonUser$1);
               return Server_Test.getStats(match.client).then(function (stats) {
                           return Promise.resolve(makeResult(stats, commonUser$1));
                         });

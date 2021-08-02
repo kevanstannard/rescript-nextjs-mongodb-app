@@ -63,7 +63,7 @@ function toCommonUser(user) {
   return {
           id: Curry._1(MongoDb.ObjectId.toString, user._id),
           email: user.email,
-          emailChange: Caml_option.null_to_opt(user.emailChange)
+          emailChange: Caml_option.nullable_to_opt(user.emailChange)
         };
 }
 

@@ -26,6 +26,7 @@ let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
     | None => Js.Null.empty
     | Some(commonUser) => Js.Null.return(commonUser)
     }
+    Js.log(commonUser)
     client
     ->Server_Test.getStats
     ->Promise.then((stats: MongoDb.Collection.statsResult) => {
