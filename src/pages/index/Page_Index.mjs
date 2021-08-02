@@ -9,7 +9,7 @@ import * as Layout_Main from "../../layouts/Layout_Main.mjs";
 function $$default(props) {
   var envMessage = "Env is " + props.env;
   var countMessage = "Count is " + String(props.count);
-  var user = Belt_Option.map(Caml_option.null_to_opt(props.user), Common_User.User.fromDto);
+  var user = Belt_Option.map(Caml_option.null_to_opt(props.userDto), Common_User.User.fromDto);
   var userMessage = user !== undefined ? "User id is " + user.id : "None";
   return React.createElement(Layout_Main.make, {
               user: user,

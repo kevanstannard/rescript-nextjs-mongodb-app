@@ -1,8 +1,8 @@
 open Page_ContactSuccess_Types
 
-let makeResult = (user): Next.GetServerSideProps.result<props> => {
+let makeResult = (userDto): Next.GetServerSideProps.result<props> => {
   let props: props = {
-    user: user,
+    userDto: userDto,
   }
   {
     props: Some(props),

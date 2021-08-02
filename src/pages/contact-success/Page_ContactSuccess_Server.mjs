@@ -4,9 +4,9 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Server_User from "../../modules/server/Server_User.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
-function makeResult(user) {
+function makeResult(userDto) {
   var props = {
-    user: user
+    userDto: userDto
   };
   return {
           props: props,

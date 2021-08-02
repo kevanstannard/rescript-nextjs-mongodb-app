@@ -9,11 +9,11 @@ open Page_Index_Types
 type user = {id: int}
 
 let default = (props: props): React.element => {
-  let {env, count, user} = props
+  let {env, count, userDto} = props
   let envMessage = "Env is " ++ env
   let countMessage = "Count is " ++ Belt.Int.toString(count)
 
-  let user = Js.Null.toOption(user)->Belt.Option.map(Common_User.User.fromDto)
+  let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
 
   let userMessage = switch user {
   | None => "None"

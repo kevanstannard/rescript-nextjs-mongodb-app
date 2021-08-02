@@ -7,7 +7,7 @@ import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Page_ContactSuccess_View from "./Page_ContactSuccess_View.mjs";
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.user), Common_User.User.fromDto);
+  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
   return React.createElement(Page_ContactSuccess_View.make, {
               user: user
             });

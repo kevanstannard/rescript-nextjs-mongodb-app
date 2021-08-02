@@ -2,12 +2,12 @@ open Page_Index_Types
 
 let makeResult = (
   stats: MongoDb.Collection.statsResult,
-  user: Js.Null.t<Common_User.User.dto>,
+  userDto: Js.Null.t<Common_User.User.dto>,
 ): Next.GetServerSideProps.result<props> => {
   let props: props = {
     env: Server_Env.getString("NODE_ENV"),
     count: stats.count,
-    user: user,
+    userDto: userDto,
   }
   {
     props: Some(props),
@@ -26,7 +26,6 @@ let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
     | None => Js.Null.empty
     | Some(commonUser) => Js.Null.return(commonUser)
     }
-    Js.log(commonUser)
     client
     ->Server_Test.getStats
     ->Promise.then((stats: MongoDb.Collection.statsResult) => {

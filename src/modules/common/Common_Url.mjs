@@ -49,6 +49,10 @@ function changeEmailConfirm(userId, emailChangeKey) {
   return "/change-email-confirm/" + userId + "/" + emailChangeKey;
 }
 
+function changeEmailSuccess(param) {
+  return "/change-email-success";
+}
+
 function changePassword(param) {
   return "/change-password";
 }
@@ -70,6 +74,7 @@ export {
   resetPassword ,
   changeEmail ,
   changeEmailConfirm ,
+  changeEmailSuccess ,
   changePassword ,
   changePasswordSuccess ,
   

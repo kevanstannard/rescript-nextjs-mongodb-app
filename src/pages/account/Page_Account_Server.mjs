@@ -6,7 +6,7 @@ import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
 function makeResult(user) {
   var props = {
-    user: user
+    userDto: user
   };
   return {
           props: props,

@@ -223,8 +223,10 @@ module ChangeEmail = {
 
   type changeEmailResult = {
     result: [#Ok | #Error],
-    errors: option<changeEmailErrors>,
+    errors: changeEmailErrors,
   }
+
+  external asChangeEmailResult: Js.Json.t => changeEmailResult = "%identity"
 
   let hasErrors = (errors: changeEmailErrors): bool => {
     Belt.Option.isSome(errors.changeEmail) || Belt.Option.isSome(errors.email)
@@ -258,7 +260,7 @@ module ChangeEmail = {
     }
   }
 
-  let emailValidationErrorToString = (error: emailError): string => {
+  let emailErrorToString = (error: emailError): string => {
     switch error {
     | #EmailEmpty => "Enter an email address"
     | #EmailInvalid => "Enter a valid email address"

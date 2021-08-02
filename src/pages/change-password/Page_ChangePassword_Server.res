@@ -1,8 +1,8 @@
 open Page_ChangePassword_Types
 
-let makeResult = (user: Js.Null.t<Common_User.User.dto>) => {
+let makeResult = (userDto: Js.Null.t<Common_User.User.dto>) => {
   let props: props = {
-    user: user,
+    userDto: userDto,
   }
   let result: Next.GetServerSideProps.result<props> = {
     props: Some(props),

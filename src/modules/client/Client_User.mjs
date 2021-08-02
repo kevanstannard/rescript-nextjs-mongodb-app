@@ -30,11 +30,19 @@ function changePassword(changePassword$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function changeEmail(changeEmail$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/change-email", {
+              TAG: /* Json */0,
+              _0: changeEmail$1
+            }, onSuccess, onError, undefined);
+}
+
 export {
   signup ,
   login ,
   contact ,
   changePassword ,
+  changeEmail ,
   
 }
 /* No side effect */

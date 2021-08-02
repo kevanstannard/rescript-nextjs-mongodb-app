@@ -1,9 +1,9 @@
 open Page_Contact_Types
 
-let makeResult = (user): Next.GetServerSideProps.result<props> => {
+let makeResult = (userDto): Next.GetServerSideProps.result<props> => {
   let config = Server_Config.getClientConfig()
   let props: props = {
-    user: user,
+    userDto: userDto,
     config: config,
   }
   {

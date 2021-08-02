@@ -6,13 +6,13 @@ import * as Server_Test from "../../modules/server/Server_Test.mjs";
 import * as Server_User from "../../modules/server/Server_User.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
-function makeResult(stats, user) {
+function makeResult(stats, userDto) {
   var props_env = Server_Env.getString("NODE_ENV");
   var props_count = stats.count;
   var props = {
     env: props_env,
     count: props_count,
-    user: user
+    userDto: userDto
   };
   return {
           props: props,
@@ -27,7 +27,6 @@ function getServerSideProps(context) {
               var match = Server_Middleware.getRequestData(req);
               var commonUser = Belt_Option.map(match.currentUser, Server_User.toCommonUserDto);
               var commonUser$1 = commonUser !== undefined ? commonUser : null;
-              console.log(commonUser$1);
               return Server_Test.getStats(match.client).then(function (stats) {
                           return Promise.resolve(makeResult(stats, commonUser$1));
                         });

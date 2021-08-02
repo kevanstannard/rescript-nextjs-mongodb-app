@@ -5,10 +5,10 @@ import * as Server_User from "../../modules/server/Server_User.mjs";
 import * as Server_Config from "../../modules/server/Server_Config.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
-function makeResult(user) {
+function makeResult(userDto) {
   var config = Server_Config.getClientConfig(undefined);
   var props = {
-    user: user,
+    userDto: userDto,
     config: config
   };
   return {

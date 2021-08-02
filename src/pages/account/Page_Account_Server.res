@@ -2,7 +2,7 @@ open Page_Account_Types
 
 let makeResult = (user): Next.GetServerSideProps.result<props> => {
   let props: props = {
-    user: user,
+    userDto: user,
   }
   {
     props: Some(props),

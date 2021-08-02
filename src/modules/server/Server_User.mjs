@@ -10,6 +10,7 @@ import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Common_User from "../common/Common_User.mjs";
 import * as Server_Email from "./Server_Email.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
+import AddHours from "date-fns/addHours";
 
 function idField(id) {
   return {
@@ -51,12 +52,31 @@ function passwordFields(passwordHash, resetPasswordKey, resetPasswordExpiry) {
         };
 }
 
+function emailChangeFields(emailChange, emailChangeKey, emailChangeKeyExpiry) {
+  return {
+          emailChange: emailChange,
+          emailChangeKey: emailChangeKey,
+          emailChangeKeyExpiry: emailChangeKeyExpiry
+        };
+}
+
+function emailFields(email, emailChange, emailChangeKey, emailChangeKeyExpiry) {
+  return {
+          email: email,
+          emailChange: emailChange,
+          emailChangeKey: emailChangeKey,
+          emailChangeKeyExpiry: emailChangeKeyExpiry
+        };
+}
+
 var User = {
   idField: idField,
   emailField: emailField,
   emailQuery: emailQuery,
   activationFields: activationFields,
-  passwordFields: passwordFields
+  passwordFields: passwordFields,
+  emailChangeFields: emailChangeFields,
+  emailFields: emailFields
 };
 
 function toCommonUser(user) {
@@ -96,13 +116,16 @@ var makeResetPasswordKey = Nanoid.nanoid;
 
 var makeEmailChangeKey = Nanoid.nanoid;
 
+function makeEmailChangeKeyExpiry(param) {
+  return AddHours(new Date(), 24);
+}
+
 function signupToUser(signup) {
   var now = new Date();
   return hashPassword(signup.password).then(function (passwordHash) {
               return Promise.resolve({
                           _id: Curry._1(MongoDb.ObjectId.make, undefined),
                           email: signup.email,
-                          emailVerified: false,
                           emailChange: null,
                           emailChangeKey: null,
                           emailChangeKeyExpiry: null,
@@ -366,6 +389,108 @@ function changePassword(client, userId, changePassword$1) {
   }
 }
 
+function setEmailChange(client, userId, emailChange, emailChangeKey) {
+  var update = emailChangeFields(emailChange, emailChangeKey, AddHours(new Date(), 24));
+  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
+}
+
+function changeEmail(client, userId, changeEmail$1) {
+  var errors = Common_User.ChangeEmail.validateChangeEmail(changeEmail$1);
+  if (Common_User.ChangeEmail.hasErrors(errors)) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: errors
+              });
+  } else {
+    return findUserByObjectId(client, userId).then(function (user) {
+                if (user === undefined) {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: {
+                                changeEmail: "UserNotFound",
+                                email: undefined
+                              }
+                            });
+                }
+                if (!user.isActivated) {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: {
+                                changeEmail: "AccountNotActivated",
+                                email: undefined
+                              }
+                            });
+                }
+                var emailTrimmed = $$String.trim(changeEmail$1.email);
+                if (emailTrimmed === user.email) {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: {
+                                changeEmail: "SameAsCurrentEmail",
+                                email: undefined
+                              }
+                            });
+                } else {
+                  return checkIfEmailIsTaken(client, emailTrimmed).then(function (isTaken) {
+                              if (isTaken) {
+                                return Promise.resolve({
+                                            TAG: /* Error */1,
+                                            _0: {
+                                              changeEmail: "EmailNotAvailable",
+                                              email: undefined
+                                            }
+                                          });
+                              }
+                              var emailChangeKey = Curry._1(makeEmailChangeKey, undefined);
+                              return setEmailChange(client, userId, emailTrimmed, emailChangeKey).then(function (param) {
+                                          var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+                                          return Server_Email.sendEmailChangeEmail(userId, changeEmail$1.email, emailChangeKey).then(function (param) {
+                                                      return Promise.resolve({
+                                                                  TAG: /* Ok */0,
+                                                                  _0: {
+                                                                    changeEmail: undefined,
+                                                                    email: undefined
+                                                                  }
+                                                                });
+                                                    });
+                                        });
+                            });
+                }
+              });
+  }
+}
+
+function setEmail(client, userId, email) {
+  var update = emailFields(email, null, null, null);
+  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
+}
+
+function changeEmailConfirm(client, userId, emailChangeKey) {
+  return findUserByObjectId(client, userId).then(function (user) {
+              if (user === undefined) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: undefined
+                          });
+              }
+              var currentEmailChange = user.emailChange;
+              var currentEmailChangeKey = user.emailChangeKey;
+              if (!(currentEmailChange == null) && !(currentEmailChangeKey == null) && currentEmailChangeKey === emailChangeKey) {
+                return setEmail(client, userId, currentEmailChange).then(function (_updateResult) {
+                            return Promise.resolve({
+                                        TAG: /* Ok */0,
+                                        _0: undefined
+                                      });
+                          });
+              } else {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: undefined
+                          });
+              }
+            });
+}
+
 export {
   User ,
   toCommonUser ,
@@ -377,6 +502,7 @@ export {
   makeActivationKey ,
   makeResetPasswordKey ,
   makeEmailChangeKey ,
+  makeEmailChangeKeyExpiry ,
   signupToUser ,
   findUserByObjectId ,
   insertUser ,
@@ -391,6 +517,10 @@ export {
   activate ,
   setPassword ,
   changePassword ,
+  setEmailChange ,
+  changeEmail ,
+  setEmail ,
+  changeEmailConfirm ,
   
 }
 /* makeActivationKey Not a pure module */

@@ -41,3 +41,13 @@ let changePassword = (
     (),
   )
 }
+
+let changeEmail = (changeEmail: Common_User.ChangeEmail.changeEmail, onSuccess, onError) => {
+  Client_Xhr.post(
+    ~url="/api/change-email",
+    ~body=Json(changeEmail->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}

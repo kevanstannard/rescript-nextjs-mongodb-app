@@ -2,5 +2,5 @@
 type props = {
   env: string,
   count: int,
-  user: Js.Null.t<Common_User.User.dto>,
+  userDto: Js.Null.t<Common_User.User.dto>,
 }

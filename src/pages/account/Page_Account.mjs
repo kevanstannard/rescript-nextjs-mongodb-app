@@ -8,7 +8,7 @@ import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Page_Account_View from "./Page_Account_View.mjs";
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.user), Common_User.User.fromDto);
+  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
   if (user !== undefined) {
     return React.createElement(Page_Account_View.make, {
                 user: user

@@ -1,4 +1,4 @@
-type props = {user: Js.Null.t<Common_User.User.dto>}
+type props = {userDto: Js.Null.t<Common_User.User.dto>}
 
 type requestError = [#RequestFailed]
 

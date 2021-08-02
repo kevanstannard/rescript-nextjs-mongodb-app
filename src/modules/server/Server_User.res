@@ -9,7 +9,6 @@ module User = {
   type t = {
     _id: ObjectId.t,
     email: string,
-    emailVerified: bool,
     emailChange: Js.Nullable.t<string>, // May be undefined or null
     emailChangeKey: Js.Nullable.t<string>, // May be undefined or null
     emailChangeKeyExpiry: Js.Nullable.t<Js.Date.t>, // May be undefined or null
@@ -47,6 +46,30 @@ module User = {
       "resetPasswordKey": resetPasswordKey,
       "resetPasswordExpiry": resetPasswordExpiry,
     }
+
+  let emailChangeFields = (
+    ~emailChange: string,
+    ~emailChangeKey: string,
+    ~emailChangeKeyExpiry: Js.Date.t,
+  ) =>
+    {
+      "emailChange": emailChange,
+      "emailChangeKey": emailChangeKey,
+      "emailChangeKeyExpiry": emailChangeKeyExpiry,
+    }
+
+  let emailFields = (
+    ~email: string,
+    ~emailChange: Js.Null.t<string>,
+    ~emailChangeKey: Js.Null.t<string>,
+    ~emailChangeKeyExpiry: Js.Null.t<Js.Date.t>,
+  ) =>
+    {
+      "email": email,
+      "emailChange": emailChange,
+      "emailChangeKey": emailChangeKey,
+      "emailChangeKeyExpiry": emailChangeKeyExpiry,
+    }
 }
 
 let toCommonUser = (user: User.t): Common_User.User.t => {
@@ -79,8 +102,12 @@ let comparePasswords = (password, passwordHash) => {
 }
 
 let makeActivationKey = NanoId.generate
+
 let makeResetPasswordKey = NanoId.generate
+
 let makeEmailChangeKey = NanoId.generate
+
+let makeEmailChangeKeyExpiry = () => Js.Date.make()->DateFns.addHours(24)
 
 let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
@@ -88,7 +115,6 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
     let user: User.t = {
       _id: ObjectId.make(),
       email: signup.email,
-      emailVerified: false,
       emailChange: Js.Nullable.null,
       emailChangeKey: Js.Nullable.null,
       emailChangeKeyExpiry: Js.Nullable.null,
@@ -343,4 +369,134 @@ let changePassword = (
       }
     })
   }
+}
+
+let setEmailChange = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  emailChange: string,
+  emailChangeKey: string,
+) => {
+  let update = User.emailChangeFields(
+    ~emailChange,
+    ~emailChangeKey,
+    ~emailChangeKeyExpiry=makeEmailChangeKeyExpiry(),
+  )
+  getCollection(client)->Collection.updateOneWithSet(userId, update)
+}
+
+let changeEmail = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  changeEmail: Common_User.ChangeEmail.changeEmail,
+) => {
+  let errors: Common_User.ChangeEmail.changeEmailErrors = Common_User.ChangeEmail.validateChangeEmail(
+    changeEmail,
+  )
+  if Common_User.ChangeEmail.hasErrors(errors) {
+    Promise.resolve(Error(errors))
+  } else {
+    client
+    ->findUserByObjectId(userId)
+    ->Promise.then(user => {
+      switch user {
+      | None => {
+          let errors: Common_User.ChangeEmail.changeEmailErrors = {
+            changeEmail: Some(#UserNotFound),
+            email: None,
+          }
+          Promise.resolve(Error(errors))
+        }
+      | Some(user) =>
+        if !user.isActivated {
+          let errors: Common_User.ChangeEmail.changeEmailErrors = {
+            changeEmail: Some(#AccountNotActivated),
+            email: None,
+          }
+          Promise.resolve(Error(errors))
+        } else {
+          let emailTrimmed = String.trim(changeEmail.email)
+          if emailTrimmed == user.email {
+            let errors: Common_User.ChangeEmail.changeEmailErrors = {
+              changeEmail: Some(#SameAsCurrentEmail),
+              email: None,
+            }
+            Promise.resolve(Error(errors))
+          } else {
+            client
+            ->checkIfEmailIsTaken(emailTrimmed)
+            ->Promise.then(isTaken => {
+              if isTaken {
+                let errors: Common_User.ChangeEmail.changeEmailErrors = {
+                  changeEmail: Some(#EmailNotAvailable),
+                  email: None,
+                }
+                Promise.resolve(Error(errors))
+              } else {
+                let emailChangeKey = makeEmailChangeKey()
+                client
+                ->setEmailChange(userId, emailTrimmed, emailChangeKey)
+                ->Promise.then(_ => {
+                  let userId = ObjectId.toString(user._id)
+                  Server_Email.sendEmailChangeEmail(
+                    userId,
+                    changeEmail.email,
+                    emailChangeKey,
+                  )->Promise.then(_ => {
+                    let errors: Common_User.ChangeEmail.changeEmailErrors = {
+                      changeEmail: None,
+                      email: None,
+                    }
+                    Promise.resolve(Ok(errors))
+                  })
+                })
+              }
+            })
+          }
+        }
+      }
+    })
+  }
+}
+
+let setEmail = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t, email: string) => {
+  let update = User.emailFields(
+    ~email,
+    ~emailChange=Js.Null.empty,
+    ~emailChangeKey=Js.Null.empty,
+    ~emailChangeKeyExpiry=Js.Null.empty,
+  )
+  getCollection(client)->Collection.updateOneWithSet(userId, update)
+}
+
+let changeEmailConfirm = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  emailChangeKey: string,
+): Promise.t<result<unit, unit>> => {
+  client
+  ->findUserByObjectId(userId)
+  ->Promise.then(user => {
+    switch user {
+    | None => Promise.resolve(Error())
+    | Some(user) => {
+        let currentEmailChange = Js.Nullable.toOption(user.emailChange)
+        let currentEmailChangeKey = Js.Nullable.toOption(user.emailChangeKey)
+        switch (currentEmailChange, currentEmailChangeKey) {
+        | (None, _) => Promise.resolve(Error())
+        | (_, None) => Promise.resolve(Error())
+        | (Some(currentEmailChange), Some(currentEmailChangeKey)) =>
+          if currentEmailChangeKey === emailChangeKey {
+            client
+            ->setEmail(userId, currentEmailChange)
+            ->Promise.then(_updateResult => {
+              Promise.resolve(Ok())
+            })
+          } else {
+            Promise.resolve(Error())
+          }
+        }
+      }
+    }
+  })
 }

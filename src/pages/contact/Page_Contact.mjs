@@ -236,7 +236,7 @@ function renderPage(user, config) {
 }
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.user), Common_User.User.fromDto);
+  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
   return renderPage(user, param.config);
 }
 

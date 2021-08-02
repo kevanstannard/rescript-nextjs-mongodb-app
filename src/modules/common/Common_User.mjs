@@ -220,7 +220,7 @@ function changeEmailErrorToString(error) {
   }
 }
 
-function emailValidationErrorToString(error) {
+function emailErrorToString$2(error) {
   if (error === "EmailInvalid") {
     return "Enter a valid email address";
   } else {
@@ -234,7 +234,7 @@ var ChangeEmail = {
   validateChangeEmail: validateChangeEmail,
   generalError: generalError,
   changeEmailErrorToString: changeEmailErrorToString,
-  emailValidationErrorToString: emailValidationErrorToString
+  emailErrorToString: emailErrorToString$2
 };
 
 function hasErrors$3(validation) {
