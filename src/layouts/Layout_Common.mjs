@@ -213,7 +213,7 @@ function Layout_Common$Header(Props) {
                       children: React.createElement("div", {
                             className: "flex items-center justify-between"
                           }, React.createElement("h1", undefined, React.createElement("a", {
-                                    className: "flex items-center font-bold text-xl xlg:text-2xl",
+                                    className: "flex items-center font-bold text-base sm:text-xl lg:text-2xl",
                                     href: Common_Url.home(undefined)
                                   }, React.createElement("img", {
                                         className: "w-5 mr-2",

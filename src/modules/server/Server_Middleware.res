@@ -107,6 +107,8 @@ let all = () => {
 
 let run = NextConnect.run
 
+let runAll = (req: Next.Req.t, res: Next.Res.t) => all()->run(req, res)
+
 type requestData = {
   client: MongoDb.MongoClient.t,
   currentUserId: option<MongoDb.ObjectId.t>,

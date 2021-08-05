@@ -77,7 +77,6 @@ module Header = {
     }
   }
 
-  // TODO: For the mobile menu, make the whole row clickable rather than just the text
   module MobileMenu = {
     @react.component
     let make = (~user) => {
@@ -116,7 +115,7 @@ module Header = {
             <h1>
               <a
                 href={Common_Url.home()}
-                className="flex items-center font-bold text-xl xlg:text-2xl">
+                className="flex items-center font-bold text-base sm:text-xl lg:text-2xl">
                 <img className="w-5 mr-2" src="/static/zeit-black-triangle.svg" />
                 {React.string("ReScript + NextJS + MongoDB")}
               </a>

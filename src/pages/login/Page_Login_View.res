@@ -44,7 +44,9 @@ let make = (
         color=#Green full=true onClick=onLoginClick state={isSubmitting ? #Processing : #Ready}>
         {React.string("Login")}
       </Button>
-      <p> <Link href={Common_Url.forgotPassword()}> {"Forgot password?"->React.string} </Link> </p>
     </FormContainer>
+    <p className="my-4">
+      <Link href={Common_Url.forgotPassword()}> {"Forgot password?"->React.string} </Link>
+    </p>
   </Layout_Main>
 }

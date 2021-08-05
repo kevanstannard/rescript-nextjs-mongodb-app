@@ -1,7 +1,5 @@
 open Page_Login_Types
 
-type user = {id: int}
-
 let initialState = () => {
   email: "",
   password: "",
@@ -21,12 +19,6 @@ let reducer = (state, action) => {
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
   | SetLoginError(loginError) => {...state, loginError: loginError}
   }
-}
-
-// TODO: Redirect on the server if user is already logged in
-let useCurrentUser = () => {
-  let {data} = SWR.useSWR("/api/user", Client_Fetch.getJson)
-  Js.Undefined.toOption(data)
 }
 
 let renderPage = () => {
@@ -94,6 +86,6 @@ let renderPage = () => {
   />
 }
 
-let default = (_: props): React.element => {
+let default = (): React.element => {
   renderPage()
 }

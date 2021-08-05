@@ -37,35 +37,37 @@ function Page_Login_View(Props) {
   var onLoginClick = Props.onLoginClick;
   return React.createElement(Layout_Main.make, {
               user: undefined,
-              children: React.createElement(Component_Form.FormContainer.make, {
-                    children: null
-                  }, React.createElement(Component_Title.make, {
-                        text: "Login",
-                        size: "Primary"
-                      }), React.createElement(Page_Login_View$ErrorMessage, {
-                        error: loginError
-                      }), React.createElement(Component_Form.TextField.make, {
-                        label: "Email",
-                        value: email,
-                        onChange: onEmailChange,
-                        error: emailError
-                      }), React.createElement(Component_Form.PasswordField.make, {
-                        label: "Password",
-                        value: password,
-                        onChange: onPasswordChange,
-                        error: passwordError,
-                        showPasswordStrength: false
-                      }), React.createElement(Component_Button.Button.make, {
-                        state: isSubmitting ? "Processing" : "Ready",
-                        onClick: onLoginClick,
-                        color: "Green",
-                        full: true,
-                        children: "Login"
-                      }), React.createElement("p", undefined, React.createElement(Component_Link.make, {
-                            href: Common_Url.forgotPassword(undefined),
-                            children: "Forgot password?"
-                          })))
-            });
+              children: null
+            }, React.createElement(Component_Form.FormContainer.make, {
+                  children: null
+                }, React.createElement(Component_Title.make, {
+                      text: "Login",
+                      size: "Primary"
+                    }), React.createElement(Page_Login_View$ErrorMessage, {
+                      error: loginError
+                    }), React.createElement(Component_Form.TextField.make, {
+                      label: "Email",
+                      value: email,
+                      onChange: onEmailChange,
+                      error: emailError
+                    }), React.createElement(Component_Form.PasswordField.make, {
+                      label: "Password",
+                      value: password,
+                      onChange: onPasswordChange,
+                      error: passwordError,
+                      showPasswordStrength: false
+                    }), React.createElement(Component_Button.Button.make, {
+                      state: isSubmitting ? "Processing" : "Ready",
+                      onClick: onLoginClick,
+                      color: "Green",
+                      full: true,
+                      children: "Login"
+                    })), React.createElement("p", {
+                  className: "my-4"
+                }, React.createElement(Component_Link.make, {
+                      href: Common_Url.forgotPassword(undefined),
+                      children: "Forgot password?"
+                    })));
 }
 
 var Main;

@@ -146,6 +146,10 @@ function run(prim0, prim1, prim2) {
   return prim0.run(prim1, prim2);
 }
 
+function runAll(req, res) {
+  return all(undefined).run(req, res);
+}
+
 function getRequestData(req) {
   var client = req[key];
   var user = Server_Request.get(req, userKey);
@@ -166,6 +170,7 @@ export {
   User ,
   all ,
   run ,
+  runAll ,
   getRequestData ,
   
 }
