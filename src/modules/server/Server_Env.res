@@ -8,6 +8,21 @@ let getString = (name: string): string => {
   }
 }
 
+let getOptionString = (name: string): option<string> => {
+  let value = Js.Dict.get(env, name)
+  switch value {
+  | None => None
+  | Some(value) => {
+      let value = String.trim(value)
+      if String.length(value) == 0 {
+        None
+      } else {
+        Some(value)
+      }
+    }
+  }
+}
+
 let getInt = (name: string): int => {
   let value = getString(name)
   let valueInt = Belt.Int.fromString(value)

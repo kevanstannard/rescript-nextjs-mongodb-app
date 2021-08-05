@@ -19,20 +19,24 @@ function get(param) {
     siteKey: reCaptcha_siteKey
   };
   var sendGrid = {
-    apiKey: Server_Env.getString("SENDGRID_API_KEY")
+    apiKey: Server_Env.getOptionString("SENDGRID_API_KEY")
   };
-  var system_emailName = Server_Env.getString("SYSTEM_EMAIL_NAME");
-  var system_emailAddress = Server_Env.getString("SYSTEM_EMAIL_ADDRESS");
-  var system = {
-    emailName: system_emailName,
-    emailAddress: system_emailAddress
+  var application_name = Server_Env.getString("APPLICATION_NAME");
+  var application_url = Server_Env.getString("APPLICATION_URL");
+  var application_emailName = Server_Env.getString("APPLICATION_EMAIL_NAME");
+  var application_emailAddress = Server_Env.getString("APPLICATION_EMAIL_ADDRESS");
+  var application = {
+    name: application_name,
+    url: application_url,
+    emailName: application_emailName,
+    emailAddress: application_emailAddress
   };
   return {
           mongoDb: mongoDb,
           session: session,
           reCaptcha: reCaptcha,
           sendGrid: sendGrid,
-          system: system
+          application: application
         };
 }
 

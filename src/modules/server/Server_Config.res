@@ -10,9 +10,11 @@ type reCaptcha = {
   siteKey: string,
 }
 
-type sendGrid = {apiKey: string}
+type sendGrid = {apiKey: option<string>}
 
-type system = {
+type application = {
+  name: string,
+  url: string,
   emailName: string,
   emailAddress: string,
 }
@@ -22,7 +24,7 @@ type t = {
   session: session,
   reCaptcha: reCaptcha,
   sendGrid: sendGrid,
-  system: system,
+  application: application,
 }
 
 let get = (): t => {
@@ -38,18 +40,20 @@ let get = (): t => {
     secretKey: Server_Env.getString("RECAPTCHA_SECRET_KEY"),
   }
   let sendGrid: sendGrid = {
-    apiKey: Server_Env.getString("SENDGRID_API_KEY"),
+    apiKey: Server_Env.getOptionString("SENDGRID_API_KEY"),
   }
-  let system: system = {
-    emailName: Server_Env.getString("SYSTEM_EMAIL_NAME"),
-    emailAddress: Server_Env.getString("SYSTEM_EMAIL_ADDRESS"),
+  let application: application = {
+    name: Server_Env.getString("APPLICATION_NAME"),
+    url: Server_Env.getString("APPLICATION_URL"),
+    emailName: Server_Env.getString("APPLICATION_EMAIL_NAME"),
+    emailAddress: Server_Env.getString("APPLICATION_EMAIL_ADDRESS"),
   }
   let config = {
     mongoDb: mongoDb,
     session: session,
     reCaptcha: reCaptcha,
     sendGrid: sendGrid,
-    system: system,
+    application: application,
   }
   config
 }

@@ -1,23 +1,27 @@
+let applicationConfig = Server_Config.get().application
+let applicationName = applicationConfig.name
+let applicationUrl = applicationConfig.url
+
 let send = message => {
-  let config = Server_Config.get()
-  SendGridMail.setApiKey(config.sendGrid.apiKey)
-  SendGridMail.sendText(message)
+  let {sendGrid} = Server_Config.get()
+  switch sendGrid.apiKey {
+  | None => Promise.resolve()
+  | Some(apiKey) => {
+      SendGridMail.setApiKey(apiKey)
+      SendGridMail.sendText(message)
+    }
+  }
 }
-
-let getSystemName = () => "ReScript NextJS MongoDB App"
-
-// Omit the trailing slash
-let getSystemUrl = () => "https://rescript-nextjs-mongodb-app.vercel.app"
 
 let makeEmailAddress = (emailName, emailAddress) => `${emailName} <${emailAddress}>`
 
-let makeUrl = path => `${getSystemUrl()}${path}`
+let makeUrl = path => `${applicationUrl}${path}`
 
-let makeSubject = subject => `${getSystemName()} ${subject}`
+let makeSubject = subject => `${applicationName} ${subject}`
 
-let getSystemEmail = () => {
-  let {system} = Server_Config.get()
-  let {emailName, emailAddress} = system
+let getApplicationEmail = () => {
+  let {application} = Server_Config.get()
+  let {emailName, emailAddress} = application
   makeEmailAddress(emailName, emailAddress)
 }
 
@@ -57,9 +61,9 @@ let sendExceptionEmail = (userEmail: option<string>, url: string, exn: exn): Pro
   let exnText = exnToString(exn)
   let text = [time, user, url, exnText]->Js.Array2.joinWith("\n\n")
   let message: SendGridMail.textMessage = {
-    to_: getSystemEmail(),
-    from: getSystemEmail(),
-    subject: `${getSystemName()} Error`,
+    to_: getApplicationEmail(),
+    from: getApplicationEmail(),
+    subject: `${applicationName} Error`,
     text: text,
   }
   send(message)
@@ -67,7 +71,7 @@ let sendExceptionEmail = (userEmail: option<string>, url: string, exn: exn): Pro
 
 let sendContactEmail = (contact: Common_Contact.contact): Promise.t<unit> => {
   let message: SendGridMail.textMessage = {
-    to_: getSystemEmail(),
+    to_: getApplicationEmail(),
     from: makeEmailAddress(contact.name, contact.email),
     subject: makeSubject("Contact"),
     text: contact.message,
@@ -81,18 +85,18 @@ let sendActivationEmail = (userId: string, userEmail: string, activationKey: str
   let url = Common_Url.activate(userId, activationKey)->makeUrl
   let text =
     [
-      `Thanks for signing up with ${getSystemName()}.`,
+      `Thanks for signing up with ${applicationName}.`,
       ``,
       `Please visit the following link to activate your account:`,
       ``,
       url,
       ``,
-      getSystemName(),
-      getSystemUrl(),
+      applicationName,
+      applicationUrl,
     ]->Js.Array2.joinWith("\n")
   let message: SendGridMail.textMessage = {
     to_: userEmail,
-    from: getSystemEmail(),
+    from: getApplicationEmail(),
     subject: makeSubject("Activation"),
     text: text,
   }
@@ -111,12 +115,12 @@ let sendForgotPasswordEmail = (userId, userEmail, resetPasswordKey): Promise.t<u
       "",
       url,
       "",
-      getSystemName(),
-      getSystemUrl(),
+      applicationName,
+      applicationUrl,
     ]->Js.Array2.joinWith("\n")
   let message: SendGridMail.textMessage = {
     to_: userEmail,
-    from: getSystemEmail(),
+    from: getApplicationEmail(),
     subject: makeSubject("Reset Password"),
     text: text,
   }
@@ -133,12 +137,12 @@ let sendEmailChangeEmail = (userId, userEmail, emailChangeKey): Promise.t<unit> 
       "",
       url,
       "",
-      getSystemName(),
-      getSystemUrl(),
+      applicationName,
+      applicationUrl,
     ]->Js.Array2.joinWith("\n")
   let message: SendGridMail.textMessage = {
     to_: userEmail,
-    from: getSystemEmail(),
+    from: getApplicationEmail(),
     subject: makeSubject("Confirm Change Email"),
     text: text,
   }

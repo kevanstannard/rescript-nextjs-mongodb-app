@@ -7,18 +7,21 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Server_Config from "./Server_Config.mjs";
 import * as Mail from "@sendgrid/mail";
 
+var applicationConfig = Server_Config.get(undefined).application;
+
+var applicationName = applicationConfig.name;
+
+var applicationUrl = applicationConfig.url;
+
 function send(message) {
-  var config = Server_Config.get(undefined);
-  Mail.setApiKey(config.sendGrid.apiKey);
-  return Mail.send(message);
-}
-
-function getSystemName(param) {
-  return "ReScript NextJS MongoDB App";
-}
-
-function getSystemUrl(param) {
-  return "https://rescript-nextjs-mongodb-app.vercel.app";
+  var match = Server_Config.get(undefined);
+  var apiKey = match.sendGrid.apiKey;
+  if (apiKey !== undefined) {
+    Mail.setApiKey(apiKey);
+    return Mail.send(message);
+  } else {
+    return Promise.resolve(undefined);
+  }
 }
 
 function makeEmailAddress(emailName, emailAddress) {
@@ -26,17 +29,17 @@ function makeEmailAddress(emailName, emailAddress) {
 }
 
 function makeUrl(path) {
-  return "https://rescript-nextjs-mongodb-app.vercel.app" + path;
+  return applicationUrl + path;
 }
 
 function makeSubject(subject) {
-  return "ReScript NextJS MongoDB App" + " " + subject;
+  return applicationName + " " + subject;
 }
 
-function getSystemEmail(param) {
+function getApplicationEmail(param) {
   var match = Server_Config.get(undefined);
-  var system = match.system;
-  return makeEmailAddress(system.emailName, system.emailAddress);
+  var application = match.application;
+  return makeEmailAddress(application.emailName, application.emailAddress);
 }
 
 function errorToString(error) {
@@ -84,46 +87,44 @@ function sendExceptionEmail(userEmail, url, exn) {
       exnText
     ].join("\n\n");
   return send({
-              to: getSystemEmail(undefined),
-              from: getSystemEmail(undefined),
-              subject: "ReScript NextJS MongoDB App" + " Error",
+              to: getApplicationEmail(undefined),
+              from: getApplicationEmail(undefined),
+              subject: applicationName + " Error",
               text: text
             });
 }
 
 function sendContactEmail(contact) {
   return send({
-              to: getSystemEmail(undefined),
+              to: getApplicationEmail(undefined),
               from: makeEmailAddress(contact.name, contact.email),
-              subject: "ReScript NextJS MongoDB App" + " " + "Contact",
+              subject: applicationName + " " + "Contact",
               text: contact.message
             });
 }
 
 function sendActivationEmail(userId, userEmail, activationKey) {
-  var path = Common_Url.activate(userId, activationKey);
-  var url = "https://rescript-nextjs-mongodb-app.vercel.app" + path;
+  var url = applicationUrl + Common_Url.activate(userId, activationKey);
   var text = [
-      "Thanks for signing up with " + "ReScript NextJS MongoDB App" + ".",
+      "Thanks for signing up with " + applicationName + ".",
       "",
       "Please visit the following link to activate your account:",
       "",
       url,
       "",
-      "ReScript NextJS MongoDB App",
-      "https://rescript-nextjs-mongodb-app.vercel.app"
+      applicationName,
+      applicationUrl
     ].join("\n");
   return send({
               to: userEmail,
-              from: getSystemEmail(undefined),
-              subject: "ReScript NextJS MongoDB App" + " " + "Activation",
+              from: getApplicationEmail(undefined),
+              subject: applicationName + " " + "Activation",
               text: text
             });
 }
 
 function sendForgotPasswordEmail(userId, userEmail, resetPasswordKey) {
-  var path = Common_Url.resetPassword(userId, resetPasswordKey);
-  var url = "https://rescript-nextjs-mongodb-app.vercel.app" + path;
+  var url = applicationUrl + Common_Url.resetPassword(userId, resetPasswordKey);
   var text = [
       "We've received a request to reset your password.",
       "",
@@ -133,20 +134,19 @@ function sendForgotPasswordEmail(userId, userEmail, resetPasswordKey) {
       "",
       url,
       "",
-      "ReScript NextJS MongoDB App",
-      "https://rescript-nextjs-mongodb-app.vercel.app"
+      applicationName,
+      applicationUrl
     ].join("\n");
   return send({
               to: userEmail,
-              from: getSystemEmail(undefined),
-              subject: "ReScript NextJS MongoDB App" + " " + "Reset Password",
+              from: getApplicationEmail(undefined),
+              subject: applicationName + " " + "Reset Password",
               text: text
             });
 }
 
 function sendEmailChangeEmail(userId, userEmail, emailChangeKey) {
-  var path = Common_Url.changeEmailConfirm(userId, emailChangeKey);
-  var url = "https://rescript-nextjs-mongodb-app.vercel.app" + path;
+  var url = applicationUrl + Common_Url.changeEmailConfirm(userId, emailChangeKey);
   var text = [
       "We've received a request to change your email address.",
       "",
@@ -154,25 +154,26 @@ function sendEmailChangeEmail(userId, userEmail, emailChangeKey) {
       "",
       url,
       "",
-      "ReScript NextJS MongoDB App",
-      "https://rescript-nextjs-mongodb-app.vercel.app"
+      applicationName,
+      applicationUrl
     ].join("\n");
   return send({
               to: userEmail,
-              from: getSystemEmail(undefined),
-              subject: "ReScript NextJS MongoDB App" + " " + "Confirm Change Email",
+              from: getApplicationEmail(undefined),
+              subject: applicationName + " " + "Confirm Change Email",
               text: text
             });
 }
 
 export {
+  applicationConfig ,
+  applicationName ,
+  applicationUrl ,
   send ,
-  getSystemName ,
-  getSystemUrl ,
   makeEmailAddress ,
   makeUrl ,
   makeSubject ,
-  getSystemEmail ,
+  getApplicationEmail ,
   errorToString ,
   unknownExnToString ,
   exnToString ,
@@ -183,4 +184,4 @@ export {
   sendEmailChangeEmail ,
   
 }
-/* Server_Config Not a pure module */
+/* applicationConfig Not a pure module */
