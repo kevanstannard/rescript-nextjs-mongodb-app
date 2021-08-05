@@ -2,6 +2,8 @@ module Title = Component_Title
 module AlertMessage = Component_AlertMessage
 module Link = Component_Link
 
+// TODO: Add cancel email change
+
 module EmailChangeAlert = {
   @react.component
   let make = (~user: Common_User.User.t) => {

@@ -1,8 +1,9 @@
 open Page_Account_Types
 
-let makeResult = (user): Next.GetServerSideProps.result<props> => {
+let makeResult = (currentUser): Next.GetServerSideProps.result<props> => {
+  let currentUserDto = Server_User.toNullCommonUserDto(currentUser)
   let props: props = {
-    userDto: user,
+    userDto: currentUserDto,
   }
   {
     props: Some(props),
@@ -13,14 +14,8 @@ let makeResult = (user): Next.GetServerSideProps.result<props> => {
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
   let {req, res} = context
-  Server_Middleware.all()
-  ->Server_Middleware.run(req, res)
-  ->Promise.then(_ => {
+  Server_Middleware.runAll(req, res)->Promise.thenResolve(_ => {
     let {currentUser} = Server_Middleware.getRequestData(req)
-    let commonUser = switch Belt.Option.map(currentUser, Server_User.toCommonUserDto) {
-    | None => Js.Null.empty
-    | Some(commonUser) => Js.Null.return(commonUser)
-    }
-    makeResult(commonUser)->Promise.resolve
+    makeResult(currentUser)
   })
 }
