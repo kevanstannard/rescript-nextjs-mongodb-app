@@ -9,7 +9,7 @@ let make = (~user) => {
       {React.string("We've sent you an email to confirm your new email address.")}
     </p>
     <p className="mb-4">
-      <Link href={Common_Url.home()}> {"Return to home"->React.string} </Link>
+      <Link href={Common_Url.account()}> {"Return to the Account page"->React.string} </Link>
     </p>
   </Layout_Main>
 }
