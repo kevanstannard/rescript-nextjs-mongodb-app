@@ -315,6 +315,156 @@ var ChangePassword = {
   newPasswordConfirmValidationErrorToString: newPasswordConfirmValidationErrorToString
 };
 
+function hasErrors$4(errors) {
+  if (Belt_Option.isSome(errors.forgotPassword)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(errors.email);
+  }
+}
+
+function validateEmail$3(email) {
+  var emailTrimmed = $$String.trim(email);
+  if (Validator.isEmpty(emailTrimmed)) {
+    return "EmailEmpty";
+  } else if (!Validator.isEmail(emailTrimmed)) {
+    return "EmailInvalid";
+  } else {
+    return ;
+  }
+}
+
+function validateForgotPassword(forgotPassword) {
+  return {
+          forgotPassword: undefined,
+          email: validateEmail$3(forgotPassword.email)
+        };
+}
+
+function forgotPasswordErrorToString(error) {
+  return "There was a problem processing your forgot password request. Please try again.";
+}
+
+function emailErrorToString$3(error) {
+  if (error === "EmailInvalid") {
+    return "Enter a valid email address";
+  } else {
+    return "Enter an email address";
+  }
+}
+
+var ForgotPassword = {
+  hasErrors: hasErrors$4,
+  validateEmail: validateEmail$3,
+  validateForgotPassword: validateForgotPassword,
+  forgotPasswordErrorToString: forgotPasswordErrorToString,
+  emailErrorToString: emailErrorToString$3
+};
+
+function resetPasswordErrorsToDto(errors) {
+  return {
+          resetPassword: Js_null.fromOption(errors.resetPassword),
+          password: Js_null.fromOption(errors.password),
+          passwordConfirm: Js_null.fromOption(errors.passwordConfirm),
+          reCaptcha: Js_null.fromOption(errors.reCaptcha)
+        };
+}
+
+function dtoToResetPasswordErrors(errors) {
+  return {
+          resetPassword: Caml_option.null_to_opt(errors.resetPassword),
+          password: Caml_option.null_to_opt(errors.password),
+          passwordConfirm: Caml_option.null_to_opt(errors.passwordConfirm),
+          reCaptcha: Caml_option.null_to_opt(errors.reCaptcha)
+        };
+}
+
+function refineResetPasswordKeyError(error) {
+  if (error === "ResetPasswordExpired") {
+    return "ResetPasswordExpired";
+  } else {
+    return "ResetPasswordInvalid";
+  }
+}
+
+function hasErrors$5(errors) {
+  if (Belt_Option.isSome(errors.resetPassword) || Belt_Option.isSome(errors.password) || Belt_Option.isSome(errors.passwordConfirm)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(errors.reCaptcha);
+  }
+}
+
+function validatePassword$2(password) {
+  if (Validator.isEmpty(password)) {
+    return "PasswordEmpty";
+  }
+  
+}
+
+function validatePasswordConfirm(password, passwordConfirm) {
+  if (Validator.isEmpty(passwordConfirm)) {
+    return "PasswordConfirmEmpty";
+  } else if (password !== passwordConfirm) {
+    return "PasswordConfirmMismatch";
+  } else {
+    return ;
+  }
+}
+
+function validateReCaptcha$1(reCaptcha) {
+  if (reCaptcha !== undefined) {
+    return ;
+  } else {
+    return "ReCaptchaEmpty";
+  }
+}
+
+function validateResetPassword(param) {
+  var password = param.password;
+  return {
+          resetPassword: undefined,
+          password: validatePassword$2(password),
+          passwordConfirm: validatePasswordConfirm(password, param.passwordConfirm),
+          reCaptcha: validateReCaptcha$1(param.reCaptcha)
+        };
+}
+
+function resetPasswordErrorToString(error) {
+  return "There was a problem resetting your password, please try again";
+}
+
+function passwordErrorToString$2(error) {
+  return "Enter your new password";
+}
+
+function passwordConfirmErrorToString(error) {
+  if (error === "PasswordConfirmEmpty") {
+    return "Re-enter your new password";
+  } else {
+    return "This does not match the password above";
+  }
+}
+
+function reCaptchaErrorToString$1(error) {
+  return "Are you sure you're a robot?";
+}
+
+var ResetPassword = {
+  resetPasswordErrorsToDto: resetPasswordErrorsToDto,
+  dtoToResetPasswordErrors: dtoToResetPasswordErrors,
+  refineResetPasswordKeyError: refineResetPasswordKeyError,
+  hasErrors: hasErrors$5,
+  validatePassword: validatePassword$2,
+  validatePasswordConfirm: validatePasswordConfirm,
+  validateReCaptcha: validateReCaptcha$1,
+  validateResetPassword: validateResetPassword,
+  resetPasswordErrorToString: resetPasswordErrorToString,
+  passwordErrorToString: passwordErrorToString$2,
+  passwordConfirmErrorToString: passwordConfirmErrorToString,
+  reCaptchaErrorToString: reCaptchaErrorToString$1
+};
+
 export {
   User ,
   Signup ,
@@ -322,6 +472,8 @@ export {
   Logout ,
   ChangeEmail ,
   ChangePassword ,
+  ForgotPassword ,
+  ResetPassword ,
   
 }
 /* validator Not a pure module */

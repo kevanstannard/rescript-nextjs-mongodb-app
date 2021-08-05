@@ -41,6 +41,10 @@ function resetPassword(userId, resetPasswordKey) {
   return "/reset-password/" + userId + "/" + resetPasswordKey;
 }
 
+function resetPasswordSuccess(param) {
+  return "/reset-password-success";
+}
+
 function changeEmail(param) {
   return "/change-email";
 }
@@ -61,6 +65,14 @@ function changePasswordSuccess(param) {
   return "/change-password-success";
 }
 
+function forgotPassword(param) {
+  return "/forgot-password";
+}
+
+function forgotPasswordSuccess(param) {
+  return "/forgot-password-success";
+}
+
 export {
   home ,
   contact ,
@@ -72,11 +84,14 @@ export {
   account ,
   activate ,
   resetPassword ,
+  resetPasswordSuccess ,
   changeEmail ,
   changeEmailConfirm ,
   changeEmailSuccess ,
   changePassword ,
   changePasswordSuccess ,
+  forgotPassword ,
+  forgotPasswordSuccess ,
   
 }
 /* No side effect */

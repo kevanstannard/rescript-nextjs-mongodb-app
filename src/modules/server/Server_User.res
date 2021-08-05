@@ -36,6 +36,12 @@ module User = {
       "activationKey": activationKey,
     }
 
+  let resetPasswordFields = (~resetPasswordKey: string, ~resetPasswordExpiry: Js.Date.t) =>
+    {
+      "resetPasswordKey": resetPasswordKey,
+      "resetPasswordExpiry": resetPasswordExpiry,
+    }
+
   let passwordFields = (
     ~passwordHash: string,
     ~resetPasswordKey: Js.Null.t<string>,
@@ -107,7 +113,9 @@ let makeResetPasswordKey = NanoId.generate
 
 let makeEmailChangeKey = NanoId.generate
 
-let makeEmailChangeKeyExpiry = () => Js.Date.make()->DateFns.addHours(24)
+let makeEmailChangeKeyExpiry = () => Js.Date.make()->DateFns.addHours(1)
+
+let makeResetPasswordExpiry = () => Js.Date.make()->DateFns.addHours(1)
 
 let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
@@ -130,11 +138,17 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   })
 }
 
-let findUserByObjectId = (client: MongoClient.t, objectId: ObjectId.t): Promise.t<
-  option<User.t>,
-> => {
-  let query = User.idField(objectId)
+let findUserByObjectId = (client: MongoClient.t, userId: ObjectId.t): Promise.t<option<User.t>> => {
+  let query = User.idField(userId)
   getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Undefined.toOption)
+}
+
+let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<User.t>> => {
+  let userId = ObjectId.fromString(userId)
+  switch userId {
+  | Error(_) => Promise.resolve(None)
+  | Ok(userId) => findUserByObjectId(client, userId)
+  }
 }
 
 let insertUser = (client: MongoClient.t, user: User.t) => {
@@ -499,4 +513,138 @@ let changeEmailConfirm = (
       }
     }
   })
+}
+
+let setResetPasswordKey = (
+  client: MongoDb.MongoClient.t,
+  userId: MongoDb.ObjectId.t,
+  resetPasswordKey: string,
+) => {
+  let resetPasswordExpiry = makeResetPasswordExpiry()
+  let update = User.resetPasswordFields(~resetPasswordKey, ~resetPasswordExpiry)
+  getCollection(client)->Collection.updateOneWithSet(userId, update)
+}
+
+let forgotPassword = (
+  client: MongoDb.MongoClient.t,
+  forgotPassword: Common_User.ForgotPassword.forgotPassword,
+) => {
+  client
+  ->findUserByEmail(forgotPassword.email)
+  ->Promise.then(user => {
+    switch user {
+    | None => Promise.resolve(Error(#EmailNotFound))
+    | Some(user) =>
+      if !user.isActivated {
+        Promise.resolve(Error(#AccountNotActivated))
+      } else {
+        let resetPasswordKey = makeResetPasswordKey()
+        setResetPasswordKey(client, user._id, resetPasswordKey)->Promise.then(_ => {
+          let userId = ObjectId.toString(user._id)
+          Server_Email.sendForgotPasswordEmail(
+            userId,
+            user.email,
+            resetPasswordKey,
+          )->Promise.then(_ => {
+            Promise.resolve(Ok())
+          })
+        })
+      }
+    }
+  })
+}
+
+let validateResetPasswordKey = (
+  client: MongoClient.t,
+  userId: string,
+  resetPasswordKey: string,
+) => {
+  client
+  ->findUserByStringId(userId)
+  ->Promise.then(user => {
+    switch user {
+    | None => Promise.resolve(Error(#UserNotFound))
+    | Some(user) =>
+      if !user.isActivated {
+        Promise.resolve(Error(#AccountNotActivated))
+      } else {
+        let userResetPasswordKey = Js.Null.toOption(user.resetPasswordKey)
+        let userResetPasswordExpiry = Js.Null.toOption(user.resetPasswordExpiry)
+        switch (userResetPasswordKey, userResetPasswordExpiry) {
+        | (None, _) => Promise.resolve(Error(#ResetPasswordNotRequested))
+        | (_, None) => Promise.resolve(Error(#ResetPasswordNotRequested))
+        | (Some(userResetPasswordKey), Some(userResetPasswordExpiry)) =>
+          if Common_Date.isInThePast(userResetPasswordExpiry) {
+            Promise.resolve(Error(#ResetPasswordExpired))
+          } else if userResetPasswordKey != resetPasswordKey {
+            Promise.resolve(Error(#ResetPasswordKeyInvalid))
+          } else {
+            Promise.resolve(Ok())
+          }
+        }
+      }
+    }
+  })
+}
+
+let resetPassword = (
+  client: MongoDb.MongoClient.t,
+  resetPassword: Common_User.ResetPassword.resetPassword,
+) => {
+  let userId = ObjectId.fromString(resetPassword.userId)
+  switch userId {
+  | Error(_) => {
+      let errors: Common_User.ResetPassword.resetPasswordErrors = {
+        resetPassword: Some(#ResetPasswordInvalid),
+        password: None,
+        passwordConfirm: None,
+        reCaptcha: None,
+      }
+      Promise.resolve(Error(errors))
+    }
+  | Ok(userId) => {
+      let errors = Common_User.ResetPassword.validateResetPassword(resetPassword)
+      if Common_User.ResetPassword.hasErrors(errors) {
+        Promise.resolve(Error(errors))
+      } else {
+        validateReCaptchaToken(resetPassword.reCaptcha)->Promise.then(reCaptchaError => {
+          switch reCaptchaError {
+          | Some(error) => {
+              let errors: Common_User.ResetPassword.resetPasswordErrors = {
+                resetPassword: None,
+                password: None,
+                passwordConfirm: None,
+                reCaptcha: Some(error),
+              }
+              Promise.resolve(Error(errors))
+            }
+          | None =>
+            validateResetPasswordKey(
+              client,
+              resetPassword.userId,
+              resetPassword.resetPasswordKey,
+            )->Promise.then(result => {
+              switch result {
+              | Error(error) => {
+                  let validation: Common_User.ResetPassword.resetPasswordErrors = {
+                    resetPassword: Some(
+                      Common_User.ResetPassword.refineResetPasswordKeyError(error),
+                    ),
+                    password: None,
+                    passwordConfirm: None,
+                    reCaptcha: None,
+                  }
+                  Promise.resolve(Error(validation))
+                }
+              | Ok() =>
+                setPassword(client, userId, resetPassword.password)->Promise.then(_ => {
+                  Promise.resolve(Ok())
+                })
+              }
+            })
+          }
+        })
+      }
+    }
+  }
 }

@@ -7,6 +7,7 @@ import * as Bcrypt from "bcrypt";
 import * as Nanoid from "nanoid";
 import * as MongoDb from "../../bindings/MongoDb.mjs";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
+import * as Common_Date from "../common/Common_Date.mjs";
 import * as Common_User from "../common/Common_User.mjs";
 import * as Server_Email from "./Server_Email.mjs";
 import * as Server_ReCaptcha from "./Server_ReCaptcha.mjs";
@@ -44,6 +45,13 @@ function activationFields(isActivated, activationKey) {
         };
 }
 
+function resetPasswordFields(resetPasswordKey, resetPasswordExpiry) {
+  return {
+          resetPasswordKey: resetPasswordKey,
+          resetPasswordExpiry: resetPasswordExpiry
+        };
+}
+
 function passwordFields(passwordHash, resetPasswordKey, resetPasswordExpiry) {
   return {
           passwordHash: passwordHash,
@@ -74,6 +82,7 @@ var User = {
   emailField: emailField,
   emailQuery: emailQuery,
   activationFields: activationFields,
+  resetPasswordFields: resetPasswordFields,
   passwordFields: passwordFields,
   emailChangeFields: emailChangeFields,
   emailFields: emailFields
@@ -117,7 +126,11 @@ var makeResetPasswordKey = Nanoid.nanoid;
 var makeEmailChangeKey = Nanoid.nanoid;
 
 function makeEmailChangeKeyExpiry(param) {
-  return AddHours(new Date(), 24);
+  return AddHours(new Date(), 1);
+}
+
+function makeResetPasswordExpiry(param) {
+  return AddHours(new Date(), 1);
 }
 
 function signupToUser(signup) {
@@ -140,9 +153,9 @@ function signupToUser(signup) {
             });
 }
 
-function findUserByObjectId(client, objectId) {
+function findUserByObjectId(client, userId) {
   var query = {
-    _id: objectId
+    _id: userId
   };
   return getCollection(client).findOne(query).then(function (prim) {
               if (prim === undefined) {
@@ -151,6 +164,15 @@ function findUserByObjectId(client, objectId) {
                 return Caml_option.some(prim);
               }
             });
+}
+
+function findUserByStringId(client, userId) {
+  var userId$1 = MongoDb.ObjectId.fromString(userId);
+  if (userId$1.TAG === /* Ok */0) {
+    return findUserByObjectId(client, userId$1._0);
+  } else {
+    return Promise.resolve(undefined);
+  }
 }
 
 function insertUser(client, user) {
@@ -390,7 +412,7 @@ function changePassword(client, userId, changePassword$1) {
 }
 
 function setEmailChange(client, userId, emailChange, emailChangeKey) {
-  var update = emailChangeFields(emailChange, emailChangeKey, AddHours(new Date(), 24));
+  var update = emailChangeFields(emailChange, emailChangeKey, AddHours(new Date(), 1));
   return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
 }
 
@@ -491,6 +513,141 @@ function changeEmailConfirm(client, userId, emailChangeKey) {
             });
 }
 
+function setResetPasswordKey(client, userId, resetPasswordKey) {
+  var resetPasswordExpiry = AddHours(new Date(), 1);
+  var update = resetPasswordFields(resetPasswordKey, resetPasswordExpiry);
+  return MongoDb.Collection.updateOneWithSet(getCollection(client), userId, update);
+}
+
+function forgotPassword(client, forgotPassword$1) {
+  return findUserByEmail(client, forgotPassword$1.email).then(function (user) {
+              if (user === undefined) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "EmailNotFound"
+                          });
+              }
+              if (!user.isActivated) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "AccountNotActivated"
+                          });
+              }
+              var resetPasswordKey = Curry._1(makeResetPasswordKey, undefined);
+              return setResetPasswordKey(client, user._id, resetPasswordKey).then(function (param) {
+                          var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+                          return Server_Email.sendForgotPasswordEmail(userId, user.email, resetPasswordKey).then(function (param) {
+                                      return Promise.resolve({
+                                                  TAG: /* Ok */0,
+                                                  _0: undefined
+                                                });
+                                    });
+                        });
+            });
+}
+
+function validateResetPasswordKey(client, userId, resetPasswordKey) {
+  return findUserByStringId(client, userId).then(function (user) {
+              if (user === undefined) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "UserNotFound"
+                          });
+              }
+              if (!user.isActivated) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "AccountNotActivated"
+                          });
+              }
+              var userResetPasswordKey = user.resetPasswordKey;
+              var userResetPasswordExpiry = user.resetPasswordExpiry;
+              if (userResetPasswordKey !== null && userResetPasswordExpiry !== null) {
+                if (Common_Date.isInThePast(userResetPasswordExpiry)) {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: "ResetPasswordExpired"
+                            });
+                } else if (userResetPasswordKey !== resetPasswordKey) {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: "ResetPasswordKeyInvalid"
+                            });
+                } else {
+                  return Promise.resolve({
+                              TAG: /* Ok */0,
+                              _0: undefined
+                            });
+                }
+              } else {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "ResetPasswordNotRequested"
+                          });
+              }
+            });
+}
+
+function resetPassword(client, resetPassword$1) {
+  var userId = MongoDb.ObjectId.fromString(resetPassword$1.userId);
+  if (userId.TAG !== /* Ok */0) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: {
+                  resetPassword: "ResetPasswordInvalid",
+                  password: undefined,
+                  passwordConfirm: undefined,
+                  reCaptcha: undefined
+                }
+              });
+  }
+  var userId$1 = userId._0;
+  var errors = Common_User.ResetPassword.validateResetPassword(resetPassword$1);
+  if (Common_User.ResetPassword.hasErrors(errors)) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: errors
+              });
+  } else {
+    return validateReCaptchaToken(resetPassword$1.reCaptcha).then(function (reCaptchaError) {
+                if (reCaptchaError === undefined) {
+                  return validateResetPasswordKey(client, resetPassword$1.userId, resetPassword$1.resetPasswordKey).then(function (result) {
+                              if (result.TAG === /* Ok */0) {
+                                return setPassword(client, userId$1, resetPassword$1.password).then(function (param) {
+                                            return Promise.resolve({
+                                                        TAG: /* Ok */0,
+                                                        _0: undefined
+                                                      });
+                                          });
+                              }
+                              var validation_resetPassword = Common_User.ResetPassword.refineResetPasswordKeyError(result._0);
+                              var validation = {
+                                resetPassword: validation_resetPassword,
+                                password: undefined,
+                                passwordConfirm: undefined,
+                                reCaptcha: undefined
+                              };
+                              return Promise.resolve({
+                                          TAG: /* Error */1,
+                                          _0: validation
+                                        });
+                            });
+                }
+                var errors_reCaptcha = reCaptchaError;
+                var errors = {
+                  resetPassword: undefined,
+                  password: undefined,
+                  passwordConfirm: undefined,
+                  reCaptcha: errors_reCaptcha
+                };
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: errors
+                          });
+              });
+  }
+}
+
 export {
   User ,
   toCommonUser ,
@@ -503,8 +660,10 @@ export {
   makeResetPasswordKey ,
   makeEmailChangeKey ,
   makeEmailChangeKeyExpiry ,
+  makeResetPasswordExpiry ,
   signupToUser ,
   findUserByObjectId ,
+  findUserByStringId ,
   insertUser ,
   findUserByEmail ,
   checkIfEmailIsTaken ,
@@ -521,6 +680,10 @@ export {
   changeEmail ,
   setEmail ,
   changeEmailConfirm ,
+  setResetPasswordKey ,
+  forgotPassword ,
+  validateResetPasswordKey ,
+  resetPassword ,
   
 }
 /* makeActivationKey Not a pure module */

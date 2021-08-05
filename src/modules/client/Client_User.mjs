@@ -37,12 +37,28 @@ function changeEmail(changeEmail$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function forgotPassword(forgotPassword$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/forgot-password", {
+              TAG: /* Json */0,
+              _0: forgotPassword$1
+            }, onSuccess, onError, undefined);
+}
+
+function resetPassword(resetPassword$1, onSuccess, onError) {
+  return Client_Xhr.post("/api/reset-password", {
+              TAG: /* Json */0,
+              _0: resetPassword$1
+            }, onSuccess, onError, undefined);
+}
+
 export {
   signup ,
   login ,
   contact ,
   changePassword ,
   changeEmail ,
+  forgotPassword ,
+  resetPassword ,
   
 }
 /* No side effect */

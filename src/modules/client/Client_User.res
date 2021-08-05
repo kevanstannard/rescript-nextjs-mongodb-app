@@ -51,3 +51,31 @@ let changeEmail = (changeEmail: Common_User.ChangeEmail.changeEmail, onSuccess, 
     (),
   )
 }
+
+let forgotPassword = (
+  forgotPassword: Common_User.ForgotPassword.forgotPassword,
+  onSuccess,
+  onError,
+) => {
+  Client_Xhr.post(
+    ~url="/api/forgot-password",
+    ~body=Json(forgotPassword->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}
+
+let resetPassword = (
+  resetPassword: Common_User.ResetPassword.resetPassword,
+  onSuccess,
+  onError,
+) => {
+  Client_Xhr.post(
+    ~url="/api/reset-password",
+    ~body=Json(resetPassword->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}
