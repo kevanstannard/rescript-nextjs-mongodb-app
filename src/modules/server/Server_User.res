@@ -88,6 +88,13 @@ let toCommonUserDto = (user: User.t): Common_User.User.dto => {
   user->toCommonUser->Common_User.User.toDto
 }
 
+let toNullCommonUserDto = (user: option<User.t>): Js.Null.t<Common_User.User.dto> => {
+  switch Belt.Option.map(user, toCommonUserDto) {
+  | None => Js.Null.empty
+  | Some(userDto) => Js.Null.return(userDto)
+  }
+}
+
 let getCollection = (client: MongoClient.t) => {
   let db = MongoClient.db(client)
   Db.collection(db, "users")

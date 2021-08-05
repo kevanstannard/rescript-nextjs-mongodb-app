@@ -59,8 +59,8 @@ function Layout_Main$Navigation(Props) {
                             className: "w-5",
                             src: "/static/zeit-black-triangle.svg"
                           }), React.createElement("span", {
-                            className: "text-xl ml-2 align-middle font-semibold"
-                          }, "Next + MongoDB + ReScript"))
+                            className: "text-xl ml-2 align-middle font-semibold whitespace-nowrap"
+                          }, "ReScript + NextJS + MongoDB"))
                 }), React.createElement("div", {
                   className: "flex justify-end"
                 }, Belt_Array.map(getHeaderLinks(user), (function (param) {

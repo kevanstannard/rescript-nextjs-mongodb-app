@@ -1,12 +1,10 @@
 open Page_Index_Types
 
-let makeResult = (
-  stats: MongoDb.Collection.statsResult,
-  userDto: Js.Null.t<Common_User.User.dto>,
-): Next.GetServerSideProps.result<props> => {
+let makeResult = (currentUser: option<Server_User.User.t>): Next.GetServerSideProps.result<
+  props,
+> => {
+  let userDto = Server_User.toNullCommonUserDto(currentUser)
   let props: props = {
-    env: Server_Env.getString("NODE_ENV"),
-    count: stats.count,
     userDto: userDto,
   }
   {
@@ -21,15 +19,7 @@ let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
   Server_Middleware.all()
   ->Server_Middleware.run(req, res)
   ->Promise.then(_ => {
-    let {client, currentUser} = Server_Middleware.getRequestData(req)
-    let commonUser = switch Belt.Option.map(currentUser, Server_User.toCommonUserDto) {
-    | None => Js.Null.empty
-    | Some(commonUser) => Js.Null.return(commonUser)
-    }
-    client
-    ->Server_Test.getStats
-    ->Promise.then((stats: MongoDb.Collection.statsResult) => {
-      makeResult(stats, commonUser)->Promise.resolve
-    })
+    let {currentUser} = Server_Middleware.getRequestData(req)
+    makeResult(currentUser)->Promise.resolve
   })
 }

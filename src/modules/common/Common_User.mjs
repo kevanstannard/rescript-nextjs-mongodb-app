@@ -22,9 +22,14 @@ function fromDto(dto) {
         };
 }
 
+function fromNullDto(dto) {
+  return Belt_Option.map(dto === null ? undefined : Caml_option.some(dto), fromDto);
+}
+
 var User = {
   toDto: toDto,
-  fromDto: fromDto
+  fromDto: fromDto,
+  fromNullDto: fromNullDto
 };
 
 function isValid(validation) {

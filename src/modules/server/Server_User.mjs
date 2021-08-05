@@ -6,6 +6,7 @@ import * as $$String from "rescript/lib/es6/string.js";
 import * as Bcrypt from "bcrypt";
 import * as Nanoid from "nanoid";
 import * as MongoDb from "../../bindings/MongoDb.mjs";
+import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Common_Date from "../common/Common_Date.mjs";
 import * as Common_User from "../common/Common_User.mjs";
@@ -98,6 +99,15 @@ function toCommonUser(user) {
 
 function toCommonUserDto(user) {
   return Common_User.User.toDto(toCommonUser(user));
+}
+
+function toNullCommonUserDto(user) {
+  var userDto = Belt_Option.map(user, toCommonUserDto);
+  if (userDto !== undefined) {
+    return userDto;
+  } else {
+    return null;
+  }
 }
 
 function getCollection(client) {
@@ -652,6 +662,7 @@ export {
   User ,
   toCommonUser ,
   toCommonUserDto ,
+  toNullCommonUserDto ,
   getCollection ,
   getStats ,
   hashPassword ,

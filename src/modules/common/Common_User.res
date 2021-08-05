@@ -26,6 +26,10 @@ module User = {
       emailChange: Js.Null.toOption(dto.emailChange),
     }
   }
+
+  let fromNullDto = (dto: Js.Null.t<dto>): option<t> => {
+    Js.Null.toOption(dto)->Belt.Option.map(fromDto)
+  }
 }
 
 module Signup = {

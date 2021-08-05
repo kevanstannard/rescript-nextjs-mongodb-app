@@ -22,8 +22,8 @@ module Navigation = {
       <Next.Link href="/">
         <a className="flex items-center">
           <img className="w-5" src="/static/zeit-black-triangle.svg" />
-          <span className="text-xl ml-2 align-middle font-semibold">
-            {React.string("Next + MongoDB + ReScript")}
+          <span className="text-xl ml-2 align-middle font-semibold whitespace-nowrap">
+            {React.string("ReScript + NextJS + MongoDB")}
           </span>
         </a>
       </Next.Link>
