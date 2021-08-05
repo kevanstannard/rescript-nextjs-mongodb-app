@@ -136,15 +136,16 @@ module Header = {
 module Footer = {
   @react.component
   let make = () => {
+    let year = Js.Date.make()->Js.Date.getFullYear->Js.Float.toString
     <div className="py-4">
       <hr className="mb-4" />
       <ContentContainer>
         <div className="flex">
-          <div className="w-1/2 text-sm md:text-base">
-            <HtmlEntity code="copy" /> {React.string(" 2021 Pixel Papercraft")}
+          <div className="w-1/2 whitespace-nowrap">
+            <HtmlEntity code="copy" /> {React.string(` ${year} Your Company Name`)}
           </div>
-          <div className="w-1/2 text-sm md:text-base text-right">
-            <Link href={Common_Url.privacy()}> {"Privacy Policy"->React.string} </Link>
+          <div className="w-1/2 text-right">
+            <Link href={Common_Url.about()}> {"About this site"->React.string} </Link>
           </div>
         </div>
       </ContentContainer>

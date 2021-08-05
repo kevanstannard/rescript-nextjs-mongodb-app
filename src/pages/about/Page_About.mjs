@@ -2,11 +2,11 @@
 
 import * as React from "react";
 import * as Common_User from "../../modules/common/Common_User.mjs";
-import * as Page_Privacy_View from "./Page_Privacy_View.mjs";
+import * as Page_About_View from "./Page_About_View.mjs";
 
 function $$default(param) {
   var user = Common_User.User.fromNullDto(param.userDto);
-  return React.createElement(Page_Privacy_View.make, {
+  return React.createElement(Page_About_View.make, {
               user: user,
               html: param.html
             });

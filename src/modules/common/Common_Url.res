@@ -2,7 +2,7 @@ let github = () => "https://github.com/kevanstannard/rescript-nextjs-mongodb-app
 
 let home = () => "/"
 
-let privacy = () => "/privacy"
+let about = () => "/about"
 
 let contact = () => "/contact"
 

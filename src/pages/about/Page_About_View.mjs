@@ -4,18 +4,16 @@ import * as React from "react";
 import * as Layout_Main from "../../layouts/Layout_Main.mjs";
 import * as Component_Title from "../../components/Component_Title.mjs";
 
-function Page_Privacy_View(Props) {
+function Page_About_View(Props) {
   var user = Props.user;
   var html = Props.html;
   return React.createElement(Layout_Main.make, {
               user: user,
               children: null
             }, React.createElement(Component_Title.make, {
-                  text: "Privacy Policy",
+                  text: "About this site",
                   size: "Primary"
-                }), React.createElement("p", {
-                  className: "pb-4"
-                }, "Updated: 1 January 2021"), React.createElement("div", {
+                }), React.createElement("div", {
                   className: "prose mb-8",
                   dangerouslySetInnerHTML: {
                     __html: html
@@ -25,7 +23,7 @@ function Page_Privacy_View(Props) {
 
 var Title;
 
-var make = Page_Privacy_View;
+var make = Page_About_View;
 
 export {
   Title ,

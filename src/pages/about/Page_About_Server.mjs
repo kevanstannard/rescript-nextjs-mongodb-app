@@ -3,7 +3,7 @@
 import * as Marked from "marked";
 import * as Server_User from "../../modules/server/Server_User.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
-import * as Page_Privacy_Markdown from "./Page_Privacy_Markdown.mjs";
+import * as Page_About_Markdown from "./Page_About_Markdown.mjs";
 
 function makeResult(currentUser, html) {
   var userDto = Server_User.toNullCommonUserDto(currentUser);
@@ -22,7 +22,7 @@ function getServerSideProps(context) {
   var req = context.req;
   return Server_Middleware.run(Server_Middleware.all(undefined), req, context.res).then(function (param) {
               var match = Server_Middleware.getRequestData(req);
-              var html = Marked(Page_Privacy_Markdown.markdown);
+              var html = Marked(Page_About_Markdown.markdown);
               return Promise.resolve(makeResult(match.currentUser, html));
             });
 }

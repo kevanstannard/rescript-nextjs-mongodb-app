@@ -9,8 +9,8 @@ function home(param) {
   return "/";
 }
 
-function privacy(param) {
-  return "/privacy";
+function about(param) {
+  return "/about";
 }
 
 function contact(param) {
@@ -84,7 +84,7 @@ function forgotPasswordSuccess(param) {
 export {
   github ,
   home ,
-  privacy ,
+  about ,
   contact ,
   contactSuccess ,
   signup ,

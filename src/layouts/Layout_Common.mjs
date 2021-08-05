@@ -244,6 +244,7 @@ var Header = {
 };
 
 function Layout_Common$Footer(Props) {
+  var year = new Date().getFullYear().toString();
   return React.createElement("div", {
               className: "py-4"
             }, React.createElement("hr", {
@@ -252,14 +253,14 @@ function Layout_Common$Footer(Props) {
                   children: React.createElement("div", {
                         className: "flex"
                       }, React.createElement("div", {
-                            className: "w-1/2 text-sm md:text-base"
+                            className: "w-1/2 whitespace-nowrap"
                           }, React.createElement(Component_HtmlEntity.make, {
                                 code: "copy"
-                              }), " 2021 Pixel Papercraft"), React.createElement("div", {
-                            className: "w-1/2 text-sm md:text-base text-right"
+                              }), " " + year + " Your Company Name"), React.createElement("div", {
+                            className: "w-1/2 text-right"
                           }, React.createElement(Component_Link.make, {
-                                href: Common_Url.privacy(undefined),
-                                children: "Privacy Policy"
+                                href: Common_Url.about(undefined),
+                                children: "About this site"
                               })))
                 }));
 }

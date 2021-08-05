@@ -10,7 +10,7 @@ https://rescript-nextjs-mongodb-app.vercel.app/
 
 ## About this template
 
-This template based on the [ReScript NextJS Template](https://github.com/ryyppy/rescript-nextjs-template) and the [NextJS MongoDB App](https://github.com/hoangvvo/nextjs-mongodb-app) projects.
+This template is based on the [ReScript NextJS Template](https://github.com/ryyppy/rescript-nextjs-template) and the [NextJS MongoDB App](https://github.com/hoangvvo/nextjs-mongodb-app) projects.
 
 The template includes:
 
@@ -19,7 +19,7 @@ The template includes:
 - [MongoDB](https://www.mongodb.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
-And has simple account features such as signing up, logging in, and basic account management. It also includes [ReCaptcha](https://www.google.com/recaptcha/about/) and account related email notifications using [Send Grid](https://sendgrid.com/).
+It has simple account features such as signing up, logging in, and basic account management. It also includes [ReCaptcha](https://www.google.com/recaptcha/about/) and account related email notifications using [Send Grid](https://sendgrid.com/).
 
 ## Environment variables
 
