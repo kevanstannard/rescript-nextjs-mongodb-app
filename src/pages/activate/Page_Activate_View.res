@@ -1,5 +1,5 @@
 module Title = Component_Title
-module Link = Next.Link
+module Link = Component_Link
 
 module ActivationSuccessful = {
   @react.component

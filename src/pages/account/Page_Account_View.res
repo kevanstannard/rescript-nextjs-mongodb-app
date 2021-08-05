@@ -1,6 +1,6 @@
 module Title = Component_Title
 module AlertMessage = Component_AlertMessage
-module Link = Next.Link
+module Link = Component_Link
 
 module EmailChangeAlert = {
   @react.component

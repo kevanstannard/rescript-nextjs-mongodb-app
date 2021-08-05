@@ -1,5 +1,6 @@
 module Title = Component_Title
 module AlertMessage = Component_AlertMessage
+module Link = Component_Link
 
 open Component_Form
 open Component_Button
@@ -23,9 +24,9 @@ module ResetPasswordError = {
         {React.string("There is a problem with your Reset Password request.")}
       </p>
       <p className="mb-4">
-        <Next.Link href={Common_Url.forgotPassword()}>
+        <Link href={Common_Url.forgotPassword()}>
           {"Try Forgot Password again"->React.string}
-        </Next.Link>
+        </Link>
       </p>
     </>
   }
@@ -40,9 +41,9 @@ module ResetPasswordInvalid = {
         {React.string("There is a problem with your Reset Password request.")}
       </p>
       <p className="mb-4">
-        <Next.Link href={Common_Url.forgotPassword()}>
+        <Link href={Common_Url.forgotPassword()}>
           {"Try Forgot Password again"->React.string}
-        </Next.Link>
+        </Link>
       </p>
     </>
   }
@@ -57,9 +58,9 @@ module ResetPasswordExpired = {
         {React.string("The time available to reset your password has expired.")}
       </p>
       <p className="mb-4">
-        <Next.Link href={Common_Url.forgotPassword()}>
+        <Link href={Common_Url.forgotPassword()}>
           {"Try Forgot Password again"->React.string}
-        </Next.Link>
+        </Link>
       </p>
     </>
   }

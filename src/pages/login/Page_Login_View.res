@@ -1,6 +1,7 @@
 module Main = Layout_Main
 module Title = Component_Title
 module AlertMessage = Component_AlertMessage
+module Link = Component_Link
 
 open Component_Form
 open Component_Button
@@ -43,11 +44,7 @@ let make = (
         color=#Green full=true onClick=onLoginClick state={isSubmitting ? #Processing : #Ready}>
         {React.string("Login")}
       </Button>
-      <p>
-        <Next.Link href={Common_Url.forgotPassword()}>
-          {"Forgot password?"->React.string}
-        </Next.Link>
-      </p>
+      <p> <Link href={Common_Url.forgotPassword()}> {"Forgot password?"->React.string} </Link> </p>
     </FormContainer>
   </Layout_Main>
 }

@@ -1,4 +1,5 @@
 module Title = Component_Title
+module Link = Component_Link
 
 @react.component
 let make = (~user) => {
@@ -10,7 +11,7 @@ let make = (~user) => {
       )}
     </p>
     <p className="mb-4">
-      <Next.Link href={Common_Url.home()}> {"Return to home"->React.string} </Next.Link>
+      <Link href={Common_Url.home()}> {"Return to home"->React.string} </Link>
     </p>
   </Layout_Main>
 }

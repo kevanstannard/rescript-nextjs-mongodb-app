@@ -1,5 +1,3 @@
-module Link = Next.Link
-
 let getHeaderLinks = user => {
   switch user {
   | None => [
@@ -21,18 +19,20 @@ module Navigation = {
   @react.component
   let make = (~user: option<Common_User.User.t>) => {
     <nav className="p-2 h-12 flex border-b border-gray-200 justify-between items-center text-sm">
-      <Link href="/">
+      <Next.Link href="/">
         <a className="flex items-center">
           <img className="w-5" src="/static/zeit-black-triangle.svg" />
           <span className="text-xl ml-2 align-middle font-semibold">
             {React.string("Next + MongoDB + ReScript")}
           </span>
         </a>
-      </Link>
+      </Next.Link>
       <div className="flex justify-end">
         {getHeaderLinks(user)
         ->Belt.Array.map(((name, url)) => {
-          <Link key={url} href={url}> <a className="px-3"> {React.string(name)} </a> </Link>
+          <Next.Link key={url} href={url}>
+            <a className="px-3"> {React.string(name)} </a>
+          </Next.Link>
         })
         ->React.array}
       </div>

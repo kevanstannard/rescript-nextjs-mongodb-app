@@ -1,4 +1,5 @@
 module Title = Component_Title
+module Link = Component_Link
 
 @react.component
 let make = (~user: Common_User.User.t, ~emailChangeSuccessful) => {
@@ -8,7 +9,7 @@ let make = (~user: Common_User.User.t, ~emailChangeSuccessful) => {
           <Title text="Email change successful" size=#Primary />
           <p className="mb-4"> {React.string("Your email has been changed.")} </p>
           <p className="mb-4">
-            <Next.Link href={Common_Url.home()}> {"Return to home"->React.string} </Next.Link>
+            <Link href={Common_Url.home()}> {"Return to home"->React.string} </Link>
           </p>
         </div>
       : <div>
@@ -17,9 +18,9 @@ let make = (~user: Common_User.User.t, ~emailChangeSuccessful) => {
             {React.string("Sorry, there was a problem confirming your email change.")}
           </p>
           <p className="mb-4">
-            <Next.Link href={Common_Url.contact()}>
+            <Link href={Common_Url.contact()}>
               {"Please contact us for support"->React.string}
-            </Next.Link>
+            </Link>
           </p>
         </div>}
   </Layout_Main>

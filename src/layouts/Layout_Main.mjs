@@ -97,12 +97,9 @@ function Layout_Main(Props) {
                     }, children)));
 }
 
-var Link$1;
-
 var make = Layout_Main;
 
 export {
-  Link$1 as Link,
   getHeaderLinks ,
   Navigation ,
   make ,
