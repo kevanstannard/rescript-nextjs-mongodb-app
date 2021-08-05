@@ -66,9 +66,11 @@ module Header = {
             | #Svg(url) => <img className="inline-block h-6" src=url />
             }
           }
-          <a key=name href={url} className="font-medium hover:bg-gray-100 p-2 mr-2 rounded">
-            {icon} {React.string(name)}
-          </a>
+          <Next.Link key=name href={url}>
+            <a className="font-medium hover:bg-gray-100 p-2 mr-2 rounded">
+              {icon} {React.string(name)}
+            </a>
+          </Next.Link>
         })
         ->React.array}
       </div>
@@ -90,11 +92,13 @@ module Header = {
             | #Svg(url) => <img className="inline-block h-6" src=url />
             }
           }
-          <div
-            key={name}
-            className="py-2 px-4 bg-gray-200 font-medium hover:bg-gray-300 text-right border-b border-white">
-            <ContentContainer> <a href={url}> {icon} {React.string(name)} </a> </ContentContainer>
-          </div>
+          <Next.Link key=name href={url}>
+            <a
+              key={name}
+              className="bg-gray-200 border-b border-white block py-2 font-medium hover:bg-gray-300 width-full text-right">
+              <ContentContainer> {icon} {React.string(name)} </ContentContainer>
+            </a>
+          </Next.Link>
         })
         ->React.array}
       </div>

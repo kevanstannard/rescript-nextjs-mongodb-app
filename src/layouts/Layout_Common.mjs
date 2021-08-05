@@ -2,6 +2,7 @@
 
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
+import Link from "next/link";
 import * as Common_Url from "../modules/common/Common_Url.mjs";
 import * as Component_Icon from "../components/Component_Icon.mjs";
 import * as Component_Link from "../components/Component_Link.mjs";
@@ -152,11 +153,13 @@ function Layout_Common$Header$DesktopMenu(Props) {
                               src: icon.VAL
                             })
                     ) : null;
-                  return React.createElement("a", {
-                              key: name,
-                              className: "font-medium hover:bg-gray-100 p-2 mr-2 rounded",
-                              href: param[1]
-                            }, icon$1, name);
+                  return React.createElement(Link, {
+                              href: param[1],
+                              children: React.createElement("a", {
+                                    className: "font-medium hover:bg-gray-100 p-2 mr-2 rounded"
+                                  }, icon$1, name),
+                              key: name
+                            });
                 }));
 }
 
@@ -178,14 +181,16 @@ function Layout_Common$Header$MobileMenu(Props) {
                               src: icon.VAL
                             })
                     ) : null;
-                  return React.createElement("div", {
-                              key: name,
-                              className: "py-2 px-4 bg-gray-200 font-medium hover:bg-gray-300 text-right border-b border-white"
-                            }, React.createElement(Component_ContentContainer.make, {
-                                  children: React.createElement("a", {
-                                        href: param[1]
-                                      }, icon$1, name)
-                                }));
+                  return React.createElement(Link, {
+                              href: param[1],
+                              children: React.createElement("a", {
+                                    key: name,
+                                    className: "bg-gray-200 border-b border-white block py-2 font-medium hover:bg-gray-300 width-full text-right"
+                                  }, React.createElement(Component_ContentContainer.make, {
+                                        children: null
+                                      }, icon$1, name)),
+                              key: name
+                            });
                 }));
 }
 
@@ -263,7 +268,7 @@ var Footer = {
   make: Layout_Common$Footer
 };
 
-var Link;
+var Link$1;
 
 var HtmlEntity;
 
@@ -272,7 +277,7 @@ var ContentContainer;
 var Icon;
 
 export {
-  Link ,
+  Link$1 as Link,
   HtmlEntity ,
   ContentContainer ,
   Icon ,
