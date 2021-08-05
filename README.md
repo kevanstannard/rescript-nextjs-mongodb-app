@@ -19,7 +19,7 @@ The template includes:
 - [MongoDB](https://www.mongodb.com/)
 - [Tailwind CSS](https://tailwindcss.com/)
 
-And has simple account features such as signing up, logging in ans basic account management. It also includes ReCaptcha and account related email notifications using [Send Grid](https://sendgrid.com/).
+And has simple account features such as signing up, logging in, and basic account management. It also includes [ReCaptcha](https://www.google.com/recaptcha/about/) and account related email notifications using [Send Grid](https://sendgrid.com/).
 
 ## Environment variables
 
