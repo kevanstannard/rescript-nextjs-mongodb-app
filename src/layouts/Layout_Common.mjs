@@ -3,8 +3,8 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Common_Url from "../modules/common/Common_Url.mjs";
+import * as Component_Icon from "../components/Component_Icon.mjs";
 import * as Component_Link from "../components/Component_Link.mjs";
-import * as Component_Button from "../components/Component_Button.mjs";
 import * as Component_HtmlEntity from "../components/Component_HtmlEntity.mjs";
 import * as Component_ContentContainer from "../components/Component_ContentContainer.mjs";
 
@@ -74,67 +74,68 @@ function getHeaderLinks(user) {
   }
 }
 
+function Layout_Common$Header$MobileIcon$OpenMenuButton(Props) {
+  var title = Props.title;
+  var onClick = Props.onClick;
+  return React.createElement("button", {
+              title: title,
+              type: "button",
+              onClick: onClick
+            }, React.createElement(Component_Icon.Menu.make, {
+                  size: "Large",
+                  color: "Black"
+                }));
+}
+
+var OpenMenuButton = {
+  make: Layout_Common$Header$MobileIcon$OpenMenuButton
+};
+
+function Layout_Common$Header$MobileIcon$CloseMenuButton(Props) {
+  var title = Props.title;
+  var onClick = Props.onClick;
+  return React.createElement("button", {
+              title: title,
+              type: "button",
+              onClick: onClick
+            }, React.createElement(Component_Icon.X.make, {
+                  size: "Large",
+                  color: "Black"
+                }));
+}
+
+var CloseMenuButton = {
+  make: Layout_Common$Header$MobileIcon$CloseMenuButton
+};
+
 function Layout_Common$Header$MobileIcon(Props) {
   var menuIsOpen = Props.menuIsOpen;
   var setMenuIsOpen = Props.setMenuIsOpen;
   if (menuIsOpen) {
-    return React.createElement(Component_Button.IconButton.make, {
+    return React.createElement(Layout_Common$Header$MobileIcon$CloseMenuButton, {
                 title: "Close menu",
                 onClick: (function (param) {
                     return Curry._1(setMenuIsOpen, (function (param) {
                                   return false;
                                 }));
-                  }),
-                icon: "X",
-                color: "None",
-                state: "Ready"
+                  })
               });
   } else {
-    return React.createElement(Component_Button.IconButton.make, {
+    return React.createElement(Layout_Common$Header$MobileIcon$OpenMenuButton, {
                 title: "Open menu",
                 onClick: (function (param) {
                     return Curry._1(setMenuIsOpen, (function (param) {
                                   return true;
                                 }));
-                  }),
-                icon: "Menu",
-                color: "None",
-                state: "Ready"
+                  })
               });
   }
 }
 
 var MobileIcon = {
+  OpenMenuButton: OpenMenuButton,
+  CloseMenuButton: CloseMenuButton,
   make: Layout_Common$Header$MobileIcon
-};
-
-function Layout_Common$Header$MobileMenu(Props) {
-  var user = Props.user;
-  return React.createElement("div", undefined, getHeaderLinks(user).map(function (param) {
-                  var icon = param[2];
-                  var name = param[0];
-                  var icon$1 = icon !== undefined ? (
-                      icon.NAME === "Svg" ? React.createElement("img", {
-                              className: "inline-block h-6",
-                              src: icon.VAL
-                            }) : React.createElement("img", {
-                              className: "inline-block h-6",
-                              src: icon.VAL
-                            })
-                    ) : null;
-                  return React.createElement("div", {
-                              key: name,
-                              className: "py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium text-right border-b border-green-500"
-                            }, React.createElement(Component_ContentContainer.make, {
-                                  children: React.createElement("a", {
-                                        href: param[1]
-                                      }, icon$1, name)
-                                }));
-                }));
-}
-
-var MobileMenu = {
-  make: Layout_Common$Header$MobileMenu
 };
 
 function Layout_Common$Header$DesktopMenu(Props) {
@@ -153,7 +154,7 @@ function Layout_Common$Header$DesktopMenu(Props) {
                     ) : null;
                   return React.createElement("a", {
                               key: name,
-                              className: "font-medium hover:bg-green-600 p-2 text-white mr-2 rounded",
+                              className: "font-medium hover:bg-gray-100 p-2 mr-2 rounded",
                               href: param[1]
                             }, icon$1, name);
                 }));
@@ -163,23 +164,56 @@ var DesktopMenu = {
   make: Layout_Common$Header$DesktopMenu
 };
 
+function Layout_Common$Header$MobileMenu(Props) {
+  var user = Props.user;
+  return React.createElement("div", undefined, getHeaderLinks(user).map(function (param) {
+                  var icon = param[2];
+                  var name = param[0];
+                  var icon$1 = icon !== undefined ? (
+                      icon.NAME === "Svg" ? React.createElement("img", {
+                              className: "inline-block h-6",
+                              src: icon.VAL
+                            }) : React.createElement("img", {
+                              className: "inline-block h-6",
+                              src: icon.VAL
+                            })
+                    ) : null;
+                  return React.createElement("div", {
+                              key: name,
+                              className: "py-2 px-4 bg-gray-200 font-medium hover:bg-gray-300 text-right border-b border-white"
+                            }, React.createElement(Component_ContentContainer.make, {
+                                  children: React.createElement("a", {
+                                        href: param[1]
+                                      }, icon$1, name)
+                                }));
+                }));
+}
+
+var MobileMenu = {
+  make: Layout_Common$Header$MobileMenu
+};
+
 function Layout_Common$Header(Props) {
   var user = Props.user;
   var match = React.useState(function () {
         return false;
       });
   var menuIsOpen = match[0];
+  var border = menuIsOpen ? "" : "border-b border-gray-200";
   return React.createElement("div", {
-              className: "mb-8"
+              className: "mb-8 " + border
             }, React.createElement("div", {
-                  className: "bg-green-500   py-2 lg:py-6"
+                  className: "py-2 lg:py-6"
                 }, React.createElement(Component_ContentContainer.make, {
                       children: React.createElement("div", {
                             className: "flex items-center justify-between"
                           }, React.createElement("h1", undefined, React.createElement("a", {
-                                    className: "flex items-center text-white font-bold text-xl lg:text-2xl",
+                                    className: "flex items-center font-bold text-xl xlg:text-2xl",
                                     href: Common_Url.home(undefined)
-                                  }, "ReScript + NextJS + MongoDB")), React.createElement("div", undefined, React.createElement("div", {
+                                  }, React.createElement("img", {
+                                        className: "w-5 mr-2",
+                                        src: "/static/zeit-black-triangle.svg"
+                                      }), "ReScript + NextJS + MongoDB")), React.createElement("div", undefined, React.createElement("div", {
                                     className: "hidden lg:block"
                                   }, React.createElement(Layout_Common$Header$DesktopMenu, {
                                         user: user
@@ -199,8 +233,8 @@ function Layout_Common$Header(Props) {
 var Header = {
   getHeaderLinks: getHeaderLinks,
   MobileIcon: MobileIcon,
-  MobileMenu: MobileMenu,
   DesktopMenu: DesktopMenu,
+  MobileMenu: MobileMenu,
   make: Layout_Common$Header
 };
 

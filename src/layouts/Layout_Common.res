@@ -28,23 +28,52 @@ module Header = {
   }
 
   module MobileIcon = {
+    module OpenMenuButton = {
+      @react.component
+      let make = (~title, ~onClick) => {
+        <button title type_="button" onClick={onClick}>
+          <Icon.Menu color=#Black size=#Large />
+        </button>
+      }
+    }
+
+    module CloseMenuButton = {
+      @react.component
+      let make = (~title, ~onClick) => {
+        <button title type_="button" onClick={onClick}>
+          <Icon.X color=#Black size=#Large />
+        </button>
+      }
+    }
+
     @react.component
     let make = (~menuIsOpen, ~setMenuIsOpen) => {
       menuIsOpen
-        ? <IconButton
-            title="Close menu"
-            onClick={_ => setMenuIsOpen(_ => false)}
-            icon=#X
-            state=#Ready
-            color=#None
-          />
-        : <IconButton
-            title="Open menu"
-            onClick={_ => setMenuIsOpen(_ => true)}
-            icon=#Menu
-            state=#Ready
-            color=#None
-          />
+        ? <CloseMenuButton title="Close menu" onClick={_ => setMenuIsOpen(_ => false)} />
+        : <OpenMenuButton title="Open menu" onClick={_ => setMenuIsOpen(_ => true)} />
+    }
+  }
+
+  module DesktopMenu = {
+    @react.component
+    let make = (~user) => {
+      <div>
+        {getHeaderLinks(user)
+        ->Js.Array2.map(((name, url, icon)) => {
+          let icon = switch icon {
+          | None => React.null
+          | Some(icon) =>
+            switch icon {
+            | #Png(url) => <img className="inline-block h-6" src=url />
+            | #Svg(url) => <img className="inline-block h-6" src=url />
+            }
+          }
+          <a key=name href={url} className="font-medium hover:bg-gray-100 p-2 mr-2 rounded">
+            {icon} {React.string(name)}
+          </a>
+        })
+        ->React.array}
+      </div>
     }
   }
 
@@ -65,35 +94,9 @@ module Header = {
           }
           <div
             key={name}
-            className="py-2 px-4 bg-green-600 hover:bg-green-700 text-white font-medium text-right border-b border-green-500">
+            className="py-2 px-4 bg-gray-200 font-medium hover:bg-gray-300 text-right border-b border-white">
             <ContentContainer> <a href={url}> {icon} {React.string(name)} </a> </ContentContainer>
           </div>
-        })
-        ->React.array}
-      </div>
-    }
-  }
-
-  module DesktopMenu = {
-    @react.component
-    let make = (~user) => {
-      <div>
-        {getHeaderLinks(user)
-        ->Js.Array2.map(((name, url, icon)) => {
-          let icon = switch icon {
-          | None => React.null
-          | Some(icon) =>
-            switch icon {
-            | #Png(url) => <img className="inline-block h-6" src=url />
-            | #Svg(url) => <img className="inline-block h-6" src=url />
-            }
-          }
-          <a
-            key=name
-            href={url}
-            className="font-medium hover:bg-green-600 p-2 text-white mr-2 rounded">
-            {icon} {React.string(name)}
-          </a>
         })
         ->React.array}
       </div>
@@ -103,14 +106,16 @@ module Header = {
   @react.component
   let make = (~user: option<Common_User.User.t>) => {
     let (menuIsOpen, setMenuIsOpen) = React.useState(_ => false)
-    <div className="mb-8">
-      <div className="bg-green-500   py-2 lg:py-6">
+    let border = menuIsOpen ? "" : "border-b border-gray-200"
+    <div className={`mb-8 ${border}`}>
+      <div className="py-2 lg:py-6">
         <ContentContainer>
           <div className="flex items-center justify-between">
             <h1>
               <a
                 href={Common_Url.home()}
-                className="flex items-center text-white font-bold text-xl lg:text-2xl">
+                className="flex items-center font-bold text-xl xlg:text-2xl">
+                <img className="w-5 mr-2" src="/static/zeit-black-triangle.svg" />
                 {React.string("ReScript + NextJS + MongoDB")}
               </a>
             </h1>

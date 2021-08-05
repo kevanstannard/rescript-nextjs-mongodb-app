@@ -3,7 +3,11 @@
 import * as React from "react";
 
 function sizeClass(size) {
-  return "w-5 h-5";
+  if (size === "Medium") {
+    return "w-5 h-5";
+  } else {
+    return "w-6 h-6";
+  }
 }
 
 function colorClass(color) {
@@ -15,14 +19,16 @@ function colorClass(color) {
 }
 
 function makeClassName(size, color) {
-  return "inline-block w-5 h-5 " + colorClass(color);
+  return "inline-block " + sizeClass(size) + " " + colorClass(color);
 }
 
 function Component_Icon$ChevronUp(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -40,10 +46,12 @@ var ChevronUp = {
 };
 
 function Component_Icon$ChevronDown(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -61,10 +69,12 @@ var ChevronDown = {
 };
 
 function Component_Icon$ChevronDoubleUp(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -82,10 +92,12 @@ var ChevronDoubleUp = {
 };
 
 function Component_Icon$ChevronDoubleDown(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -103,10 +115,12 @@ var ChevronDoubleDown = {
 };
 
 function Component_Icon$Eye(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -129,10 +143,12 @@ var Eye = {
 };
 
 function Component_Icon$EyeOff(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -150,10 +166,12 @@ var EyeOff = {
 };
 
 function Component_Icon$Menu(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -171,10 +189,12 @@ var Menu = {
 };
 
 function Component_Icon$ProgressSpin(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color) + " animate-spin",
+              className: makeClassName(size, color) + " animate-spin",
               fill: "none",
               viewBox: "0 0 24 24",
               xmlns: "http://www.w3.org/2000/svg"
@@ -197,10 +217,12 @@ var ProgressSpin = {
 };
 
 function Component_Icon$Trash(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",
@@ -218,10 +240,12 @@ var Trash = {
 };
 
 function Component_Icon$X(Props) {
+  var sizeOpt = Props.size;
   var colorOpt = Props.color;
+  var size = sizeOpt !== undefined ? sizeOpt : "Medium";
   var color = colorOpt !== undefined ? colorOpt : "Black";
   return React.createElement("svg", {
-              className: "inline-block w-5 h-5 " + colorClass(color),
+              className: makeClassName(size, color),
               fill: "none",
               stroke: "currentColor",
               viewBox: "0 0 24 24",

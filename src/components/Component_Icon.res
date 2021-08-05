@@ -3,6 +3,7 @@
 let sizeClass = size => {
   switch size {
   | #Medium => "w-5 h-5"
+  | #Large => "w-6 h-6"
   }
 }
 

@@ -2,13 +2,13 @@
 
 import * as React from "react";
 import * as Common_Url from "../../modules/common/Common_Url.mjs";
-import * as Layout_Main2 from "../../layouts/Layout_Main2.mjs";
+import * as Layout_Main from "../../layouts/Layout_Main.mjs";
 import * as Component_Link from "../../components/Component_Link.mjs";
 import * as Component_Title from "../../components/Component_Title.mjs";
 
 function Page_Index_View(Props) {
   var user = Props.user;
-  return React.createElement(Layout_Main2.make, {
+  return React.createElement(Layout_Main.make, {
               user: user,
               children: null
             }, React.createElement(Component_Title.make, {
