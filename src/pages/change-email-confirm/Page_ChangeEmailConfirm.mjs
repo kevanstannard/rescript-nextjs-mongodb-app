@@ -2,13 +2,11 @@
 
 import * as React from "react";
 import $$Error from "next/error";
-import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Page_ChangeEmailConfirm_View from "./Page_ChangeEmailConfirm_View.mjs";
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
+  var user = Common_User.User.fromNullDto(param.userDto);
   if (user !== undefined) {
     return React.createElement(Page_ChangeEmailConfirm_View.make, {
                 user: user,

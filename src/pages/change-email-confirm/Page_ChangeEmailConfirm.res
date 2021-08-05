@@ -1,7 +1,7 @@
 open Page_ChangeEmailConfirm_Types
 
 let default = ({userDto, emailChangeSuccessful}: props) => {
-  let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
+  let user = Common_User.User.fromNullDto(userDto)
   switch user {
   | None => <Next.Error statusCode=#Forbidden />
   | Some(user) =>

@@ -74,7 +74,7 @@ let renderPage = user => {
 }
 
 let default = ({userDto}: props) => {
-  let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
+  let user = Common_User.User.fromNullDto(userDto)
   switch user {
   | None => <Next.Error statusCode=#Forbidden />
   | Some(user) => renderPage(user)
