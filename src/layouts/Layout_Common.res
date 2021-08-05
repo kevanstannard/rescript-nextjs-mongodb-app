@@ -5,8 +5,6 @@ module HtmlEntity = Component_HtmlEntity
 module ContentContainer = Component_ContentContainer
 module Icon = Component_Icon
 
-open Component_Button
-
 module Header = {
   let getHeaderLinks = user => {
     switch user {
