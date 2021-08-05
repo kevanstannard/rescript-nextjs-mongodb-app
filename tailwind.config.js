@@ -6,6 +6,7 @@ module.exports = {
     content: [
       "./src/components/**/*.res",
       "./src/layouts/**/*.res",
+      "./src/pages/**/*.res",
       "./src/*.res",
     ],
     options: {
