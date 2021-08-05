@@ -21,6 +21,21 @@ The template includes:
 
 And has simple account features such as signing up, logging in ans basic account management. It also includes ReCaptcha and account related email notifications using [Send Grid](https://sendgrid.com/).
 
+## Environment variables
+
+| Variable                  | Description                                                     |
+| ------------------------- | --------------------------------------------------------------- |
+| APPLICATION_NAME          | Name of your application. Currently used in email messages.     |
+| APPLICATION_URL           | URL of your hosted application. Used in email messages.         |
+| APPLICATION_EMAIL_NAME    | Name to use in emails sent from the application.                |
+| APPLICATION_EMAIL_ADDRESS | Email address to use in emails sent from the application.       |
+| MONGODB_URI               | MongoDB connection string (including credentials and database). |
+| SESSION_COOKIE_NAME       | Name of cookie for IronSession session management.              |
+| SESSION_COOKIE_PASSWORD   | Password for cookie for IronSession session management.         |
+| RECAPTCHA_SITE_KEY        | ReCaptcha site key.                                             |
+| RECAPTCHA_SECRET_KEY      | ReCaptcha secret key.                                           |
+| SENDGRID_API_KEY          | SendGrid API key (optional).                                    |
+
 ## Development
 
 Run ReScript in dev mode:
