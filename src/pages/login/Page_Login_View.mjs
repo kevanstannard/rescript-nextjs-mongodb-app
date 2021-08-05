@@ -7,22 +7,35 @@ import * as Component_Form from "../../components/Component_Form.mjs";
 import * as Component_Link from "../../components/Component_Link.mjs";
 import * as Component_Title from "../../components/Component_Title.mjs";
 import * as Component_Button from "../../components/Component_Button.mjs";
+import * as Page_Login_Resend from "./Page_Login_Resend.mjs";
 import * as Component_AlertMessage from "../../components/Component_AlertMessage.mjs";
 
-function Page_Login_View$ErrorMessage(Props) {
+function Page_Login_View$LoginError(Props) {
   var error = Props.error;
+  var email = Props.email;
   if (error !== undefined) {
-    return React.createElement(Component_AlertMessage.make, {
-                type_: "Error",
-                children: error
-              });
+    if (error === "LoginFailed") {
+      return React.createElement(Component_AlertMessage.make, {
+                  type_: "Error",
+                  children: "Your email or password is not correct."
+                });
+    } else if (error === "AccountInactive") {
+      return React.createElement(Page_Login_Resend.make, {
+                  email: email
+                });
+    } else {
+      return React.createElement(Component_AlertMessage.make, {
+                  type_: "Error",
+                  children: "There was a problem logging you in. Please try again."
+                });
+    }
   } else {
     return null;
   }
 }
 
-var ErrorMessage = {
-  make: Page_Login_View$ErrorMessage
+var LoginError = {
+  make: Page_Login_View$LoginError
 };
 
 function Page_Login_View(Props) {
@@ -43,8 +56,9 @@ function Page_Login_View(Props) {
                 }, React.createElement(Component_Title.make, {
                       text: "Login",
                       size: "Primary"
-                    }), React.createElement(Page_Login_View$ErrorMessage, {
-                      error: loginError
+                    }), React.createElement(Page_Login_View$LoginError, {
+                      error: loginError,
+                      email: email
                     }), React.createElement(Component_Form.TextField.make, {
                       label: "Email",
                       value: email,
@@ -85,7 +99,7 @@ export {
   Title ,
   AlertMessage ,
   Link ,
-  ErrorMessage ,
+  LoginError ,
   make ,
   
 }

@@ -3,21 +3,20 @@ open Page_Login_Types
 let initialState = () => {
   email: "",
   password: "",
-  validation: {
+  isSubmitting: false,
+  errors: {
+    login: None,
     email: None,
     password: None,
   },
-  isSubmitting: false,
-  loginError: None,
 }
 
 let reducer = (state, action) => {
   switch action {
   | SetEmail(email) => {...state, email: email}
   | SetPassword(password) => {...state, password: password}
-  | SetValidation(validation) => {...state, validation: validation}
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
-  | SetLoginError(loginError) => {...state, loginError: loginError}
+  | SetErrors(errors) => {...state, errors: errors}
   }
 }
 
@@ -30,34 +29,32 @@ let renderPage = () => {
       password: state.password,
     }
 
-    let validation = Common_User.Login.validateLogin(login)
+    let errors = Common_User.Login.validateLogin(login)
 
-    dispatch(SetLoginError(None))
-    dispatch(SetValidation(validation))
+    dispatch(SetErrors(errors))
 
-    if Common_User.Login.isValid(validation) {
+    if !Common_User.Login.hasErrors(errors) {
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        dispatch(SetLoginError(Some(#RequestFailed)))
+        let errors: Common_User.Login.errors = {
+          login: Some(#RequestFailed),
+          email: None,
+          password: None,
+        }
+        dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
 
       let onSuccess = (json: Js.Json.t) => {
         let loginResult = json->Common_User.Login.asLoginResult
-        switch loginResult.result {
-        | #Ok =>
+        if Common_User.Login.hasErrors(loginResult.errors) {
+          dispatch(SetErrors(loginResult.errors))
+          dispatch(SetIsSubmitting(false))
+        } else {
           switch loginResult.nextUrl {
           | Some(nextUrl) => Location.assign(nextUrl)
           | None => Common_Url.home()->Location.assign
-          }
-        | #Error => {
-            let error = switch loginResult.error {
-            | Some(error) => error
-            | None => #UnknownError
-            }
-            dispatch(SetLoginError(Some(error)))
-            dispatch(SetIsSubmitting(false))
           }
         }
       }
@@ -66,23 +63,21 @@ let renderPage = () => {
     }
   }
 
-  let loginError = state.loginError->Belt.Option.map(Common_User.Login.loginErrorToString)
-
-  let emailError = state.validation.email->Belt.Option.map(Common_User.Login.emailErrorToString)
+  let emailError = state.errors.email->Belt.Option.map(Common_User.Login.emailErrorToString)
 
   let passwordError =
-    state.validation.password->Belt.Option.map(Common_User.Login.passwordErrorToString)
+    state.errors.password->Belt.Option.map(Common_User.Login.passwordErrorToString)
 
   <Page_Login_View
     email={state.email}
     password={state.password}
-    emailError={emailError}
-    passwordError={passwordError}
     isSubmitting={state.isSubmitting}
-    loginError={loginError}
     onEmailChange={email => dispatch(SetEmail(email))}
     onPasswordChange={password => dispatch(SetPassword(password))}
     onLoginClick
+    loginError={state.errors.login}
+    emailError={emailError}
+    passwordError={passwordError}
   />
 }
 

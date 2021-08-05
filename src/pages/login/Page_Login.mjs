@@ -12,12 +12,12 @@ function initialState(param) {
   return {
           email: "",
           password: "",
-          validation: {
+          isSubmitting: false,
+          errors: {
+            login: undefined,
             email: undefined,
             password: undefined
-          },
-          isSubmitting: false,
-          loginError: undefined
+          }
         };
 }
 
@@ -27,41 +27,29 @@ function reducer(state, action) {
         return {
                 email: action._0,
                 password: state.password,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                loginError: state.loginError
+                errors: state.errors
               };
     case /* SetPassword */1 :
         return {
                 email: state.email,
                 password: action._0,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                loginError: state.loginError
+                errors: state.errors
               };
     case /* SetIsSubmitting */2 :
         return {
                 email: state.email,
                 password: state.password,
-                validation: state.validation,
                 isSubmitting: action._0,
-                loginError: state.loginError
+                errors: state.errors
               };
-    case /* SetLoginError */3 :
+    case /* SetErrors */3 :
         return {
                 email: state.email,
                 password: state.password,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                loginError: action._0
-              };
-    case /* SetValidation */4 :
-        return {
-                email: state.email,
-                password: state.password,
-                validation: action._0,
-                isSubmitting: state.isSubmitting,
-                loginError: state.loginError
+                errors: action._0
               };
     
   }
@@ -71,12 +59,12 @@ function renderPage(param) {
   var match = React.useReducer(reducer, {
         email: "",
         password: "",
-        validation: {
+        isSubmitting: false,
+        errors: {
+          login: undefined,
           email: undefined,
           password: undefined
-        },
-        isSubmitting: false,
-        loginError: undefined
+        }
       });
   var dispatch = match[1];
   var state = match[0];
@@ -87,16 +75,12 @@ function renderPage(param) {
       email: login_email,
       password: login_password
     };
-    var validation = Common_User.Login.validateLogin(login);
+    var errors = Common_User.Login.validateLogin(login);
     Curry._1(dispatch, {
-          TAG: /* SetLoginError */3,
-          _0: undefined
+          TAG: /* SetErrors */3,
+          _0: errors
         });
-    Curry._1(dispatch, {
-          TAG: /* SetValidation */4,
-          _0: validation
-        });
-    if (!Common_User.Login.isValid(validation)) {
+    if (Common_User.Login.hasErrors(errors)) {
       return ;
     }
     Curry._1(dispatch, {
@@ -105,8 +89,12 @@ function renderPage(param) {
         });
     var onError = function (param) {
       Curry._1(dispatch, {
-            TAG: /* SetLoginError */3,
-            _0: "RequestFailed"
+            TAG: /* SetErrors */3,
+            _0: {
+              login: "RequestFailed",
+              email: undefined,
+              password: undefined
+            }
           });
       return Curry._1(dispatch, {
                   TAG: /* SetIsSubmitting */2,
@@ -114,13 +102,10 @@ function renderPage(param) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
-        var error = json.error;
-        var error$1 = error !== undefined ? error : "UnknownError";
+      if (Common_User.Login.hasErrors(json.errors)) {
         Curry._1(dispatch, {
-              TAG: /* SetLoginError */3,
-              _0: error$1
+              TAG: /* SetErrors */3,
+              _0: json.errors
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */2,
@@ -138,16 +123,15 @@ function renderPage(param) {
     Client_User.login(login, onSuccess, onError);
     
   };
-  var loginError = Belt_Option.map(state.loginError, Common_User.Login.loginErrorToString);
-  var emailError = Belt_Option.map(state.validation.email, Common_User.Login.emailErrorToString);
-  var passwordError = Belt_Option.map(state.validation.password, Common_User.Login.passwordErrorToString);
+  var emailError = Belt_Option.map(state.errors.email, Common_User.Login.emailErrorToString);
+  var passwordError = Belt_Option.map(state.errors.password, Common_User.Login.passwordErrorToString);
   return React.createElement(Page_Login_View.make, {
               email: state.email,
               emailError: emailError,
               password: state.password,
               passwordError: passwordError,
               isSubmitting: state.isSubmitting,
-              loginError: loginError,
+              loginError: state.errors.login,
               onEmailChange: (function (email) {
                   return Curry._1(dispatch, {
                               TAG: /* SetEmail */0,

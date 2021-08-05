@@ -9,6 +9,13 @@ function signup(signup$1, onSuccess, onError) {
             }, onSuccess, onError, undefined);
 }
 
+function resendActivationEmail(resendActivation, onSuccess, onError) {
+  return Client_Xhr.post("/api/resend-activation-email", {
+              TAG: /* Json */0,
+              _0: resendActivation
+            }, onSuccess, onError, undefined);
+}
+
 function login(login$1, onSuccess, onError) {
   return Client_Xhr.post("/api/login", {
               TAG: /* Json */0,
@@ -53,6 +60,7 @@ function resetPassword(resetPassword$1, onSuccess, onError) {
 
 export {
   signup ,
+  resendActivationEmail ,
   login ,
   contact ,
   changePassword ,

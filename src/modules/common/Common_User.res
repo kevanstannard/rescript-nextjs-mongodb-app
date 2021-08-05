@@ -127,34 +127,81 @@ module Signup = {
   }
 }
 
+module ResendActivation = {
+  type resendActivation = {email: string}
+
+  type resendActivationError = [
+    | #EmailEmpty
+    | #EmailInvalid
+    | #RequestFailed
+    | #AlreadyActivated
+    | #UserNotFound
+  ]
+
+  type error = option<resendActivationError>
+
+  type resendActivationResult = {error: error}
+
+  external asResendActivationResult: Js.Json.t => resendActivationResult = "%identity"
+
+  let isError = (error: error): bool => Belt.Option.isSome(error)
+
+  let validateEmail = (email): option<resendActivationError> => {
+    let emailTrimmed = String.trim(email)
+    if Validator.isEmpty(emailTrimmed) {
+      Some(#EmailEmpty)
+    } else if !Validator.isEmail(emailTrimmed) {
+      Some(#EmailInvalid)
+    } else {
+      None
+    }
+  }
+
+  let validateResendActivation = ({email}: resendActivation): error => validateEmail(email)
+
+  let resendError = message => {
+    "There was a problem resending the activation email. " ++ message
+  }
+
+  let resendActivationErrorToString = (error: resendActivationError): string => {
+    switch error {
+    | #RequestFailed => resendError("Please try again.")
+    | #EmailEmpty => resendError("Check the email below is a valid email address.")
+    | #EmailInvalid => resendError("Check the email below is a valid email address.")
+    | #AlreadyActivated => resendError("Your account has already been activated.")
+    | #UserNotFound => resendError("That email address was not found.")
+    }
+  }
+}
+
 module Login = {
   type login = {
     email: string,
     password: string,
   }
 
-  type loginError = [#LoginFailed | #AccountInactive | #RequestFailed | #UnknownError]
+  type loginError = [#RequestFailed | #LoginFailed | #AccountInactive]
   type emailError = [#EmailEmpty | #EmailInvalid]
   type passwordError = [#PasswordEmpty]
 
-  type validation = {
+  type errors = {
+    login: option<loginError>,
     email: option<emailError>,
     password: option<passwordError>,
   }
 
+  let hasErrors = (errors: errors): bool => {
+    Belt.Option.isSome(errors.login) ||
+    Belt.Option.isSome(errors.email) ||
+    Belt.Option.isSome(errors.password)
+  }
+
   type loginResult = {
-    result: [#Ok | #Error],
-    error: option<loginError>,
+    errors: errors,
     nextUrl: option<string>,
   }
 
   external asLoginResult: Js.Json.t => loginResult = "%identity"
-
-  let isValid = (validation: validation): bool => {
-    Belt.Option.isNone(validation.email) && Belt.Option.isNone(validation.password)
-  }
-
-  let hasErrors = (validation: validation): bool => !isValid(validation)
 
   let validateEmail = (email): option<emailError> => {
     let emailTrimmed = String.trim(email)
@@ -175,18 +222,10 @@ module Login = {
     }
   }
 
-  let validateLogin = ({email, password}: login): validation => {
+  let validateLogin = ({email, password}: login): errors => {
+    login: None,
     email: validateEmail(email),
     password: validatePassword(password),
-  }
-
-  let loginErrorToString = (error: loginError): string => {
-    switch error {
-    | #RequestFailed => "There was a problem logging in, please try again."
-    | #UnknownError => "There was a problem logging in, please try again."
-    | #LoginFailed => "Your email or password is not correct."
-    | #AccountInactive => "Your account has not been activated."
-    }
   }
 
   let emailErrorToString = (error: emailError): string => {

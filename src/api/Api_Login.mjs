@@ -18,9 +18,13 @@ function handlePost(req, res) {
                   var userId = Curry._1(MongoDb.ObjectId.toString, loginResult._0._id);
                   return Server_Session.setUserId(req, userId).then(function (param) {
                               return Server_Session.setNextUrl(req, undefined).then(function (param) {
+                                          var result_errors = {
+                                            login: undefined,
+                                            email: undefined,
+                                            password: undefined
+                                          };
                                           var result = {
-                                            result: "Ok",
-                                            error: undefined,
+                                            errors: result_errors,
                                             nextUrl: nextUrl
                                           };
                                           Server_Api.sendJson(res, "Success", result);
@@ -29,10 +33,14 @@ function handlePost(req, res) {
                             });
                 }
                 var error = loginResult._0 === "AccountInactive" ? "AccountInactive" : "LoginFailed";
-                var result_error = error;
+                var errors_login = error;
+                var errors = {
+                  login: errors_login,
+                  email: undefined,
+                  password: undefined
+                };
                 var result = {
-                  result: "Error",
-                  error: result_error,
+                  errors: errors,
                   nextUrl: undefined
                 };
                 Server_Api.sendJson(res, "Success", result);

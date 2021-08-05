@@ -8,6 +8,20 @@ let signup = (signup: Common_User.Signup.signup, onSuccess, onError) => {
   )
 }
 
+let resendActivationEmail = (
+  resendActivation: Common_User.ResendActivation.resendActivation,
+  onSuccess,
+  onError,
+) => {
+  Client_Xhr.post(
+    ~url="/api/resend-activation-email",
+    ~body=Json(resendActivation->Common_Json.asJson),
+    ~onSuccess,
+    ~onError,
+    (),
+  )
+}
+
 let login = (login: Common_User.Login.login, onSuccess, onError) => {
   Client_Xhr.post(
     ~url="/api/login",

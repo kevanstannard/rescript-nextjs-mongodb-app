@@ -6,12 +6,25 @@ module Link = Component_Link
 open Component_Form
 open Component_Button
 
-module ErrorMessage = {
+module LoginError = {
   @react.component
-  let make = (~error) => {
+  let make = (~error: option<Common_User.Login.loginError>, ~email) => {
     switch error {
-    | Some(error) => <AlertMessage type_=#Error> {React.string(error)} </AlertMessage>
     | None => React.null
+    | Some(error) =>
+      switch error {
+      | #RequestFailed =>
+        <AlertMessage type_=#Error>
+          {"There was a problem logging you in. Please try again."->React.string}
+        </AlertMessage>
+
+      | #LoginFailed =>
+        <AlertMessage type_=#Error>
+          {"Your email or password is not correct."->React.string}
+        </AlertMessage>
+
+      | #AccountInactive => <Page_Login_Resend email />
+      }
     }
   }
 }
@@ -23,7 +36,7 @@ let make = (
   ~password,
   ~passwordError,
   ~isSubmitting,
-  ~loginError,
+  ~loginError: option<Common_User.Login.loginError>,
   ~onEmailChange,
   ~onPasswordChange,
   ~onLoginClick,
@@ -31,7 +44,7 @@ let make = (
   <Layout_Main user={None}>
     <FormContainer>
       <Title text="Login" size=#Primary />
-      <ErrorMessage error={loginError} />
+      <LoginError error={loginError} email={email} />
       <TextField label="Email" value={email} onChange={onEmailChange} error={emailError} />
       <PasswordField
         label="Password"

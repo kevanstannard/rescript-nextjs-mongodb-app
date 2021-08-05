@@ -120,10 +120,12 @@ let makeResetPasswordKey = NanoId.generate
 
 let makeEmailChangeKey = NanoId.generate
 
+// TODO: Is this necessary?
 let makeEmailChangeKeyExpiry = () => Js.Date.make()->DateFns.addHours(1)
 
 let makeResetPasswordExpiry = () => Js.Date.make()->DateFns.addHours(1)
 
+// TODO: Update `updated` field on all queries that change user data
 let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
   hashPassword(signup.password)->Promise.then(passwordHash => {
@@ -236,6 +238,35 @@ let validateSignup = (client: MongoClient.t, signup: Common_User.Signup.signup):
       })
     }
   }
+}
+
+let resendActivationEmail = (
+  client: MongoClient.t,
+  resendActivation: Common_User.ResendActivation.resendActivation,
+) => {
+  client
+  ->findUserByEmail(resendActivation.email)
+  ->Promise.then(user => {
+    switch user {
+    | None => Promise.resolve(Error(#UserNotFound))
+    | Some(user) => {
+        let {_id, isActivated, email, activationKey} = user
+        if isActivated {
+          Promise.resolve(Error(#AlreadyActivated))
+        } else {
+          switch activationKey->Js.Null.toOption {
+          | None => Js.Exn.raiseError("Activation key missing")
+          | Some(activationKey) => {
+              let userId = ObjectId.toString(_id)
+              Server_Email.sendActivationEmail(userId, email, activationKey)->Promise.then(_ => {
+                Promise.resolve(Ok())
+              })
+            }
+          }
+        }
+      }
+    }
+  })
 }
 
 let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {

@@ -17,9 +17,12 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
             Server_Session.setUserId(req, Some(userId))->Promise.then(_ => {
               Server_Session.setNextUrl(req, None)->Promise.then(_ => {
                 let result: Common_User.Login.loginResult = {
-                  result: #Ok,
                   nextUrl: nextUrl,
-                  error: None,
+                  errors: {
+                    login: None,
+                    email: None,
+                    password: None,
+                  },
                 }
                 Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
                 Promise.resolve()
@@ -32,10 +35,14 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
           | #PasswordInvalid => #LoginFailed
           | #AccountInactive => #AccountInactive
           }
+          let errors: Common_User.Login.errors = {
+            login: Some(error),
+            email: None,
+            password: None,
+          }
           let result: Common_User.Login.loginResult = {
-            result: #Error,
+            errors: errors,
             nextUrl: None,
-            error: Some(error),
           }
           Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
           Promise.resolve()

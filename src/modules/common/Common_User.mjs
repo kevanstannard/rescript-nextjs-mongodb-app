@@ -113,19 +113,56 @@ var Signup = {
   reCaptchaErrorToString: reCaptchaErrorToString
 };
 
-function isValid$1(validation) {
-  if (Belt_Option.isNone(validation.email)) {
-    return Belt_Option.isNone(validation.password);
+var isError = Belt_Option.isSome;
+
+function validateEmail$1(email) {
+  var emailTrimmed = $$String.trim(email);
+  if (Validator.isEmpty(emailTrimmed)) {
+    return "EmailEmpty";
+  } else if (!Validator.isEmail(emailTrimmed)) {
+    return "EmailInvalid";
   } else {
-    return false;
+    return ;
   }
 }
 
-function hasErrors$1(validation) {
-  return !isValid$1(validation);
+function validateResendActivation(param) {
+  return validateEmail$1(param.email);
 }
 
-function validateEmail$1(email) {
+function resendError(message) {
+  return "There was a problem resending the activation email. " + message;
+}
+
+function resendActivationErrorToString(error) {
+  if (error === "UserNotFound") {
+    return "There was a problem resending the activation email. That email address was not found.";
+  } else if (error === "AlreadyActivated") {
+    return "There was a problem resending the activation email. Your account has already been activated.";
+  } else if (error === "EmailEmpty" || error === "EmailInvalid") {
+    return "There was a problem resending the activation email. Check the email below is a valid email address.";
+  } else {
+    return "There was a problem resending the activation email. Please try again.";
+  }
+}
+
+var ResendActivation = {
+  isError: isError,
+  validateEmail: validateEmail$1,
+  validateResendActivation: validateResendActivation,
+  resendError: resendError,
+  resendActivationErrorToString: resendActivationErrorToString
+};
+
+function hasErrors$1(errors) {
+  if (Belt_Option.isSome(errors.login) || Belt_Option.isSome(errors.email)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(errors.password);
+  }
+}
+
+function validateEmail$2(email) {
   var emailTrimmed = $$String.trim(email);
   if (Validator.isEmpty(emailTrimmed)) {
     return "EmailEmpty";
@@ -145,21 +182,10 @@ function validatePassword$1(password) {
 
 function validateLogin(param) {
   return {
-          email: validateEmail$1(param.email),
+          login: undefined,
+          email: validateEmail$2(param.email),
           password: validatePassword$1(param.password)
         };
-}
-
-function loginErrorToString(error) {
-  if (error === "RequestFailed") {
-    return "There was a problem logging in, please try again.";
-  } else if (error === "LoginFailed") {
-    return "Your email or password is not correct.";
-  } else if (error === "AccountInactive") {
-    return "Your account has not been activated.";
-  } else {
-    return "There was a problem logging in, please try again.";
-  }
 }
 
 function emailErrorToString$1(error) {
@@ -175,12 +201,10 @@ function passwordErrorToString$1(error) {
 }
 
 var Login = {
-  isValid: isValid$1,
   hasErrors: hasErrors$1,
-  validateEmail: validateEmail$1,
+  validateEmail: validateEmail$2,
   validatePassword: validatePassword$1,
   validateLogin: validateLogin,
-  loginErrorToString: loginErrorToString,
   emailErrorToString: emailErrorToString$1,
   passwordErrorToString: passwordErrorToString$1
 };
@@ -195,7 +219,7 @@ function hasErrors$2(errors) {
   }
 }
 
-function validateEmail$2(email) {
+function validateEmail$3(email) {
   var emailTrimmed = $$String.trim(email);
   if (Validator.isEmpty(emailTrimmed)) {
     return "EmailEmpty";
@@ -209,7 +233,7 @@ function validateEmail$2(email) {
 function validateChangeEmail(param) {
   return {
           changeEmail: undefined,
-          email: validateEmail$2(param.email)
+          email: validateEmail$3(param.email)
         };
 }
 
@@ -235,7 +259,7 @@ function emailErrorToString$2(error) {
 
 var ChangeEmail = {
   hasErrors: hasErrors$2,
-  validateEmail: validateEmail$2,
+  validateEmail: validateEmail$3,
   validateChangeEmail: validateChangeEmail,
   generalError: generalError,
   changeEmailErrorToString: changeEmailErrorToString,
@@ -328,7 +352,7 @@ function hasErrors$4(errors) {
   }
 }
 
-function validateEmail$3(email) {
+function validateEmail$4(email) {
   var emailTrimmed = $$String.trim(email);
   if (Validator.isEmpty(emailTrimmed)) {
     return "EmailEmpty";
@@ -342,7 +366,7 @@ function validateEmail$3(email) {
 function validateForgotPassword(forgotPassword) {
   return {
           forgotPassword: undefined,
-          email: validateEmail$3(forgotPassword.email)
+          email: validateEmail$4(forgotPassword.email)
         };
 }
 
@@ -360,7 +384,7 @@ function emailErrorToString$3(error) {
 
 var ForgotPassword = {
   hasErrors: hasErrors$4,
-  validateEmail: validateEmail$3,
+  validateEmail: validateEmail$4,
   validateForgotPassword: validateForgotPassword,
   forgotPasswordErrorToString: forgotPasswordErrorToString,
   emailErrorToString: emailErrorToString$3
@@ -473,6 +497,7 @@ var ResetPassword = {
 export {
   User ,
   Signup ,
+  ResendActivation ,
   Login ,
   Logout ,
   ChangeEmail ,

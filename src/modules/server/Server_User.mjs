@@ -256,6 +256,34 @@ function validateSignup(client, signup) {
             });
 }
 
+function resendActivationEmail(client, resendActivation) {
+  return findUserByEmail(client, resendActivation.email).then(function (user) {
+              if (user === undefined) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "UserNotFound"
+                          });
+              }
+              if (user.isActivated) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "AlreadyActivated"
+                          });
+              }
+              var activationKey = user.activationKey;
+              if (activationKey === null) {
+                return Js_exn.raiseError("Activation key missing");
+              }
+              var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+              return Server_Email.sendActivationEmail(userId, user.email, activationKey).then(function (param) {
+                          return Promise.resolve({
+                                      TAG: /* Ok */0,
+                                      _0: undefined
+                                    });
+                        });
+            });
+}
+
 function signup(client, signup$1) {
   return validateSignup(client, signup$1).then(function (validation) {
               if (Common_User.Signup.isValid(validation)) {
@@ -681,6 +709,7 @@ export {
   validateEmailIsAvailable ,
   validateReCaptchaToken ,
   validateSignup ,
+  resendActivationEmail ,
   signup ,
   login ,
   setIsActivated ,
