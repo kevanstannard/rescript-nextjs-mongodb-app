@@ -18,18 +18,21 @@ let getServerSideProps: Next.GetServerSideProps.t<props, params, _> = context =>
   switch userId {
   | Error(_) => makeResult(false)->Promise.resolve
   | Ok(userId) =>
-    Server_Middleware.all()
-    ->Server_Middleware.run(req, res)
-    ->Promise.then(_ => {
-      let {client} = Server_Middleware.getRequestData(req)
-      client
-      ->Server_User.activate(userId, activationKey)
-      ->Promise.then(result => {
-        switch result {
-        | Error(_) => makeResult(false)->Promise.resolve
-        | Ok() => makeResult(true)->Promise.resolve
-        }
-      })
+    Server_Middleware.runAll(req, res)->Promise.then(_ => {
+      let {client, currentUser} = Server_Middleware.getRequestData(req)
+      // If currently logged in then ignore activation request and redirect to home
+      switch currentUser {
+      | Some(_) => Server_Page.redirectHome()->Promise.resolve
+      | None =>
+        client
+        ->Server_User.activate(userId, activationKey)
+        ->Promise.then(result => {
+          switch result {
+          | Error(_) => makeResult(false)->Promise.resolve
+          | Ok() => makeResult(true)->Promise.resolve
+          }
+        })
+      }
     })
   }
 }
