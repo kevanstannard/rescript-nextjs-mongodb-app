@@ -23,6 +23,8 @@ It has simple account features such as signing up, logging in, and basic account
 
 ## Environment variables
 
+For local development, copy the `.env.example` file to `.env` and provide the following environment variables.
+
 | Variable                  | Description                                                     |
 | ------------------------- | --------------------------------------------------------------- |
 | APPLICATION_NAME          | Name of your application. Currently used in email messages.     |
