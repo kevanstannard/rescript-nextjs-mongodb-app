@@ -1,9 +1,9 @@
 open Page_ChangePasswordSuccess_Types
 
 let default = ({userDto}: props) => {
-  let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
+  let user = Common_User.User.fromNullDto(userDto)
   switch user {
-  | None => <Next.Error statusCode=#Forbidden />
+  | None => <Component_Error403 />
   | Some(user) => <Page_ChangePasswordSuccess_View user={user} />
   }
 }
