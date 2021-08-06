@@ -1,6 +1,7 @@
 open Page_ChangeEmail_Types
 
-let makeResult = userDto => {
+let makeResult = currentUser => {
+  let userDto = Server_User.toNullCommonUserDto(currentUser)
   let props: props = {userDto: userDto}
   let result: Next.GetServerSideProps.result<props> = {
     props: Some(props),
@@ -12,14 +13,8 @@ let makeResult = userDto => {
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
   let {req, res} = context
-  Server_Middleware.all()
-  ->Server_Middleware.run(req, res)
-  ->Promise.thenResolve(_ => {
+  Server_Middleware.runAll(req, res)->Promise.thenResolve(_ => {
     let {currentUser} = Server_Middleware.getRequestData(req)
-    let commonUser = switch Belt.Option.map(currentUser, Server_User.toCommonUserDto) {
-    | None => Js.Null.empty
-    | Some(commonUser) => Js.Null.return(commonUser)
-    }
-    makeResult(commonUser)
+    makeResult(currentUser)
   })
 }

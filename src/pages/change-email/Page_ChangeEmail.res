@@ -17,7 +17,7 @@ let reducer = (state, action) => {
   }
 }
 
-let renderPage = user => {
+let renderPage = (user: Common_User.User.t) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
 
   let onChangeEmailClick = _ => {
@@ -76,7 +76,7 @@ let renderPage = user => {
 let default = ({userDto}: props) => {
   let user = Common_User.User.fromNullDto(userDto)
   switch user {
-  | None => <Next.Error statusCode=#Forbidden />
+  | None => <Component_Error403 />
   | Some(user) => renderPage(user)
   }
 }

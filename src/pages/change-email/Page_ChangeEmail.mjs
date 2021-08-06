@@ -3,10 +3,10 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Common_Url from "../../modules/common/Common_Url.mjs";
-import $$Error from "next/error";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
+import * as Component_Error403 from "../../components/Component_Error403.mjs";
 import * as Page_ChangeEmail_View from "./Page_ChangeEmail_View.mjs";
 
 function initialState(param) {
@@ -125,9 +125,7 @@ function $$default(param) {
   if (user !== undefined) {
     return renderPage(user);
   } else {
-    return React.createElement($$Error, {
-                statusCode: 403
-              });
+    return React.createElement(Component_Error403.make, {});
   }
 }
 
