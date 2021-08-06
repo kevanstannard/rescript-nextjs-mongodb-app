@@ -348,7 +348,7 @@ function setIsActivated(client, userId) {
 }
 
 function activate(client, userId, activationKey) {
-  return findUserByObjectId(client, userId).then(function (user) {
+  return findUserByStringId(client, userId).then(function (user) {
               if (user === undefined) {
                 return Promise.resolve({
                             TAG: /* Error */1,
@@ -364,7 +364,7 @@ function activate(client, userId, activationKey) {
               var userActivationKey = user.activationKey;
               if (userActivationKey !== null) {
                 if (userActivationKey === activationKey) {
-                  return setIsActivated(client, userId).then(function (_updateResult) {
+                  return setIsActivated(client, user._id).then(function (_updateResult) {
                               return Promise.resolve({
                                           TAG: /* Ok */0,
                                           _0: undefined

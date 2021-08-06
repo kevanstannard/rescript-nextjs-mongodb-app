@@ -3,12 +3,15 @@ module Link = Component_Link
 
 module ActivationSuccessful = {
   @react.component
-  let make = () => {
+  let make = (~user: option<Common_User.User.t>) => {
     <div>
       <Title text="Account activation successful" size=#Primary />
       <p className="mb-4"> {React.string("Your account has been activated.")} </p>
       <p className="mb-4">
-        <Link href={Common_Url.login()}> {"Login to your account"->React.string} </Link>
+        {switch user {
+        | None => <Link href={Common_Url.login()}> {"Login to your account"->React.string} </Link>
+        | Some(_) => <Link href={Common_Url.home()}> {"Return to home"->React.string} </Link>
+        }}
       </p>
     </div>
   }
@@ -30,8 +33,8 @@ module ActivationFailed = {
 }
 
 @react.component
-let make = (~activationSuccessful) => {
-  <Layout_Main user={None}>
-    {activationSuccessful ? <ActivationSuccessful /> : <ActivationFailed />}
+let make = (~user: option<Common_User.User.t>, ~activationSuccessful) => {
+  <Layout_Main user={user}>
+    {activationSuccessful ? <ActivationSuccessful user={user} /> : <ActivationFailed />}
   </Layout_Main>
 }

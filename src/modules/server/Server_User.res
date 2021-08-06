@@ -319,11 +319,12 @@ let setIsActivated = (client: MongoClient.t, userId: ObjectId.t) => {
   getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
 
-let activate = (client: MongoClient.t, userId: ObjectId.t, activationKey: string) => {
+let activate = (client: MongoClient.t, userId: string, activationKey: string) => {
   client
-  ->findUserByObjectId(userId)
+  ->findUserByStringId(userId)
   ->Promise.then(user => {
     switch user {
+    | None => Promise.resolve(Error(#UserNotFound))
     | Some(user) =>
       if user.isActivated {
         Promise.resolve(Ok())
@@ -333,7 +334,7 @@ let activate = (client: MongoClient.t, userId: ObjectId.t, activationKey: string
         | Some(userActivationKey) =>
           if userActivationKey === activationKey {
             client
-            ->setIsActivated(userId)
+            ->setIsActivated(user._id)
             ->Promise.then(_updateResult => {
               Promise.resolve(Ok())
             })
@@ -342,7 +343,6 @@ let activate = (client: MongoClient.t, userId: ObjectId.t, activationKey: string
           }
         }
       }
-    | None => Promise.resolve(Error(#UserNotFound))
     }
   })
 }

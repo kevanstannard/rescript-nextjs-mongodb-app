@@ -7,6 +7,7 @@ import * as Component_Link from "../../components/Component_Link.mjs";
 import * as Component_Title from "../../components/Component_Title.mjs";
 
 function Page_Activate_View$ActivationSuccessful(Props) {
+  var user = Props.user;
   return React.createElement("div", undefined, React.createElement(Component_Title.make, {
                   text: "Account activation successful",
                   size: "Primary"
@@ -14,10 +15,13 @@ function Page_Activate_View$ActivationSuccessful(Props) {
                   className: "mb-4"
                 }, "Your account has been activated."), React.createElement("p", {
                   className: "mb-4"
-                }, React.createElement(Component_Link.make, {
-                      href: Common_Url.login(undefined),
-                      children: "Login to your account"
-                    })));
+                }, user !== undefined ? React.createElement(Component_Link.make, {
+                        href: Common_Url.home(undefined),
+                        children: "Return to home"
+                      }) : React.createElement(Component_Link.make, {
+                        href: Common_Url.login(undefined),
+                        children: "Login to your account"
+                      })));
 }
 
 var ActivationSuccessful = {
@@ -43,10 +47,13 @@ var ActivationFailed = {
 };
 
 function Page_Activate_View(Props) {
+  var user = Props.user;
   var activationSuccessful = Props.activationSuccessful;
   return React.createElement(Layout_Main.make, {
-              user: undefined,
-              children: activationSuccessful ? React.createElement(Page_Activate_View$ActivationSuccessful, {}) : React.createElement(Page_Activate_View$ActivationFailed, {})
+              user: user,
+              children: activationSuccessful ? React.createElement(Page_Activate_View$ActivationSuccessful, {
+                      user: user
+                    }) : React.createElement(Page_Activate_View$ActivationFailed, {})
             });
 }
 
