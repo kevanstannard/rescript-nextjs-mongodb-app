@@ -2,8 +2,8 @@ module Title = Component_Title
 module Link = Component_Link
 
 @react.component
-let make = (~user: Common_User.User.t, ~emailChangeSuccessful) => {
-  <Layout_Main user={Some(user)}>
+let make = (~user: option<Common_User.User.t>, ~emailChangeSuccessful) => {
+  <Layout_Main user={user}>
     {emailChangeSuccessful
       ? <div>
           <Title text="Email change successful" size=#Primary />

@@ -523,29 +523,29 @@ let setEmail = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t, email
 
 let changeEmailConfirm = (
   client: MongoDb.MongoClient.t,
-  userId: MongoDb.ObjectId.t,
+  userId: string,
   emailChangeKey: string,
-): Promise.t<result<unit, unit>> => {
+) => {
   client
-  ->findUserByObjectId(userId)
+  ->findUserByStringId(userId)
   ->Promise.then(user => {
     switch user {
-    | None => Promise.resolve(Error())
+    | None => Promise.resolve(Error(#UserNotFound))
     | Some(user) => {
         let currentEmailChange = Js.Nullable.toOption(user.emailChange)
         let currentEmailChangeKey = Js.Nullable.toOption(user.emailChangeKey)
         switch (currentEmailChange, currentEmailChangeKey) {
-        | (None, _) => Promise.resolve(Error())
-        | (_, None) => Promise.resolve(Error())
+        | (None, _) => Promise.resolve(Error(#EmailChangeMissing))
+        | (_, None) => Promise.resolve(Error(#EmailChangeKeyMissing))
         | (Some(currentEmailChange), Some(currentEmailChangeKey)) =>
           if currentEmailChangeKey === emailChangeKey {
             client
-            ->setEmail(userId, currentEmailChange)
+            ->setEmail(user._id, currentEmailChange)
             ->Promise.then(_updateResult => {
               Promise.resolve(Ok())
             })
           } else {
-            Promise.resolve(Error())
+            Promise.resolve(Error(#IncorrectEmailChangeKey))
           }
         }
       }

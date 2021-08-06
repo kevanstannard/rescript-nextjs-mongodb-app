@@ -526,17 +526,27 @@ function setEmail(client, userId, email) {
 }
 
 function changeEmailConfirm(client, userId, emailChangeKey) {
-  return findUserByObjectId(client, userId).then(function (user) {
+  return findUserByStringId(client, userId).then(function (user) {
               if (user === undefined) {
                 return Promise.resolve({
                             TAG: /* Error */1,
-                            _0: undefined
+                            _0: "UserNotFound"
                           });
               }
               var currentEmailChange = user.emailChange;
               var currentEmailChangeKey = user.emailChangeKey;
-              if (!(currentEmailChange == null) && !(currentEmailChangeKey == null) && currentEmailChangeKey === emailChangeKey) {
-                return setEmail(client, userId, currentEmailChange).then(function (_updateResult) {
+              if (currentEmailChange == null) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "EmailChangeMissing"
+                          });
+              } else if (currentEmailChangeKey == null) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: "EmailChangeKeyMissing"
+                          });
+              } else if (currentEmailChangeKey === emailChangeKey) {
+                return setEmail(client, user._id, currentEmailChange).then(function (_updateResult) {
                             return Promise.resolve({
                                         TAG: /* Ok */0,
                                         _0: undefined
@@ -545,7 +555,7 @@ function changeEmailConfirm(client, userId, emailChangeKey) {
               } else {
                 return Promise.resolve({
                             TAG: /* Error */1,
-                            _0: undefined
+                            _0: "IncorrectEmailChangeKey"
                           });
               }
             });
