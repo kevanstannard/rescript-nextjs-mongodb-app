@@ -1,26 +1,26 @@
-let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  let body = Server_Middleware.NextRequest.getBody(req)
-  switch body {
-  | None => {
-      Server_Api.sendError(res, #ServerError, "Body is missing from request")
-      Promise.resolve()
+let makePayload = contactResult => {
+  let payload: Common_Contact.contactResult = switch contactResult {
+  | Ok(validation) => {
+      result: #Ok,
+      validation: validation,
     }
-  | Some(contact: Common_Contact.contact) =>
+  | Error(validation) => {
+      result: #Error,
+      validation: validation,
+    }
+  }
+  payload
+}
+
+let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
+  Server_Api.withBody(req, res, body => {
+    let contact: Common_Contact.contact = body
     Server_Contact.contact(contact)->Promise.then(contactResult => {
-      let result: Common_Contact.contactResult = switch contactResult {
-      | Ok(validation) => {
-          result: #Ok,
-          validation: validation,
-        }
-      | Error(validation) => {
-          result: #Error,
-          validation: validation,
-        }
-      }
-      Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
+      let payload = makePayload(contactResult)
+      Server_Api.sendSuccess(res, payload)
       Promise.resolve()
     })
-  }
+  })
 }
 
 let default =
