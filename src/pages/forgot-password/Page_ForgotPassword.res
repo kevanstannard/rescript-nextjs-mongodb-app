@@ -83,6 +83,7 @@ let renderPage = (user: option<Common_User.User.t>) => {
   />
 }
 
+// TODO: Currently the forgot password page is accessible when logged in, does this matter?
 let default = ({userDto}: props) => {
   let user = Common_User.User.fromNullDto(userDto)
   renderPage(user)
