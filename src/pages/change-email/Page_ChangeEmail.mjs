@@ -6,6 +6,7 @@ import * as Common_Url from "../../modules/common/Common_Url.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
+import * as Router from "next/router";
 import * as Component_Error403 from "../../components/Component_Error403.mjs";
 import * as Page_ChangeEmail_View from "./Page_ChangeEmail_View.mjs";
 
@@ -55,6 +56,7 @@ function renderPage(user) {
       });
   var dispatch = match[1];
   var state = match[0];
+  var router = Router.useRouter();
   var onChangeEmailClick = function (param) {
     var changeEmail = {
       email: state.email
@@ -95,7 +97,7 @@ function renderPage(user) {
                     _0: false
                   });
       } else {
-        document.location.assign(Common_Url.changeEmailSuccess(undefined));
+        router.push(Common_Url.changeEmailSuccess(undefined));
         return ;
       }
     };

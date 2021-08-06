@@ -19,6 +19,7 @@ let reducer = (state, action) => {
 
 let renderPage = (user: Common_User.User.t) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onChangeEmailClick = _ => {
     let changeEmail: Common_User.ChangeEmail.changeEmail = {
@@ -44,7 +45,7 @@ let renderPage = (user: Common_User.User.t) => {
       let onSuccess = (json: Js.Json.t) => {
         let {result, errors} = json->Common_User.ChangeEmail.asChangeEmailResult
         switch result {
-        | #Ok => Location.assign(Common_Url.changeEmailSuccess())
+        | #Ok => Next.Router.push(router, Common_Url.changeEmailSuccess())
         | #Error => {
             dispatch(SetErrors(errors))
             dispatch(SetIsSubmitting(false))
