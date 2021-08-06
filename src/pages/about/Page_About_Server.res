@@ -9,11 +9,7 @@ let makeResult = (
     userDto: userDto,
     html: html,
   }
-  {
-    props: Some(props),
-    redirect: None,
-    notFound: None,
-  }
+  Server_Page.props(props)
 }
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {

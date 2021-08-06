@@ -5,11 +5,7 @@ let makeResult = (currentUser): Next.GetServerSideProps.result<props> => {
   let props: props = {
     userDto: currentUserDto,
   }
-  {
-    props: Some(props),
-    redirect: None,
-    notFound: None,
-  }
+  Server_Page.props(props)
 }
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {

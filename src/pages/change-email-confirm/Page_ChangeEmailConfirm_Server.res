@@ -5,11 +5,7 @@ let makeResult = (userDto, emailChangeSuccessful): Next.GetServerSideProps.resul
     userDto: userDto,
     emailChangeSuccessful: emailChangeSuccessful,
   }
-  {
-    props: Some(props),
-    redirect: None,
-    notFound: None,
-  }
+  Server_Page.props(props)
 }
 
 // Security/UX Note: You don't need to be logged in to confirm an email change

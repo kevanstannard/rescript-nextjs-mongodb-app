@@ -6,11 +6,7 @@ let makeResult = (currentUser, activationSuccessful): Next.GetServerSideProps.re
     userDto: userDto,
     activationSuccessful: activationSuccessful,
   }
-  {
-    props: Some(props),
-    redirect: None,
-    notFound: None,
-  }
+  Server_Page.props(props)
 }
 
 let getServerSideProps: Next.GetServerSideProps.t<props, params, _> = context => {

@@ -3,12 +3,7 @@ open Page_ChangeEmail_Types
 let makeResult = currentUser => {
   let userDto = Server_User.toNullCommonUserDto(currentUser)
   let props: props = {userDto: userDto}
-  let result: Next.GetServerSideProps.result<props> = {
-    props: Some(props),
-    redirect: None,
-    notFound: None,
-  }
-  result
+  Server_Page.props(props)
 }
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {

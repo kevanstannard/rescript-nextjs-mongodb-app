@@ -1,6 +1,10 @@
-open Next.GetServerSideProps
+let props = (props: 'a): Next.GetServerSideProps.result<'a> => {
+  props: Some(props),
+  redirect: None,
+  notFound: None,
+}
 
-let redirect = url => {
+let redirect = (url: string): Next.GetServerSideProps.result<_> => {
   props: None,
   redirect: Some({
     destination: url,
@@ -9,7 +13,7 @@ let redirect = url => {
   notFound: None,
 }
 
-let redirectHome = () => {
+let redirectHome = (): Next.GetServerSideProps.result<_> => {
   props: None,
   redirect: Some({
     destination: Common_Url.home(),
@@ -18,7 +22,7 @@ let redirectHome = () => {
   notFound: None,
 }
 
-let redirectLogin = () => {
+let redirectLogin = (): Next.GetServerSideProps.result<_> => {
   props: None,
   redirect: Some({
     destination: Common_Url.login(),
