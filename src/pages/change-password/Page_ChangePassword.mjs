@@ -3,12 +3,11 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Common_Url from "../../modules/common/Common_Url.mjs";
-import $$Error from "next/error";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Router from "next/router";
+import * as Component_Error403 from "../../components/Component_Error403.mjs";
 import * as Page_ChangePassword_View from "./Page_ChangePassword_View.mjs";
 
 function initialState(param) {
@@ -196,13 +195,11 @@ function renderPage(user) {
 }
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
+  var user = Common_User.User.fromNullDto(param.userDto);
   if (user !== undefined) {
     return renderPage(user);
   } else {
-    return React.createElement($$Error, {
-                statusCode: 403
-              });
+    return React.createElement(Component_Error403.make, {});
   }
 }
 
