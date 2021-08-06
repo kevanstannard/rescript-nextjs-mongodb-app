@@ -7,7 +7,7 @@ import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
 function handlePost(req, res) {
   Server_Session.destroy(req);
-  Server_Api.sendJson(res, "Success", {
+  Server_Api.sendSuccess(res, {
         result: "Ok"
       });
   return Promise.resolve(undefined);

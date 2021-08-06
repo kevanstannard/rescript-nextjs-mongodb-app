@@ -11,7 +11,7 @@ let handleOK = (req, res, user: Server_User.User.t) => {
           password: None,
         },
       }
-      Server_Api.sendSuccess(res, payload->Common_Json.asJson)
+      Server_Api.sendSuccess(res, payload)
       Promise.resolve()
     })
   })
@@ -32,7 +32,7 @@ let handleError = (res, reason) => {
     errors: errors,
     nextUrl: None,
   }
-  Server_Api.sendSuccess(res, payload->Common_Json.asJson)
+  Server_Api.sendSuccess(res, payload)
   Promise.resolve()
 }
 

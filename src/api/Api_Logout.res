@@ -3,7 +3,7 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
   let result: Common_User.Logout.logoutResult = {
     result: #Ok,
   }
-  Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
+  Server_Api.sendSuccess(res, result)
   Promise.resolve()
 }
 
