@@ -1,30 +1,28 @@
-let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  let body = Server_Middleware.NextRequest.getBody(req)
-  switch body {
-  | None => {
-      Server_Api.sendError(res, #ServerError, "Body is missing from request")
-      Promise.resolve()
+let makePayload = (resetPasswordResult): Common_User.ResetPassword.resetPasswordResult => {
+  switch resetPasswordResult {
+  | Ok() => {
+      result: #Ok,
+      errors: None,
     }
-  | Some(resetPassword: Common_User.ResetPassword.resetPassword) => {
-      let {client} = Server_Middleware.getRequestData(req)
-      client
-      ->Server_User.resetPassword(resetPassword)
-      ->Promise.then(resetPasswordResult => {
-        let result: Common_User.ResetPassword.resetPasswordResult = switch resetPasswordResult {
-        | Ok() => {
-            result: #Ok,
-            errors: None,
-          }
-        | Error(errors) => {
-            result: #Error,
-            errors: Some(errors),
-          }
-        }
-        Server_Api.sendJson(res, #Success, result->Common_Json.asJson)
-        Promise.resolve()
-      })
+  | Error(errors) => {
+      result: #Error,
+      errors: Some(errors),
     }
   }
+}
+
+let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
+  Server_Api.withBody(req, res, body => {
+    let resetPassword: Common_User.ResetPassword.resetPassword = body
+    let {client} = Server_Middleware.getRequestData(req)
+    client
+    ->Server_User.resetPassword(resetPassword)
+    ->Promise.then(resetPasswordResult => {
+      let payload = makePayload(resetPasswordResult)
+      Server_Api.sendSuccess(res, payload)
+      Promise.resolve()
+    })
+  })
 }
 
 let default =
