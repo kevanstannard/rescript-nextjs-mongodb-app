@@ -4,7 +4,6 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Common_Url from "../../modules/common/Common_Url.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Router from "next/router";
@@ -124,7 +123,7 @@ function reducer(state, action) {
   }
 }
 
-function renderPage(user, config) {
+function renderPage(user, clientConfig) {
   var match = React.useReducer(reducer, initialState(undefined));
   var dispatch = match[1];
   var state = match[0];
@@ -197,7 +196,7 @@ function renderPage(user, config) {
   var messageError = Belt_Option.map(state.validation.message, Common_Contact.messageErrorToString);
   var reCaptchaError = Belt_Option.map(state.validation.reCaptcha, Common_Contact.reCaptchaErrorToString);
   return React.createElement(Page_Contact_View.make, {
-              reCaptchaSiteKey: config.reCaptcha.siteKey,
+              reCaptchaSiteKey: clientConfig.reCaptcha.siteKey,
               user: user,
               name: state.name,
               email: state.email,
@@ -238,8 +237,8 @@ function renderPage(user, config) {
 }
 
 function $$default(param) {
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
-  return renderPage(user, param.config);
+  var user = Common_User.User.fromNullDto(param.userDto);
+  return renderPage(user, param.clientConfig);
 }
 
 export {

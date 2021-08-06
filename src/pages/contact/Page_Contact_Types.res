@@ -1,7 +1,7 @@
 // Important: The props must only contain valid JSON types
 type props = {
   userDto: Js.Null.t<Common_User.User.dto>,
-  config: Common_ClientConfig.t,
+  clientConfig: Common_ClientConfig.t,
 }
 
 type state = {
