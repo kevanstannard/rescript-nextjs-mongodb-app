@@ -1,4 +1,5 @@
 module Icon = Component_Icon
+module ButtonStyles = Component_ButtonStyles
 module PasswordStrength = Component_PasswordStrength
 
 module FormContainer = {
@@ -220,11 +221,11 @@ module ImageFileButton = {
   @react.component
   let make = (~accept: string, ~label: string, ~onChange) => {
     let className =
-      Component_Button.Styles.className(
-        #Ready,
-        #Gray,
-        #Base,
-        false,
+      ButtonStyles.makeClassName(
+        ~state=#Ready,
+        ~color=#Gray,
+        ~size=#Base,
+        ~full=false,
       ) ++ " inline-block cursor-pointer mb-6"
     let inputRef = React.useRef(Js.Nullable.null)
     <label className={className}>

@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import * as Component_Icon from "./Component_Icon.mjs";
+import * as Component_ButtonStyles from "./Component_ButtonStyles.mjs";
 
 function getDisabled(state) {
   return state !== "Ready";
@@ -17,69 +18,6 @@ function getContent(state, children) {
   }
 }
 
-function getColor(style, state) {
-  if (style === "Red") {
-    if (state === "Disabled" || state !== "Ready") {
-      return "bg-gray-300";
-    } else {
-      return "bg-red-500 hover:bg-red-400";
-    }
-  } else if (style === "Blue") {
-    if (state === "Disabled" || state !== "Ready") {
-      return "bg-gray-300";
-    } else {
-      return "bg-blue-500 hover:bg-blue-400";
-    }
-  } else if (style === "Green") {
-    if (state === "Disabled" || state !== "Ready") {
-      return "bg-gray-300";
-    } else {
-      return "bg-green-500 hover:bg-green-400";
-    }
-  } else if (style === "Gray") {
-    if (state === "Disabled" || state !== "Ready") {
-      return "bg-gray-200";
-    } else {
-      return "bg-gray-500 hover:bg-gray-400";
-    }
-  } else if (style === "None") {
-    return "bg-transparent";
-  } else if (state === "Disabled" || state !== "Ready") {
-    return "bg-gray-200";
-  } else {
-    return "bg-gray-400 hover:bg-gray-300";
-  }
-}
-
-function getSize(size) {
-  if (size === "Base") {
-    return "text-base py-4 px-6";
-  } else {
-    return "text-sm py-2 px-4";
-  }
-}
-
-function getFull(full) {
-  if (full) {
-    return "w-full";
-  } else {
-    return "";
-  }
-}
-
-function className(state, color, size, full) {
-  return "text-white text-center font-semibold rounded " + getSize(size) + " " + getColor(color, state) + " " + (
-          full ? "w-full" : ""
-        );
-}
-
-var Styles = {
-  getColor: getColor,
-  getSize: getSize,
-  getFull: getFull,
-  className: className
-};
-
 function Component_Button$Button(Props) {
   var state = Props.state;
   var onClick = Props.onClick;
@@ -92,9 +30,9 @@ function Component_Button$Button(Props) {
   var size = sizeOpt !== undefined ? sizeOpt : "Base";
   var full = fullOpt !== undefined ? fullOpt : false;
   var title = titleOpt !== undefined ? titleOpt : "";
-  var className$1 = className(state, color, size, full);
+  var className = Component_ButtonStyles.makeClassName(state, color, size, full);
   return React.createElement("button", {
-              className: className$1,
+              className: className,
               title: title,
               disabled: state !== "Ready",
               type: "button",
@@ -160,10 +98,15 @@ var IconButton = {
   make: Component_Button$IconButton
 };
 
+var Icon;
+
+var ButtonStyles;
+
 export {
+  Icon ,
+  ButtonStyles ,
   getDisabled ,
   getContent ,
-  Styles ,
   Button ,
   IconButton ,
   

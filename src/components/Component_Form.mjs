@@ -5,8 +5,8 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Component_Icon from "./Component_Icon.mjs";
-import * as Component_Button from "./Component_Button.mjs";
 import * as Component_ReCaptcha from "./Component_ReCaptcha.mjs";
+import * as Component_ButtonStyles from "./Component_ButtonStyles.mjs";
 import * as Component_PasswordStrength from "./Component_PasswordStrength.mjs";
 
 function Component_Form$FormContainer(Props) {
@@ -263,7 +263,7 @@ function Component_Form$ImageFileButton(Props) {
   var accept = Props.accept;
   var label = Props.label;
   var onChange = Props.onChange;
-  var className = Component_Button.Styles.className("Ready", "Gray", "Base", false) + " inline-block cursor-pointer mb-6";
+  var className = Component_ButtonStyles.makeClassName("Ready", "Gray", "Base", false) + " inline-block cursor-pointer mb-6";
   var inputRef = React.useRef(null);
   return React.createElement("label", {
               className: className
@@ -308,10 +308,13 @@ var ImageFileButton = {
 
 var Icon;
 
+var ButtonStyles;
+
 var PasswordStrength;
 
 export {
   Icon ,
+  ButtonStyles ,
   PasswordStrength ,
   FormContainer ,
   FieldErrorMessage ,

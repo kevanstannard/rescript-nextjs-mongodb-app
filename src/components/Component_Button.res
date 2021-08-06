@@ -1,4 +1,5 @@
-open Component_Icon
+module Icon = Component_Icon
+module ButtonStyles = Component_ButtonStyles
 
 type buttonState = [#Ready | #Disabled | #Processing]
 type buttonColor = [#None | #LightGray | #Gray | #Green | #Blue | #Red]
@@ -16,70 +17,8 @@ let getContent = (state, children) => {
   switch state {
   | #Ready => children
   | #Disabled => children
-  | #Processing => <ProgressSpin color=#White />
+  | #Processing => <Icon.ProgressSpin color=#White />
   }
-}
-
-// TODO: Deprecated. Use Component_ButtonStyles
-module Styles = {
-  let getColor = (style: buttonColor, state: buttonState) => {
-    switch style {
-    | #None =>
-      switch state {
-      | #Ready => "bg-transparent"
-      | #Disabled => "bg-transparent"
-      | #Processing => "bg-transparent"
-      }
-    | #LightGray =>
-      switch state {
-      | #Ready => "bg-gray-400 hover:bg-gray-300"
-      | #Disabled => "bg-gray-200"
-      | #Processing => "bg-gray-200"
-      }
-    | #Gray =>
-      switch state {
-      | #Ready => "bg-gray-500 hover:bg-gray-400"
-      | #Disabled => "bg-gray-200"
-      | #Processing => "bg-gray-200"
-      }
-    | #Green =>
-      switch state {
-      | #Ready => "bg-green-500 hover:bg-green-400"
-      | #Disabled => "bg-gray-300"
-      | #Processing => "bg-gray-300"
-      }
-    | #Blue =>
-      switch state {
-      | #Ready => "bg-blue-500 hover:bg-blue-400"
-      | #Disabled => "bg-gray-300"
-      | #Processing => "bg-gray-300"
-      }
-    | #Red =>
-      switch state {
-      | #Ready => "bg-red-500 hover:bg-red-400"
-      | #Disabled => "bg-gray-300"
-      | #Processing => "bg-gray-300"
-      }
-    }
-  }
-
-  let getSize = (size: buttonSize) => {
-    switch size {
-    | #Base => "text-base py-4 px-6"
-    | #Small => "text-sm py-2 px-4"
-    }
-  }
-
-  let getFull = full => full ? "w-full" : ""
-
-  let className = (state, color, size, full) =>
-    "text-white text-center font-semibold rounded" ++
-    " " ++
-    getSize(size) ++
-    " " ++
-    getColor(color, state) ++
-    " " ++
-    getFull(full)
 }
 
 module Button = {
@@ -93,7 +32,7 @@ module Button = {
     ~title: string="",
     ~children: React.element,
   ) => {
-    let className = Styles.className(state, color, size, full)
+    let className = ButtonStyles.makeClassName(~state, ~color, ~size, ~full)
     <button
       title type_="button" className={className} disabled={getDisabled(state)} onClick={onClick}>
       {getContent(state, children)}
