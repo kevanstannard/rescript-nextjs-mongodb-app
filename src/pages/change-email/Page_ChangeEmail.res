@@ -37,7 +37,6 @@ let renderPage = (user: Common_User.User.t) => {
           changeEmail: Some(#RequestFailed),
           email: None,
         }
-        // TODO: What if `errors` contains no errors
         dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
