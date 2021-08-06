@@ -2,18 +2,13 @@
 
 import * as React from "react";
 import * as Common_User from "../../modules/common/Common_User.mjs";
-import * as Component_Error403 from "../../components/Component_Error403.mjs";
 import * as Page_ChangeEmailSuccess_View from "./Page_ChangeEmailSuccess_View.mjs";
 
 function $$default(param) {
-  var user = Common_User.User.fromNullDto(param.userDto);
-  if (user !== undefined) {
-    return React.createElement(Page_ChangeEmailSuccess_View.make, {
-                user: user
-              });
-  } else {
-    return React.createElement(Component_Error403.make, {});
-  }
+  var user = Common_User.User.fromDto(param.userDto);
+  return React.createElement(Page_ChangeEmailSuccess_View.make, {
+              user: user
+            });
 }
 
 export {
