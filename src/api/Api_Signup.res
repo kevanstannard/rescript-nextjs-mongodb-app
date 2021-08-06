@@ -1,14 +1,9 @@
 let makePayload = (signupResult): Common_User.Signup.signupResult => {
-  switch signupResult {
-  | Ok(validation) => {
-      result: #Ok,
-      validation: validation,
-    }
-  | Error(validation) => {
-      result: #Error,
-      validation: validation,
-    }
+  let errors = switch signupResult {
+  | Ok() => Common_User.Signup.emptyErrors()
+  | Error(errors) => errors
   }
+  {errors: errors}
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {

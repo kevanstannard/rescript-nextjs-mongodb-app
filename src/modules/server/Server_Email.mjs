@@ -103,7 +103,7 @@ function sendContactEmail(contact) {
             });
 }
 
-function sendActivationEmail(userId, userEmail, activationKey) {
+function sendActivationEmail(userId, email, activationKey) {
   var url = applicationUrl + Common_Url.activate(userId, activationKey);
   var text = [
       "Thanks for signing up with " + applicationName + ".",
@@ -116,7 +116,7 @@ function sendActivationEmail(userId, userEmail, activationKey) {
       applicationUrl
     ].join("\n");
   return send({
-              to: userEmail,
+              to: email,
               from: getApplicationEmail(undefined),
               subject: applicationName + " " + "Activation",
               text: text

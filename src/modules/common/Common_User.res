@@ -39,32 +39,35 @@ module Signup = {
     reCaptcha: option<string>,
   }
 
-  type signupError = [#RequestFailed | #UnknownError]
-
+  type signupError = [#RequestFailed]
   type emailError = [#EmailEmpty | #EmailInvalid | #EmailNotAvailable]
   type passwordError = [#PasswordEmpty]
   type reCaptchaError = [#ReCaptchaEmpty | #ReCaptchaInvalid]
 
-  type validation = {
+  type errors = {
+    signup: option<signupError>,
     email: option<emailError>,
     password: option<passwordError>,
     reCaptcha: option<reCaptchaError>,
   }
 
-  type signupResult = {
-    result: [#Ok | #Error],
-    validation: validation,
-  }
+  type signupResult = {errors: errors}
 
   external asSignupResult: Js.Json.t => signupResult = "%identity"
 
-  let isValid = (validation: validation): bool => {
-    Belt.Option.isNone(validation.email) &&
-    Belt.Option.isNone(validation.password) &&
-    Belt.Option.isNone(validation.reCaptcha)
+  let emptyErrors = (): errors => {
+    signup: None,
+    email: None,
+    password: None,
+    reCaptcha: None,
   }
 
-  let hasErrors = (validation: validation): bool => !isValid(validation)
+  let hasErrors = (errors: errors): bool => {
+    Belt.Option.isSome(errors.signup) ||
+    Belt.Option.isSome(errors.email) ||
+    Belt.Option.isSome(errors.password) ||
+    Belt.Option.isSome(errors.reCaptcha)
+  }
 
   let validateEmail = (email): option<emailError> => {
     let emailTrimmed = String.trim(email)
@@ -92,7 +95,8 @@ module Signup = {
     }
   }
 
-  let validateSignup = ({email, password, reCaptcha}: signup): validation => {
+  let validateSignup = ({email, password, reCaptcha}: signup): errors => {
+    signup: None,
     email: validateEmail(email),
     password: validatePassword(password),
     reCaptcha: validateReCaptcha(reCaptcha),
@@ -101,7 +105,6 @@ module Signup = {
   let signupErrorToString = (error: signupError): string => {
     switch error {
     | #RequestFailed => "There was a problem signing up, please try again"
-    | #UnknownError => "There was a problem signing up, please try again"
     }
   }
 

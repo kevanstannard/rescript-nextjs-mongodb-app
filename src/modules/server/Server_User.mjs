@@ -238,9 +238,9 @@ function validateReCaptchaToken(token) {
 }
 
 function validateSignup(client, signup) {
-  var validation = Common_User.Signup.validateSignup(signup);
-  if (Common_User.Signup.hasErrors(validation)) {
-    return Promise.resolve(validation);
+  var errors = Common_User.Signup.validateSignup(signup);
+  if (Common_User.Signup.hasErrors(errors)) {
+    return Promise.resolve(errors);
   }
   var emailTrimmed = $$String.trim(signup.email);
   var emailPromise = validateEmailIsAvailable(client, emailTrimmed);
@@ -248,6 +248,7 @@ function validateSignup(client, signup) {
   return emailPromise.then(function (emailError) {
               return reCaptchaPromise.then(function (reCaptchaError) {
                           return Promise.resolve({
+                                      signup: undefined,
                                       email: emailError,
                                       password: undefined,
                                       reCaptcha: reCaptchaError
@@ -285,8 +286,13 @@ function resendActivationEmail(client, resendActivation) {
 }
 
 function signup(client, signup$1) {
-  return validateSignup(client, signup$1).then(function (validation) {
-              if (Common_User.Signup.isValid(validation)) {
+  return validateSignup(client, signup$1).then(function (errors) {
+              if (Common_User.Signup.hasErrors(errors)) {
+                return Promise.resolve({
+                            TAG: /* Error */1,
+                            _0: errors
+                          });
+              } else {
                 return signupToUser(signup$1).then(function (param) {
                               return insertUser(client, param);
                             }).then(function (user) {
@@ -296,16 +302,11 @@ function signup(client, signup$1) {
                             }
                             var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
                             return Server_Email.sendActivationEmail(userId, user.email, activationKey).then(function (param) {
-                                        return Promise.resolve({
-                                                    TAG: /* Ok */0,
-                                                    _0: validation
-                                                  });
+                                        return {
+                                                TAG: /* Ok */0,
+                                                _0: undefined
+                                              };
                                       });
-                          });
-              } else {
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: validation
                           });
               }
             });

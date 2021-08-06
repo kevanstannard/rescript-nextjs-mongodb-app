@@ -1,14 +1,13 @@
-// Important: The props must only contain valid JSON types
+// `props` must only contain valid JSON types (no undefined values)
 type props = {clientConfig: Common_ClientConfig.t}
 
 type state = {
   email: string,
   password: string,
   reCaptcha: option<string>,
-  validation: Common_User.Signup.validation,
   isSubmitting: bool,
-  signupError: option<Common_User.Signup.signupError>,
   signupAttemptCount: int,
+  errors: Common_User.Signup.errors,
 }
 
 type action =
@@ -16,6 +15,5 @@ type action =
   | SetPassword(string)
   | SetReCaptcha(string)
   | SetIsSubmitting(bool)
-  | SetSignupError(option<Common_User.Signup.signupError>)
-  | SetValidation(Common_User.Signup.validation)
+  | SetErrors(Common_User.Signup.errors)
   | IncrementSignupAttemptCount

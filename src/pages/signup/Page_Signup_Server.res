@@ -1,7 +1,6 @@
 open Page_Signup_Types
 
 let makeResult = (currentUser): Next.GetServerSideProps.result<_> => {
-  // If currently logged in, then redirect to home
   switch currentUser {
   | Some(_) => Server_Page.redirectHome()
   | None => {

@@ -1,19 +1,17 @@
 open Page_Signup_Types
 
-type user = {id: int}
-
-let initialState = () => {
+let initialState = (): state => {
   email: "",
   password: "",
   reCaptcha: None,
-  validation: {
+  isSubmitting: false,
+  signupAttemptCount: 0,
+  errors: {
+    signup: None,
     email: None,
     password: None,
     reCaptcha: None,
   },
-  isSubmitting: false,
-  signupError: None,
-  signupAttemptCount: 0,
 }
 
 let reducer = (state, action) => {
@@ -21,10 +19,9 @@ let reducer = (state, action) => {
   | SetEmail(email) => {...state, email: email}
   | SetPassword(password) => {...state, password: password}
   | SetReCaptcha(reCaptcha) => {...state, reCaptcha: Some(reCaptcha)}
-  | SetValidation(validation) => {...state, validation: validation}
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
-  | SetSignupError(signupError) => {...state, signupError: signupError}
   | IncrementSignupAttemptCount => {...state, signupAttemptCount: state.signupAttemptCount + 1}
+  | SetErrors(errors) => {...state, errors: errors}
   }
 }
 
@@ -39,29 +36,32 @@ let renderPage = (clientConfig: Common_ClientConfig.t) => {
       reCaptcha: state.reCaptcha,
     }
 
-    let validation = Common_User.Signup.validateSignup(signup)
+    let errors = Common_User.Signup.validateSignup(signup)
 
-    dispatch(SetSignupError(None))
-    dispatch(SetValidation(validation))
+    dispatch(SetErrors(errors))
 
-    if Common_User.Signup.isValid(validation) {
+    if !Common_User.Signup.hasErrors(errors) {
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        dispatch(SetSignupError(Some(#RequestFailed)))
+        let errors: Common_User.Signup.errors = {
+          signup: Some(#RequestFailed),
+          email: None,
+          password: None,
+          reCaptcha: None,
+        }
+        dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let signupResult = json->Common_User.Signup.asSignupResult
-        switch signupResult.result {
-        | #Ok => router->Next.Router.push(Common_Url.signupSuccess())
-        | #Error => {
-            dispatch(SetValidation(signupResult.validation))
-            dispatch(SetSignupError(None))
-            dispatch(SetIsSubmitting(false))
-            dispatch(IncrementSignupAttemptCount)
-          }
+        let {errors} = json->Common_User.Signup.asSignupResult
+        if Common_User.Signup.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+          dispatch(IncrementSignupAttemptCount)
+        } else {
+          router->Next.Router.push(Common_Url.signupSuccess())
         }
       }
 
@@ -69,30 +69,30 @@ let renderPage = (clientConfig: Common_ClientConfig.t) => {
     }
   }
 
-  let signupError = state.signupError->Belt.Option.map(Common_User.Signup.signupErrorToString)
+  let signupError = state.errors.signup->Belt.Option.map(Common_User.Signup.signupErrorToString)
 
-  let emailError = state.validation.email->Belt.Option.map(Common_User.Signup.emailErrorToString)
+  let emailError = state.errors.email->Belt.Option.map(Common_User.Signup.emailErrorToString)
 
   let passwordError =
-    state.validation.password->Belt.Option.map(Common_User.Signup.passwordErrorToString)
+    state.errors.password->Belt.Option.map(Common_User.Signup.passwordErrorToString)
 
   let reCaptchaError =
-    state.validation.reCaptcha->Belt.Option.map(Common_User.Signup.reCaptchaErrorToString)
+    state.errors.reCaptcha->Belt.Option.map(Common_User.Signup.reCaptchaErrorToString)
 
   <Page_Signup_View
     reCaptchaSiteKey={clientConfig.reCaptcha.siteKey}
     email={state.email}
     password={state.password}
-    emailError={emailError}
-    passwordError={passwordError}
-    reCaptchaError={reCaptchaError}
     isSubmitting={state.isSubmitting}
-    signupError={signupError}
     signupAttemptCount={state.signupAttemptCount}
     onEmailChange={email => dispatch(SetEmail(email))}
     onPasswordChange={password => dispatch(SetPassword(password))}
     onReCaptchaChange={password => dispatch(SetReCaptcha(password))}
     onSignupClick
+    signupError
+    emailError
+    passwordError
+    reCaptchaError
   />
 }
 

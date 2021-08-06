@@ -1,5 +1,7 @@
 open MongoDb
 
+// TODO: Update `updated` field on all queries that change user data
+
 type opaque
 external opaque: 'a => opaque = "%identity"
 
@@ -125,7 +127,6 @@ let makeEmailChangeKeyExpiry = () => Js.Date.make()->DateFns.addHours(1)
 
 let makeResetPasswordExpiry = () => Js.Date.make()->DateFns.addHours(1)
 
-// TODO: Update `updated` field on all queries that change user data
 let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
   let now = Js.Date.make()
   hashPassword(signup.password)->Promise.then(passwordHash => {
@@ -202,7 +203,9 @@ let validateEmailIsAvailable = (client: MongoClient.t, email: string): Promise.t
   })
 }
 
-let validateReCaptchaToken = token => {
+let validateReCaptchaToken = (token: option<string>): Promise.t<
+  option<Common_User.Signup.reCaptchaError>,
+> => {
   switch token {
   | None => Promise.resolve(Some(#ReCaptchaEmpty))
   | Some(token) =>
@@ -216,11 +219,11 @@ let validateReCaptchaToken = token => {
 }
 
 let validateSignup = (client: MongoClient.t, signup: Common_User.Signup.signup): Promise.t<
-  Common_User.Signup.validation,
+  Common_User.Signup.errors,
 > => {
-  let validation: Common_User.Signup.validation = Common_User.Signup.validateSignup(signup)
-  switch Common_User.Signup.hasErrors(validation) {
-  | true => Promise.resolve(validation)
+  let errors: Common_User.Signup.errors = Common_User.Signup.validateSignup(signup)
+  switch Common_User.Signup.hasErrors(errors) {
+  | true => Promise.resolve(errors)
   | false => {
       let {email, reCaptcha} = signup
       let emailTrimmed = String.trim(email)
@@ -228,12 +231,13 @@ let validateSignup = (client: MongoClient.t, signup: Common_User.Signup.signup):
       let reCaptchaPromise = validateReCaptchaToken(reCaptcha)
       emailPromise->Promise.then(emailError => {
         reCaptchaPromise->Promise.then(reCaptchaError => {
-          let validation: Common_User.Signup.validation = {
+          let errors: Common_User.Signup.errors = {
+            signup: None,
             email: emailError,
             password: None,
             reCaptcha: reCaptchaError,
           }
-          Promise.resolve(validation)
+          Promise.resolve(errors)
         })
       })
     }
@@ -258,7 +262,7 @@ let resendActivationEmail = (
           | None => Js.Exn.raiseError("Activation key missing")
           | Some(activationKey) => {
               let userId = ObjectId.toString(_id)
-              Server_Email.sendActivationEmail(userId, email, activationKey)->Promise.then(_ => {
+              Server_Email.sendActivationEmail(~userId, ~email, ~activationKey)->Promise.then(_ => {
                 Promise.resolve(Ok())
               })
             }
@@ -270,8 +274,10 @@ let resendActivationEmail = (
 }
 
 let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
-  validateSignup(client, signup)->Promise.then(validation => {
-    if Common_User.Signup.isValid(validation) {
+  validateSignup(client, signup)->Promise.then(errors => {
+    if Common_User.Signup.hasErrors(errors) {
+      Promise.resolve(Error(errors))
+    } else {
       signupToUser(signup)
       ->Promise.then(insertUser(client))
       ->Promise.then(user => {
@@ -280,14 +286,16 @@ let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
         | None => Js.Exn.raiseError("Activation key not found after signup")
         | Some(activationKey) => {
             let userId = ObjectId.toString(_id)
-            Server_Email.sendActivationEmail(userId, email, activationKey)->Promise.then(_ => {
-              Promise.resolve(Ok(validation))
+            Server_Email.sendActivationEmail(
+              ~userId,
+              ~email,
+              ~activationKey,
+            )->Promise.thenResolve(_ => {
+              Ok()
             })
           }
         }
       })
-    } else {
-      Promise.resolve(Error(validation))
     }
   })
 }

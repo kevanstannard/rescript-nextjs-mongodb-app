@@ -14,14 +14,14 @@ function initialState(param) {
           email: "",
           password: "",
           reCaptcha: undefined,
-          validation: {
+          isSubmitting: false,
+          signupAttemptCount: 0,
+          errors: {
+            signup: undefined,
             email: undefined,
             password: undefined,
             reCaptcha: undefined
-          },
-          isSubmitting: false,
-          signupError: undefined,
-          signupAttemptCount: 0
+          }
         };
 }
 
@@ -31,10 +31,9 @@ function reducer(state, action) {
             email: state.email,
             password: state.password,
             reCaptcha: state.reCaptcha,
-            validation: state.validation,
             isSubmitting: state.isSubmitting,
-            signupError: state.signupError,
-            signupAttemptCount: state.signupAttemptCount + 1 | 0
+            signupAttemptCount: state.signupAttemptCount + 1 | 0,
+            errors: state.errors
           };
   }
   switch (action.TAG | 0) {
@@ -43,60 +42,45 @@ function reducer(state, action) {
                 email: action._0,
                 password: state.password,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                signupError: state.signupError,
-                signupAttemptCount: state.signupAttemptCount
+                signupAttemptCount: state.signupAttemptCount,
+                errors: state.errors
               };
     case /* SetPassword */1 :
         return {
                 email: state.email,
                 password: action._0,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                signupError: state.signupError,
-                signupAttemptCount: state.signupAttemptCount
+                signupAttemptCount: state.signupAttemptCount,
+                errors: state.errors
               };
     case /* SetReCaptcha */2 :
         return {
                 email: state.email,
                 password: state.password,
                 reCaptcha: action._0,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                signupError: state.signupError,
-                signupAttemptCount: state.signupAttemptCount
+                signupAttemptCount: state.signupAttemptCount,
+                errors: state.errors
               };
     case /* SetIsSubmitting */3 :
         return {
                 email: state.email,
                 password: state.password,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
                 isSubmitting: action._0,
-                signupError: state.signupError,
-                signupAttemptCount: state.signupAttemptCount
+                signupAttemptCount: state.signupAttemptCount,
+                errors: state.errors
               };
-    case /* SetSignupError */4 :
+    case /* SetErrors */4 :
         return {
                 email: state.email,
                 password: state.password,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
                 isSubmitting: state.isSubmitting,
-                signupError: action._0,
-                signupAttemptCount: state.signupAttemptCount
-              };
-    case /* SetValidation */5 :
-        return {
-                email: state.email,
-                password: state.password,
-                reCaptcha: state.reCaptcha,
-                validation: action._0,
-                isSubmitting: state.isSubmitting,
-                signupError: state.signupError,
-                signupAttemptCount: state.signupAttemptCount
+                signupAttemptCount: state.signupAttemptCount,
+                errors: action._0
               };
     
   }
@@ -107,14 +91,14 @@ function renderPage(clientConfig) {
         email: "",
         password: "",
         reCaptcha: undefined,
-        validation: {
+        isSubmitting: false,
+        signupAttemptCount: 0,
+        errors: {
+          signup: undefined,
           email: undefined,
           password: undefined,
           reCaptcha: undefined
-        },
-        isSubmitting: false,
-        signupError: undefined,
-        signupAttemptCount: 0
+        }
       });
   var dispatch = match[1];
   var state = match[0];
@@ -128,16 +112,12 @@ function renderPage(clientConfig) {
       password: signup_password,
       reCaptcha: signup_reCaptcha
     };
-    var validation = Common_User.Signup.validateSignup(signup);
+    var errors = Common_User.Signup.validateSignup(signup);
     Curry._1(dispatch, {
-          TAG: /* SetSignupError */4,
-          _0: undefined
+          TAG: /* SetErrors */4,
+          _0: errors
         });
-    Curry._1(dispatch, {
-          TAG: /* SetValidation */5,
-          _0: validation
-        });
-    if (!Common_User.Signup.isValid(validation)) {
+    if (Common_User.Signup.hasErrors(errors)) {
       return ;
     }
     Curry._1(dispatch, {
@@ -146,8 +126,13 @@ function renderPage(clientConfig) {
         });
     var onError = function (param) {
       Curry._1(dispatch, {
-            TAG: /* SetSignupError */4,
-            _0: "RequestFailed"
+            TAG: /* SetErrors */4,
+            _0: {
+              signup: "RequestFailed",
+              email: undefined,
+              password: undefined,
+              reCaptcha: undefined
+            }
           });
       return Curry._1(dispatch, {
                   TAG: /* SetIsSubmitting */3,
@@ -155,15 +140,11 @@ function renderPage(clientConfig) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
+      var errors = json.errors;
+      if (Common_User.Signup.hasErrors(errors)) {
         Curry._1(dispatch, {
-              TAG: /* SetValidation */5,
-              _0: json.validation
-            });
-        Curry._1(dispatch, {
-              TAG: /* SetSignupError */4,
-              _0: undefined
+              TAG: /* SetErrors */4,
+              _0: errors
             });
         Curry._1(dispatch, {
               TAG: /* SetIsSubmitting */3,
@@ -178,10 +159,10 @@ function renderPage(clientConfig) {
     Client_User.signup(signup, onSuccess, onError);
     
   };
-  var signupError = Belt_Option.map(state.signupError, Common_User.Signup.signupErrorToString);
-  var emailError = Belt_Option.map(state.validation.email, Common_User.Signup.emailErrorToString);
-  var passwordError = Belt_Option.map(state.validation.password, Common_User.Signup.passwordErrorToString);
-  var reCaptchaError = Belt_Option.map(state.validation.reCaptcha, Common_User.Signup.reCaptchaErrorToString);
+  var signupError = Belt_Option.map(state.errors.signup, Common_User.Signup.signupErrorToString);
+  var emailError = Belt_Option.map(state.errors.email, Common_User.Signup.emailErrorToString);
+  var passwordError = Belt_Option.map(state.errors.password, Common_User.Signup.passwordErrorToString);
+  var reCaptchaError = Belt_Option.map(state.errors.reCaptcha, Common_User.Signup.reCaptchaErrorToString);
   return React.createElement(Page_Signup_View.make, {
               reCaptchaSiteKey: clientConfig.reCaptcha.siteKey,
               email: state.email,

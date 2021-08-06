@@ -79,7 +79,7 @@ let sendContactEmail = (contact: Common_Contact.contact): Promise.t<unit> => {
   send(message)
 }
 
-let sendActivationEmail = (userId: string, userEmail: string, activationKey: string): Promise.t<
+let sendActivationEmail = (~userId: string, ~email: string, ~activationKey: string): Promise.t<
   unit,
 > => {
   let url = Common_Url.activate(userId, activationKey)->makeUrl
@@ -95,7 +95,7 @@ let sendActivationEmail = (userId: string, userEmail: string, activationKey: str
       applicationUrl,
     ]->Js.Array2.joinWith("\n")
   let message: SendGridMail.textMessage = {
-    to_: userEmail,
+    to_: email,
     from: getApplicationEmail(),
     subject: makeSubject("Activation"),
     text: text,

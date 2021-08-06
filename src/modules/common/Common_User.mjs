@@ -32,16 +32,21 @@ var User = {
   fromNullDto: fromNullDto
 };
 
-function isValid(validation) {
-  if (Belt_Option.isNone(validation.email) && Belt_Option.isNone(validation.password)) {
-    return Belt_Option.isNone(validation.reCaptcha);
-  } else {
-    return false;
-  }
+function emptyErrors(param) {
+  return {
+          signup: undefined,
+          email: undefined,
+          password: undefined,
+          reCaptcha: undefined
+        };
 }
 
-function hasErrors(validation) {
-  return !isValid(validation);
+function hasErrors(errors) {
+  if (Belt_Option.isSome(errors.signup) || Belt_Option.isSome(errors.email) || Belt_Option.isSome(errors.password)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(errors.reCaptcha);
+  }
 }
 
 function validateEmail(email) {
@@ -72,6 +77,7 @@ function validateReCaptcha(reCaptcha) {
 
 function validateSignup(param) {
   return {
+          signup: undefined,
           email: validateEmail(param.email),
           password: validatePassword(param.password),
           reCaptcha: validateReCaptcha(param.reCaptcha)
@@ -101,7 +107,7 @@ function reCaptchaErrorToString(error) {
 }
 
 var Signup = {
-  isValid: isValid,
+  emptyErrors: emptyErrors,
   hasErrors: hasErrors,
   validateEmail: validateEmail,
   validatePassword: validatePassword,
