@@ -5,7 +5,7 @@ import * as Server_User from "../modules/server/Server_User.mjs";
 import * as NextConnect from "next-connect";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
-function toPayload(changeEmailResult) {
+function makePayload(changeEmailResult) {
   if (changeEmailResult.TAG === /* Ok */0) {
     return {
             result: "Ok",
@@ -24,7 +24,7 @@ function handlePost(req, res) {
                 return Server_Api.withCurrentUser(req, res, (function (currentUser) {
                               var match = Server_Middleware.getRequestData(req);
                               return Server_User.changeEmail(match.client, currentUser._id, body).then(function (changeEmailResult) {
-                                          var payload = toPayload(changeEmailResult);
+                                          var payload = makePayload(changeEmailResult);
                                           Server_Api.sendSuccess(res, payload);
                                           return Promise.resolve(undefined);
                                         });
@@ -35,7 +35,7 @@ function handlePost(req, res) {
 var $$default = NextConnect().use(Server_Middleware.all(undefined)).post(handlePost);
 
 export {
-  toPayload ,
+  makePayload ,
   handlePost ,
   $$default ,
   $$default as default,

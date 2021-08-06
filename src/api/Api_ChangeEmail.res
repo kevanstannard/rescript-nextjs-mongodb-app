@@ -1,4 +1,4 @@
-let toPayload = changeEmailResult => {
+let makePayload = changeEmailResult => {
   let payload: Common_User.ChangeEmail.changeEmailResult = switch changeEmailResult {
   | Ok(errors) => {
       result: #Ok,
@@ -20,7 +20,7 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
       client
       ->Server_User.changeEmail(currentUser._id, changeEmail)
       ->Promise.then(changeEmailResult => {
-        let payload = toPayload(changeEmailResult)
+        let payload = makePayload(changeEmailResult)
         Server_Api.sendSuccess(res, payload)
         Promise.resolve()
       })
