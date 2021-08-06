@@ -8,52 +8,60 @@ import * as NextConnect from "next-connect";
 import * as Server_Session from "../modules/server/Server_Session.mjs";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
-function handlePost(req, res) {
-  var body = Server_Middleware.NextRequest.getBody(req);
-  if (body !== undefined) {
-    var match = Server_Middleware.getRequestData(req);
-    return Server_User.login(match.client, body).then(function (loginResult) {
-                if (loginResult.TAG === /* Ok */0) {
-                  var nextUrl = Server_Session.getNextUrl(req);
-                  var userId = Curry._1(MongoDb.ObjectId.toString, loginResult._0._id);
-                  return Server_Session.setUserId(req, userId).then(function (param) {
-                              return Server_Session.setNextUrl(req, undefined).then(function (param) {
-                                          var result_errors = {
-                                            login: undefined,
-                                            email: undefined,
-                                            password: undefined
-                                          };
-                                          var result = {
-                                            errors: result_errors,
-                                            nextUrl: nextUrl
-                                          };
-                                          Server_Api.sendJson(res, "Success", result);
-                                          return Promise.resolve(undefined);
-                                        });
-                            });
-                }
-                var error = loginResult._0 === "AccountInactive" ? "AccountInactive" : "LoginFailed";
-                var errors_login = error;
-                var errors = {
-                  login: errors_login,
-                  email: undefined,
-                  password: undefined
-                };
-                var result = {
-                  errors: errors,
-                  nextUrl: undefined
-                };
-                Server_Api.sendJson(res, "Success", result);
-                return Promise.resolve(undefined);
-              });
-  }
-  Server_Api.sendError(res, "ServerError", "Body is missing from request");
+function handleOK(req, res, user) {
+  var nextUrl = Server_Session.getNextUrl(req);
+  var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+  return Server_Session.setUserId(req, userId).then(function (param) {
+              return Server_Session.setNextUrl(req, undefined).then(function (param) {
+                          var payload_errors = {
+                            login: undefined,
+                            email: undefined,
+                            password: undefined
+                          };
+                          var payload = {
+                            errors: payload_errors,
+                            nextUrl: nextUrl
+                          };
+                          Server_Api.sendSuccess(res, payload);
+                          return Promise.resolve(undefined);
+                        });
+            });
+}
+
+function handleError(res, reason) {
+  var error = reason === "AccountInactive" ? "AccountInactive" : "LoginFailed";
+  var errors_login = error;
+  var errors = {
+    login: errors_login,
+    email: undefined,
+    password: undefined
+  };
+  var payload = {
+    errors: errors,
+    nextUrl: undefined
+  };
+  Server_Api.sendSuccess(res, payload);
   return Promise.resolve(undefined);
+}
+
+function handlePost(req, res) {
+  return Server_Api.withBody(req, res, (function (body) {
+                var match = Server_Middleware.getRequestData(req);
+                return Server_User.login(match.client, body).then(function (loginResult) {
+                            if (loginResult.TAG === /* Ok */0) {
+                              return handleOK(req, res, loginResult._0);
+                            } else {
+                              return handleError(res, loginResult._0);
+                            }
+                          });
+              }));
 }
 
 var $$default = NextConnect().use(Server_Middleware.all(undefined)).post(handlePost);
 
 export {
+  handleOK ,
+  handleError ,
   handlePost ,
   $$default ,
   $$default as default,
