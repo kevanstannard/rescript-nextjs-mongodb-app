@@ -6,36 +6,44 @@ import * as Server_User from "../modules/server/Server_User.mjs";
 import * as NextConnect from "next-connect";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
-function handlePost(req, res) {
-  var body = Server_Middleware.NextRequest.getBody(req);
-  if (body !== undefined) {
-    var error = Common_User.ResendActivation.validateResendActivation(body);
-    if (Common_User.ResendActivation.isError(error)) {
-      var result = {
-        error: error
-      };
-      Server_Api.sendJson(res, "Success", result);
-      return Promise.resolve(undefined);
-    }
-    var match = Server_Middleware.getRequestData(req);
-    return Server_User.resendActivationEmail(match.client, body).then(function (result) {
-                var result$1;
-                result$1 = result.TAG === /* Ok */0 ? ({
-                      error: undefined
-                    }) : ({
-                      error: result._0
-                    });
-                Server_Api.sendJson(res, "Success", result$1);
-                return Promise.resolve(undefined);
-              });
-  }
-  Server_Api.sendError(res, "ServerError", "Body is missing from request");
+function handleError(res, error) {
+  var payload = {
+    error: error
+  };
+  Server_Api.sendSuccess(res, payload);
   return Promise.resolve(undefined);
+}
+
+function handleOk(req, res, resendActivation) {
+  var match = Server_Middleware.getRequestData(req);
+  return Server_User.resendActivationEmail(match.client, resendActivation).then(function (result) {
+              var payload;
+              payload = result.TAG === /* Ok */0 ? ({
+                    error: undefined
+                  }) : ({
+                    error: result._0
+                  });
+              Server_Api.sendSuccess(res, payload);
+              return Promise.resolve(undefined);
+            });
+}
+
+function handlePost(req, res) {
+  return Server_Api.withBody(req, res, (function (body) {
+                var error = Common_User.ResendActivation.validateResendActivation(body);
+                if (Common_User.ResendActivation.isError(error)) {
+                  return handleError(res, error);
+                } else {
+                  return handleOk(req, res, body);
+                }
+              }));
 }
 
 var $$default = NextConnect().use(Server_Middleware.all(undefined)).post(handlePost);
 
 export {
+  handleError ,
+  handleOk ,
   handlePost ,
   $$default ,
   $$default as default,
