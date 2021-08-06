@@ -7,11 +7,7 @@ function makeResult(currentUser) {
   if (currentUser !== undefined) {
     return Server_Page.redirectHome(undefined);
   } else {
-    return {
-            props: {},
-            redirect: undefined,
-            notFound: undefined
-          };
+    return Server_Page.noProps(undefined);
   }
 }
 

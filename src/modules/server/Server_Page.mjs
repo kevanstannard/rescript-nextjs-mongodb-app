@@ -11,6 +11,10 @@ function props(props$1) {
         };
 }
 
+function noProps(param) {
+  return props({});
+}
+
 function redirect(url) {
   return {
           props: undefined,
@@ -46,6 +50,7 @@ function redirectLogin(param) {
 
 export {
   props ,
+  noProps ,
   redirect ,
   redirectHome ,
   redirectLogin ,

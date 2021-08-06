@@ -4,6 +4,10 @@ let props = (props: 'a): Next.GetServerSideProps.result<'a> => {
   notFound: None,
 }
 
+let noProps = (): Next.GetServerSideProps.result<_> => {
+  props(Js.Obj.empty())
+}
+
 let redirect = (url: string): Next.GetServerSideProps.result<_> => {
   props: None,
   redirect: Some({

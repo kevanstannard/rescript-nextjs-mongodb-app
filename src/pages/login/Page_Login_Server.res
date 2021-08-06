@@ -1,12 +1,8 @@
-let makeResult = (currentUser: option<Server_User.User.t>): Next.GetServerSideProps.result<_> => {
+let makeResult = (currentUser): Next.GetServerSideProps.result<_> => {
   // If currently logged in, then redirect to home
   switch currentUser {
   | Some(_) => Server_Page.redirectHome()
-  | None => {
-      props: Some(Js.Obj.empty()),
-      redirect: None,
-      notFound: None,
-    }
+  | None => Server_Page.noProps()
   }
 }
 
