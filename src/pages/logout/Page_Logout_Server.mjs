@@ -6,9 +6,9 @@ import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
 function getServerSideProps(context) {
   var req = context.req;
-  return Server_Middleware.run(Server_Middleware.all(undefined), req, context.res).then(function (param) {
+  return Server_Middleware.runAll(req, context.res).then(function (param) {
               Server_Session.destroy(req);
-              return Promise.resolve(Server_Page.redirectHome(undefined));
+              return Server_Page.redirectHome(undefined);
             });
 }
 
