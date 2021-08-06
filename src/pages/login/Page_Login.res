@@ -22,6 +22,7 @@ let reducer = (state, action) => {
 
 let renderPage = () => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onLoginClick = _ => {
     let login: Common_User.Login.login = {
@@ -53,8 +54,8 @@ let renderPage = () => {
           dispatch(SetIsSubmitting(false))
         } else {
           switch loginResult.nextUrl {
-          | Some(nextUrl) => Location.assign(nextUrl)
-          | None => Common_Url.home()->Location.assign
+          | Some(nextUrl) => router->Next.Router.push(nextUrl)
+          | None => router->Next.Router.push(Common_Url.home())
           }
         }
       }

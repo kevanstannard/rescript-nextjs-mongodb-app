@@ -45,7 +45,7 @@ let renderPage = (user: Common_User.User.t) => {
       let onSuccess = (json: Js.Json.t) => {
         let {result, errors} = json->Common_User.ChangeEmail.asChangeEmailResult
         switch result {
-        | #Ok => Next.Router.push(router, Common_Url.changeEmailSuccess())
+        | #Ok => router->Next.Router.push(Common_Url.changeEmailSuccess())
         | #Error => {
             dispatch(SetErrors(errors))
             dispatch(SetIsSubmitting(false))

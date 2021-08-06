@@ -28,14 +28,9 @@ let reducer = (state, action) => {
   }
 }
 
-// TODO: Redirect on the server if user is already logged in
-let useCurrentUser = () => {
-  let {data} = SWR.useSWR("/api/user", Client_Fetch.getJson)
-  Js.Undefined.toOption(data)
-}
-
 let renderPage = (config: Common_ClientConfig.t) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onSignupClick = _ => {
     let signup: Common_User.Signup.signup = {
@@ -60,7 +55,7 @@ let renderPage = (config: Common_ClientConfig.t) => {
       let onSuccess = (json: Js.Json.t) => {
         let signupResult = json->Common_User.Signup.asSignupResult
         switch signupResult.result {
-        | #Ok => Common_Url.signupSuccess()->Location.assign
+        | #Ok => router->Next.Router.push(Common_Url.signupSuccess())
         | #Error => {
             dispatch(SetValidation(signupResult.validation))
             dispatch(SetSignupError(None))

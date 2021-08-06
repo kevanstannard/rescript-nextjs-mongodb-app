@@ -31,6 +31,7 @@ let reducer = (state, action) => {
 
 let renderPage = (user: option<Common_User.User.t>, config: Common_ClientConfig.t) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onSendClick = _ => {
     let contact: Common_Contact.contact = {
@@ -56,7 +57,7 @@ let renderPage = (user: option<Common_User.User.t>, config: Common_ClientConfig.
       let onSuccess = (json: Js.Json.t) => {
         let contactResult = json->Common_Contact.asContactResult
         switch contactResult.result {
-        | #Ok => Location.assign(Common_Url.contactSuccess())
+        | #Ok => router->Next.Router.push(Common_Url.contactSuccess())
         | #Error => {
             dispatch(SetValidation(contactResult.validation))
             dispatch(SetContactError(None))

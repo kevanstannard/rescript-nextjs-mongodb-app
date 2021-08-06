@@ -19,6 +19,7 @@ let reducer = (state, action) => {
 
 let renderPage = (user: option<Common_User.User.t>) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onForgotPasswordClick = _ => {
     let forgotPassword: Common_User.ForgotPassword.forgotPassword = {
@@ -44,7 +45,7 @@ let renderPage = (user: option<Common_User.User.t>) => {
       let onSuccess = (json: Js.Json.t) => {
         let forgotPasswordResult = json->Common_User.ForgotPassword.asForgotPasswordResult
         switch forgotPasswordResult.result {
-        | #Ok => Location.assign(Common_Url.forgotPasswordSuccess())
+        | #Ok => router->Next.Router.push(Common_Url.forgotPasswordSuccess())
         | #Error => {
             let errors: Common_User.ForgotPassword.forgotPasswordErrors = switch forgotPasswordResult.errors {
             | None => {

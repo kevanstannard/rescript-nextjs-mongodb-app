@@ -7,6 +7,7 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
+import * as Router from "next/router";
 import * as Common_Contact from "../../modules/common/Common_Contact.mjs";
 import * as Page_Contact_View from "./Page_Contact_View.mjs";
 
@@ -127,6 +128,7 @@ function renderPage(user, config) {
   var match = React.useReducer(reducer, initialState(undefined));
   var dispatch = match[1];
   var state = match[0];
+  var router = Router.useRouter();
   var onSendClick = function (param) {
     var contact_name = state.name;
     var contact_email = state.email;
@@ -181,7 +183,7 @@ function renderPage(user, config) {
             });
         return Curry._1(dispatch, /* IncrementContactAttemptCount */0);
       } else {
-        document.location.assign(Common_Url.contactSuccess(undefined));
+        router.push(Common_Url.contactSuccess(undefined));
         return ;
       }
     };

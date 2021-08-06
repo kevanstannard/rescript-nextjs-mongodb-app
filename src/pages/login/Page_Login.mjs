@@ -6,6 +6,7 @@ import * as Common_Url from "../../modules/common/Common_Url.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
+import * as Router from "next/router";
 import * as Page_Login_View from "./Page_Login_View.mjs";
 
 function initialState(param) {
@@ -68,6 +69,7 @@ function renderPage(param) {
       });
   var dispatch = match[1];
   var state = match[0];
+  var router = Router.useRouter();
   var onLoginClick = function (param) {
     var login_email = state.email;
     var login_password = state.password;
@@ -114,9 +116,9 @@ function renderPage(param) {
       }
       var nextUrl = json.nextUrl;
       if (nextUrl !== undefined) {
-        document.location.assign(nextUrl);
+        router.push(nextUrl);
       } else {
-        document.location.assign(Common_Url.home(undefined));
+        router.push(Common_Url.home(undefined));
       }
       
     };

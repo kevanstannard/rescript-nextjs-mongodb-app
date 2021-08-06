@@ -24,6 +24,7 @@ let default = ({userDto, userId, resetPasswordKey, resetPasswordErrorsDto, confi
   let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
 
   let (state, dispatch) = React.useReducer(reducer, initialState(resetPasswordErrors))
+  let router = Next.Router.useRouter()
 
   let onResetPasswordClick = _ => {
     let resetPassword: Common_User.ResetPassword.resetPassword = {
@@ -54,7 +55,7 @@ let default = ({userDto, userId, resetPasswordKey, resetPasswordErrorsDto, confi
       let onSuccess = (json: Js.Json.t) => {
         let resetPasswordResult = json->Common_User.ResetPassword.asResetPasswordResult
         switch resetPasswordResult.result {
-        | #Ok => Location.assign(Common_Url.resetPasswordSuccess())
+        | #Ok => router->Next.Router.push(Common_Url.resetPasswordSuccess())
         | #Error => {
             let errors: Common_User.ResetPassword.resetPasswordErrors = switch resetPasswordResult.errors {
             | None => {

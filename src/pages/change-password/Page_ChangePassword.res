@@ -27,6 +27,7 @@ let reducer = (state, action) => {
 
 let renderPage = user => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
+  let router = Next.Router.useRouter()
 
   let onChangePasswordClick = _ => {
     let changePassword: Common_User.ChangePassword.changePassword = {
@@ -51,7 +52,7 @@ let renderPage = user => {
       let onSuccess = (json: Js.Json.t) => {
         let changePasswordResult = json->Common_User.ChangePassword.asChangePasswordResult
         switch changePasswordResult.result {
-        | #Ok => Location.assign(Common_Url.changePasswordSuccess())
+        | #Ok => router->Next.Router.push(Common_Url.changePasswordSuccess())
         | #Error => {
             dispatch(SetValidation(changePasswordResult.validation))
             dispatch(SetIsSubmitting(false))
