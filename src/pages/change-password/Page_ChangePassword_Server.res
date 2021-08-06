@@ -1,7 +1,7 @@
 open Page_ChangePassword_Types
 
 let makeResult = currentUser => {
-  let userDto = Server_User.toNullCommonUserDto(currentUser)
+  let userDto = Server_User.toCommonUserDto(currentUser)
   let props: props = {
     userDto: userDto,
   }
@@ -10,8 +10,9 @@ let makeResult = currentUser => {
 
 let getServerSideProps: Next.GetServerSideProps.t<props, _, _> = context => {
   let {req, res} = context
-  Server_Middleware.runAll(req, res)->Promise.thenResolve(_ => {
-    let {currentUser} = Server_Middleware.getRequestData(req)
-    makeResult(currentUser)
+  Server_Middleware.runAll(req, res)->Promise.then(_ => {
+    Server_Page.withAuthentication(req, currentUser => {
+      makeResult(currentUser)->Promise.resolve
+    })
   })
 }

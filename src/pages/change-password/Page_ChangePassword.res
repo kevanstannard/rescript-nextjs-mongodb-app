@@ -110,9 +110,6 @@ let renderPage = (user: Common_User.User.t) => {
 }
 
 let default = ({userDto}: props) => {
-  let user = Common_User.User.fromNullDto(userDto)
-  switch user {
-  | None => <Component_Error403 />
-  | Some(user) => renderPage(user)
-  }
+  let user = Common_User.User.fromDto(userDto)
+  renderPage(user)
 }

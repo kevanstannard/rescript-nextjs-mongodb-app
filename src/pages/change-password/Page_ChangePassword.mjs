@@ -7,7 +7,6 @@ import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Router from "next/router";
-import * as Component_Error403 from "../../components/Component_Error403.mjs";
 import * as Page_ChangePassword_View from "./Page_ChangePassword_View.mjs";
 
 function initialState(param) {
@@ -195,12 +194,7 @@ function renderPage(user) {
 }
 
 function $$default(param) {
-  var user = Common_User.User.fromNullDto(param.userDto);
-  if (user !== undefined) {
-    return renderPage(user);
-  } else {
-    return React.createElement(Component_Error403.make, {});
-  }
+  return renderPage(Common_User.User.fromDto(param.userDto));
 }
 
 export {
