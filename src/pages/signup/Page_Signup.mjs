@@ -102,7 +102,7 @@ function reducer(state, action) {
   }
 }
 
-function renderPage(config) {
+function renderPage(clientConfig) {
   var match = React.useReducer(reducer, {
         email: "",
         password: "",
@@ -183,7 +183,7 @@ function renderPage(config) {
   var passwordError = Belt_Option.map(state.validation.password, Common_User.Signup.passwordErrorToString);
   var reCaptchaError = Belt_Option.map(state.validation.reCaptcha, Common_User.Signup.reCaptchaErrorToString);
   return React.createElement(Page_Signup_View.make, {
-              reCaptchaSiteKey: config.reCaptcha.siteKey,
+              reCaptchaSiteKey: clientConfig.reCaptcha.siteKey,
               email: state.email,
               emailError: emailError,
               password: state.password,
@@ -215,7 +215,7 @@ function renderPage(config) {
 }
 
 function $$default(param) {
-  return renderPage(param.config);
+  return renderPage(param.clientConfig);
 }
 
 export {

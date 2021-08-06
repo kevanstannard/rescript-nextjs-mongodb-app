@@ -1,8 +1,5 @@
 // Important: The props must only contain valid JSON types
-type props = {
-  env: string,
-  config: Common_ClientConfig.t,
-}
+type props = {clientConfig: Common_ClientConfig.t}
 
 type state = {
   email: string,

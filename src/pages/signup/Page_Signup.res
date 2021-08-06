@@ -28,7 +28,7 @@ let reducer = (state, action) => {
   }
 }
 
-let renderPage = (config: Common_ClientConfig.t) => {
+let renderPage = (clientConfig: Common_ClientConfig.t) => {
   let (state, dispatch) = React.useReducer(reducer, initialState())
   let router = Next.Router.useRouter()
 
@@ -80,8 +80,7 @@ let renderPage = (config: Common_ClientConfig.t) => {
     state.validation.reCaptcha->Belt.Option.map(Common_User.Signup.reCaptchaErrorToString)
 
   <Page_Signup_View
-    reCaptchaSiteKey={config.reCaptcha.siteKey}
-    // user={user}
+    reCaptchaSiteKey={clientConfig.reCaptcha.siteKey}
     email={state.email}
     password={state.password}
     emailError={emailError}
@@ -97,6 +96,6 @@ let renderPage = (config: Common_ClientConfig.t) => {
   />
 }
 
-let default = ({config}: props): React.element => {
-  renderPage(config)
+let default = ({clientConfig}: props): React.element => {
+  renderPage(clientConfig)
 }
