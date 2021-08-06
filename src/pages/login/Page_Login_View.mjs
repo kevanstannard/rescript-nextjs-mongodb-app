@@ -19,7 +19,7 @@ function Page_Login_View$LoginError(Props) {
                   type_: "Error",
                   children: "Your email or password is not correct."
                 });
-    } else if (error === "AccountInactive") {
+    } else if (error === "AccountNotActivated") {
       return React.createElement(Page_Login_Resend.make, {
                   email: email
                 });

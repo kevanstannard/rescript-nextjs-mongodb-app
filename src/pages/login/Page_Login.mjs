@@ -115,11 +115,8 @@ function renderPage(param) {
                   });
       }
       var nextUrl = json.nextUrl;
-      if (nextUrl !== undefined) {
-        router.push(nextUrl);
-      } else {
-        router.push(Common_Url.home(undefined));
-      }
+      var nextUrl$1 = nextUrl !== undefined ? nextUrl : Common_Url.home(undefined);
+      router.push(nextUrl$1);
       
     };
     Client_User.login(login, onSuccess, onError);

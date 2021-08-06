@@ -3,6 +3,7 @@
 import * as Curry from "rescript/lib/es6/curry.js";
 import * as MongoDb from "../bindings/MongoDb.mjs";
 import * as Server_Api from "../modules/server/Server_Api.mjs";
+import * as Common_User from "../modules/common/Common_User.mjs";
 import * as Server_User from "../modules/server/Server_User.mjs";
 import * as NextConnect from "next-connect";
 import * as Server_Session from "../modules/server/Server_Session.mjs";
@@ -13,11 +14,7 @@ function handleOK(req, res, user) {
   var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
   return Server_Session.setUserId(req, userId).then(function (param) {
               return Server_Session.setNextUrl(req, undefined).then(function (param) {
-                          var payload_errors = {
-                            login: undefined,
-                            email: undefined,
-                            password: undefined
-                          };
+                          var payload_errors = Common_User.Login.emptyErrors(undefined);
                           var payload = {
                             errors: payload_errors,
                             nextUrl: nextUrl
@@ -28,14 +25,7 @@ function handleOK(req, res, user) {
             });
 }
 
-function handleError(res, reason) {
-  var error = reason === "AccountInactive" ? "AccountInactive" : "LoginFailed";
-  var errors_login = error;
-  var errors = {
-    login: errors_login,
-    email: undefined,
-    password: undefined
-  };
+function handleError(res, errors) {
   var payload = {
     errors: errors,
     nextUrl: undefined

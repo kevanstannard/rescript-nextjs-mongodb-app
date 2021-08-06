@@ -168,6 +168,14 @@ function hasErrors$1(errors) {
   }
 }
 
+function emptyErrors$1(param) {
+  return {
+          login: undefined,
+          email: undefined,
+          password: undefined
+        };
+}
+
 function validateEmail$2(email) {
   var emailTrimmed = $$String.trim(email);
   if (Validator.isEmpty(emailTrimmed)) {
@@ -208,6 +216,7 @@ function passwordErrorToString$1(error) {
 
 var Login = {
   hasErrors: hasErrors$1,
+  emptyErrors: emptyErrors$1,
   validateEmail: validateEmail$2,
   validatePassword: validatePassword$1,
   validateLogin: validateLogin,

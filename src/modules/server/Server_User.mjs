@@ -313,31 +313,51 @@ function signup(client, signup$1) {
 }
 
 function login(client, login$1) {
-  return findUserByEmail(client, login$1.email).then(function (user) {
-              if (user !== undefined) {
-                if (user.isActivated) {
-                  return Bcrypt.compare(login$1.password, user.passwordHash).then(function (compareResult) {
-                              return Promise.resolve(compareResult ? ({
-                                              TAG: /* Ok */0,
-                                              _0: user
-                                            }) : ({
-                                              TAG: /* Error */1,
-                                              _0: "PasswordInvalid"
-                                            }));
-                            });
+  var errors = Common_User.Login.validateLogin(login$1);
+  if (Common_User.Login.hasErrors(errors)) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: errors
+              });
+  } else {
+    return findUserByEmail(client, login$1.email).then(function (user) {
+                if (user !== undefined) {
+                  if (user.isActivated) {
+                    return Bcrypt.compare(login$1.password, user.passwordHash).then(function (compareResult) {
+                                return Promise.resolve(compareResult ? ({
+                                                TAG: /* Ok */0,
+                                                _0: user
+                                              }) : ({
+                                                TAG: /* Error */1,
+                                                _0: {
+                                                  login: "LoginFailed",
+                                                  email: undefined,
+                                                  password: undefined
+                                                }
+                                              }));
+                              });
+                  } else {
+                    return Promise.resolve({
+                                TAG: /* Error */1,
+                                _0: {
+                                  login: "AccountNotActivated",
+                                  email: undefined,
+                                  password: undefined
+                                }
+                              });
+                  }
                 } else {
                   return Promise.resolve({
                               TAG: /* Error */1,
-                              _0: "AccountInactive"
+                              _0: {
+                                login: "LoginFailed",
+                                email: undefined,
+                                password: undefined
+                              }
                             });
                 }
-              } else {
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: "UserNotFound"
-                          });
-              }
-            });
+              });
+  }
 }
 
 function setIsActivated(client, userId) {

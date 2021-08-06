@@ -301,25 +301,49 @@ let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
 }
 
 let login = (client: MongoClient.t, login: Common_User.Login.login) => {
-  client
-  ->findUserByEmail(login.email)
-  ->Promise.then(user => {
-    switch user {
-    | None => Promise.resolve(Error(#UserNotFound))
-    | Some(user) =>
-      if !user.isActivated {
-        Promise.resolve(Error(#AccountInactive))
-      } else {
-        comparePasswords(login.password, user.passwordHash)->Promise.then(compareResult => {
-          let result = switch compareResult {
-          | true => Ok(user)
-          | false => Error(#PasswordInvalid)
+  let errors = Common_User.Login.validateLogin(login)
+  if Common_User.Login.hasErrors(errors) {
+    Promise.resolve(Error(errors))
+  } else {
+    client
+    ->findUserByEmail(login.email)
+    ->Promise.then(user => {
+      switch user {
+      | None => {
+          let errors: Common_User.Login.errors = {
+            login: Some(#LoginFailed),
+            email: None,
+            password: None,
           }
-          Promise.resolve(result)
-        })
+          Promise.resolve(Error(errors))
+        }
+      | Some(user) =>
+        if !user.isActivated {
+          let errors: Common_User.Login.errors = {
+            login: Some(#AccountNotActivated),
+            email: None,
+            password: None,
+          }
+          Promise.resolve(Error(errors))
+        } else {
+          comparePasswords(login.password, user.passwordHash)->Promise.then(compareResult => {
+            let result = switch compareResult {
+            | true => Ok(user)
+            | false => {
+                let errors: Common_User.Login.errors = {
+                  login: Some(#LoginFailed),
+                  email: None,
+                  password: None,
+                }
+                Error(errors)
+              }
+            }
+            Promise.resolve(result)
+          })
+        }
       }
-    }
-  })
+    })
+  }
 }
 
 let setIsActivated = (client: MongoClient.t, userId: ObjectId.t) => {

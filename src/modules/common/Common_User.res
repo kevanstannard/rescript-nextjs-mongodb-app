@@ -183,7 +183,7 @@ module Login = {
     password: string,
   }
 
-  type loginError = [#RequestFailed | #LoginFailed | #AccountInactive]
+  type loginError = [#RequestFailed | #LoginFailed | #AccountNotActivated]
   type emailError = [#EmailEmpty | #EmailInvalid]
   type passwordError = [#PasswordEmpty]
 
@@ -193,15 +193,21 @@ module Login = {
     password: option<passwordError>,
   }
 
+  type loginResult = {
+    errors: errors,
+    nextUrl: option<string>,
+  }
+
   let hasErrors = (errors: errors): bool => {
     Belt.Option.isSome(errors.login) ||
     Belt.Option.isSome(errors.email) ||
     Belt.Option.isSome(errors.password)
   }
 
-  type loginResult = {
-    errors: errors,
-    nextUrl: option<string>,
+  let emptyErrors = (): errors => {
+    login: None,
+    email: None,
+    password: None,
   }
 
   external asLoginResult: Js.Json.t => loginResult = "%identity"

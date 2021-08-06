@@ -53,10 +53,11 @@ let renderPage = () => {
           dispatch(SetErrors(loginResult.errors))
           dispatch(SetIsSubmitting(false))
         } else {
-          switch loginResult.nextUrl {
-          | Some(nextUrl) => router->Next.Router.push(nextUrl)
-          | None => router->Next.Router.push(Common_Url.home())
+          let nextUrl = switch loginResult.nextUrl {
+          | Some(nextUrl) => nextUrl
+          | None => Common_Url.home()
           }
+          router->Next.Router.push(nextUrl)
         }
       }
 

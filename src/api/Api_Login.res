@@ -5,11 +5,7 @@ let handleOK = (req, res, user: Server_User.User.t) => {
     Server_Session.setNextUrl(req, None)->Promise.then(_ => {
       let payload: Common_User.Login.loginResult = {
         nextUrl: nextUrl,
-        errors: {
-          login: None,
-          email: None,
-          password: None,
-        },
+        errors: Common_User.Login.emptyErrors(),
       }
       Server_Api.sendSuccess(res, payload)
       Promise.resolve()
@@ -17,17 +13,7 @@ let handleOK = (req, res, user: Server_User.User.t) => {
   })
 }
 
-let handleError = (res, reason) => {
-  let error = switch reason {
-  | #UserNotFound => #LoginFailed
-  | #PasswordInvalid => #LoginFailed
-  | #AccountInactive => #AccountInactive
-  }
-  let errors: Common_User.Login.errors = {
-    login: Some(error),
-    email: None,
-    password: None,
-  }
+let handleError = (res, errors) => {
   let payload: Common_User.Login.loginResult = {
     errors: errors,
     nextUrl: None,
@@ -45,7 +31,7 @@ let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
     ->Promise.then(loginResult => {
       switch loginResult {
       | Ok(user) => handleOK(req, res, user)
-      | Error(reason) => handleError(res, reason)
+      | Error(errors) => handleError(res, errors)
       }
     })
   })

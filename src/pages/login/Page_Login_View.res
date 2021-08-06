@@ -17,13 +17,11 @@ module LoginError = {
         <AlertMessage type_=#Error>
           {"There was a problem logging you in. Please try again."->React.string}
         </AlertMessage>
-
       | #LoginFailed =>
         <AlertMessage type_=#Error>
           {"Your email or password is not correct."->React.string}
         </AlertMessage>
-
-      | #AccountInactive => <Page_Login_Resend email />
+      | #AccountNotActivated => <Page_Login_Resend email />
       }
     }
   }
