@@ -7,7 +7,7 @@ let make = (~user) => {
     <Title text="Forgot Password Successful" size=#Primary />
     <p className="mb-4">
       {React.string(
-        "If the email address you provided exists, we will send you an email to reset your password.",
+        "If the email address you provided exists, we'll send you an email to reset your password.",
       )}
     </p>
     <p className="mb-4">

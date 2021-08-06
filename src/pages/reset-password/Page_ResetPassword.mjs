@@ -4,7 +4,6 @@ import * as Curry from "rescript/lib/es6/curry.js";
 import * as React from "react";
 import * as Common_Url from "../../modules/common/Common_Url.mjs";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
-import * as Caml_option from "rescript/lib/es6/caml_option.js";
 import * as Client_User from "../../modules/client/Client_User.mjs";
 import * as Common_User from "../../modules/common/Common_User.mjs";
 import * as Router from "next/router";
@@ -70,7 +69,7 @@ function $$default(param) {
   var resetPasswordKey = param.resetPasswordKey;
   var userId = param.userId;
   var resetPasswordErrors = Common_User.ResetPassword.dtoToResetPasswordErrors(param.resetPasswordErrorsDto);
-  var user = Belt_Option.map(Caml_option.null_to_opt(param.userDto), Common_User.User.fromDto);
+  var user = Common_User.User.fromNullDto(param.userDto);
   var match = React.useReducer(reducer, initialState(resetPasswordErrors));
   var dispatch = match[1];
   var state = match[0];

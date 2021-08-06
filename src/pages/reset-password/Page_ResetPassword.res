@@ -21,7 +21,8 @@ let reducer = (state, action) => {
 let default = ({userDto, userId, resetPasswordKey, resetPasswordErrorsDto, config}: props) => {
   let resetPasswordErrors =
     resetPasswordErrorsDto->Common_User.ResetPassword.dtoToResetPasswordErrors
-  let user = Js.Null.toOption(userDto)->Belt.Option.map(Common_User.User.fromDto)
+
+  let user = Common_User.User.fromNullDto(userDto)
 
   let (state, dispatch) = React.useReducer(reducer, initialState(resetPasswordErrors))
   let router = Next.Router.useRouter()
