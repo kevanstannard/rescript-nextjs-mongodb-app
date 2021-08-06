@@ -5,39 +5,39 @@ import * as Server_User from "../modules/server/Server_User.mjs";
 import * as NextConnect from "next-connect";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
-function handlePost(req, res) {
-  var body = Server_Middleware.NextRequest.getBody(req);
-  if (body !== undefined) {
-    var match = Server_Middleware.getRequestData(req);
-    return Server_User.forgotPassword(match.client, body).then(function (forgotPasswordResult) {
-                var result;
-                if (forgotPasswordResult.TAG === /* Ok */0) {
-                  result = {
-                    result: "Ok",
-                    errors: undefined
-                  };
-                } else {
-                  var errors_forgotPassword = forgotPasswordResult._0;
-                  var errors = {
-                    forgotPassword: errors_forgotPassword,
-                    email: undefined
-                  };
-                  result = {
-                    result: "Error",
-                    errors: errors
-                  };
-                }
-                Server_Api.sendJson(res, "Success", result);
-                return Promise.resolve(undefined);
-              });
+function makePayload(forgotPasswordResult) {
+  if (forgotPasswordResult.TAG === /* Ok */0) {
+    return {
+            result: "Ok",
+            errors: undefined
+          };
   }
-  Server_Api.sendError(res, "ServerError", "Body is missing from request");
-  return Promise.resolve(undefined);
+  var errors_forgotPassword = forgotPasswordResult._0;
+  var errors = {
+    forgotPassword: errors_forgotPassword,
+    email: undefined
+  };
+  return {
+          result: "Error",
+          errors: errors
+        };
+}
+
+function handlePost(req, res) {
+  return Server_Api.withBody(req, res, (function (body) {
+                var match = Server_Middleware.getRequestData(req);
+                return Server_User.forgotPassword(match.client, body).then(function (forgotPasswordResult) {
+                            var payload = makePayload(forgotPasswordResult);
+                            Server_Api.sendSuccess(res, payload);
+                            return Promise.resolve(undefined);
+                          });
+              }));
 }
 
 var $$default = NextConnect().use(Server_Middleware.all(undefined)).post(handlePost);
 
 export {
+  makePayload ,
   handlePost ,
   $$default ,
   $$default as default,

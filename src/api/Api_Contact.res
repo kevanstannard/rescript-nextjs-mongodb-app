@@ -1,5 +1,5 @@
-let makePayload = contactResult => {
-  let payload: Common_Contact.contactResult = switch contactResult {
+let makePayload = (contactResult): Common_Contact.contactResult => {
+  switch contactResult {
   | Ok(validation) => {
       result: #Ok,
       validation: validation,
@@ -9,7 +9,6 @@ let makePayload = contactResult => {
       validation: validation,
     }
   }
-  payload
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {

@@ -1,5 +1,5 @@
-let makePayload = changePasswordResult => {
-  let payload: Common_User.ChangePassword.changePasswordResult = switch changePasswordResult {
+let makePayload = (changePasswordResult): Common_User.ChangePassword.changePasswordResult => {
+  switch changePasswordResult {
   | Ok(validation) => {
       result: #Ok,
       validation: validation,
@@ -9,7 +9,6 @@ let makePayload = changePasswordResult => {
       validation: validation,
     }
   }
-  payload
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {

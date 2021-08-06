@@ -1,5 +1,5 @@
-let makePayload = changeEmailResult => {
-  let payload: Common_User.ChangeEmail.changeEmailResult = switch changeEmailResult {
+let makePayload = (changeEmailResult): Common_User.ChangeEmail.changeEmailResult => {
+  switch changeEmailResult {
   | Ok(errors) => {
       result: #Ok,
       errors: errors,
@@ -9,7 +9,6 @@ let makePayload = changeEmailResult => {
       errors: errors,
     }
   }
-  payload
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
