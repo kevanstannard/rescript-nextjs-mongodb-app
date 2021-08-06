@@ -35,21 +35,21 @@ function sendSuccess(res, payload) {
   return sendJson(res, "Success", payload);
 }
 
-function withBody(req, res, callback) {
+function withBody(req, res, next) {
   var body = Server_Middleware.NextRequest.getBody(req);
   if (body !== undefined) {
-    return Curry._1(callback, Caml_option.valFromOption(body));
+    return Curry._1(next, Caml_option.valFromOption(body));
   } else {
     sendError(res, "BadRequest", "Body is missing from request");
     return Promise.resolve(undefined);
   }
 }
 
-function withCurrentUser(req, res, callback) {
+function withCurrentUser(req, res, next) {
   var match = Server_Middleware.getRequestData(req);
   var currentUser = match.currentUser;
   if (currentUser !== undefined) {
-    return Curry._1(callback, currentUser);
+    return Curry._1(next, currentUser);
   } else {
     sendError(res, "Forbidden", "Not logged in");
     return Promise.resolve(undefined);

@@ -1,2 +1,2 @@
 // Important: The props must only contain valid JSON types
-type props = {userDto: Js.Null.t<Common_User.User.dto>}
+type props = {userDto: Common_User.User.dto}

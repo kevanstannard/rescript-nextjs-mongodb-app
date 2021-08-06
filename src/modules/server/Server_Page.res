@@ -34,3 +34,16 @@ let redirectLogin = (): Next.GetServerSideProps.result<_> => {
   }),
   notFound: None,
 }
+
+let withAuthentication = (req, next) => {
+  let {currentUser} = Server_Middleware.getRequestData(req)
+  switch currentUser {
+  | Some(user) => next(user)
+  | None => {
+      let url = Next.Req.url(req)
+      Server_Session.setNextUrl(req, Some(url))->Promise.thenResolve(_ => {
+        redirectLogin()
+      })
+    }
+  }
+}

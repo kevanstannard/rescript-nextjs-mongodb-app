@@ -5,7 +5,7 @@ import * as Server_User from "../../modules/server/Server_User.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
 function makeResult(currentUser) {
-  var currentUserDto = Server_User.toNullCommonUserDto(currentUser);
+  var currentUserDto = Server_User.toCommonUserDto(currentUser);
   return Server_Page.props({
               userDto: currentUserDto
             });
@@ -14,8 +14,9 @@ function makeResult(currentUser) {
 function getServerSideProps(context) {
   var req = context.req;
   return Server_Middleware.runAll(req, context.res).then(function (param) {
-              var match = Server_Middleware.getRequestData(req);
-              return makeResult(match.currentUser);
+              return Server_Page.withAuthentication(req, (function (currentUser) {
+                            return Promise.resolve(makeResult(currentUser));
+                          }));
             });
 }
 
@@ -24,4 +25,4 @@ export {
   getServerSideProps ,
   
 }
-/* Server_User Not a pure module */
+/* Server_Page Not a pure module */

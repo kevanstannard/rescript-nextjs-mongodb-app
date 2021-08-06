@@ -35,4 +35,4 @@ export {
   getServerSideProps ,
   
 }
-/* Server_User Not a pure module */
+/* Server_Page Not a pure module */

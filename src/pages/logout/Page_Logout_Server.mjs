@@ -16,4 +16,4 @@ export {
   getServerSideProps ,
   
 }
-/* Server_Middleware Not a pure module */
+/* Server_Page Not a pure module */
