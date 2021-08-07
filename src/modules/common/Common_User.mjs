@@ -119,7 +119,15 @@ var Signup = {
   reCaptchaErrorToString: reCaptchaErrorToString
 };
 
-var isError = Belt_Option.isSome;
+function emptyErrors$1(param) {
+  return {
+          resendActivation: undefined
+        };
+}
+
+function hasErrors$1(errors) {
+  return Belt_Option.isSome(errors.resendActivation);
+}
 
 function validateEmail$1(email) {
   var emailTrimmed = $$String.trim(email);
@@ -133,7 +141,9 @@ function validateEmail$1(email) {
 }
 
 function validateResendActivation(param) {
-  return validateEmail$1(param.email);
+  return {
+          resendActivation: validateEmail$1(param.email)
+        };
 }
 
 function resendError(message) {
@@ -152,15 +162,26 @@ function resendActivationErrorToString(error) {
   }
 }
 
+function errorsToString(errors) {
+  var error = errors.resendActivation;
+  if (error !== undefined) {
+    return resendActivationErrorToString(error);
+  } else {
+    return "An unknown error occurred. Please contact us for support.";
+  }
+}
+
 var ResendActivation = {
-  isError: isError,
+  emptyErrors: emptyErrors$1,
+  hasErrors: hasErrors$1,
   validateEmail: validateEmail$1,
   validateResendActivation: validateResendActivation,
   resendError: resendError,
-  resendActivationErrorToString: resendActivationErrorToString
+  resendActivationErrorToString: resendActivationErrorToString,
+  errorsToString: errorsToString
 };
 
-function hasErrors$1(errors) {
+function hasErrors$2(errors) {
   if (Belt_Option.isSome(errors.login) || Belt_Option.isSome(errors.email)) {
     return true;
   } else {
@@ -168,7 +189,7 @@ function hasErrors$1(errors) {
   }
 }
 
-function emptyErrors$1(param) {
+function emptyErrors$2(param) {
   return {
           login: undefined,
           email: undefined,
@@ -215,8 +236,8 @@ function passwordErrorToString$1(error) {
 }
 
 var Login = {
-  hasErrors: hasErrors$1,
-  emptyErrors: emptyErrors$1,
+  hasErrors: hasErrors$2,
+  emptyErrors: emptyErrors$2,
   validateEmail: validateEmail$2,
   validatePassword: validatePassword$1,
   validateLogin: validateLogin,
@@ -226,7 +247,7 @@ var Login = {
 
 var Logout = {};
 
-function hasErrors$2(errors) {
+function hasErrors$3(errors) {
   if (Belt_Option.isSome(errors.changeEmail)) {
     return true;
   } else {
@@ -273,7 +294,7 @@ function emailErrorToString$2(error) {
 }
 
 var ChangeEmail = {
-  hasErrors: hasErrors$2,
+  hasErrors: hasErrors$3,
   validateEmail: validateEmail$3,
   validateChangeEmail: validateChangeEmail,
   generalError: generalError,
@@ -281,7 +302,7 @@ var ChangeEmail = {
   emailErrorToString: emailErrorToString$2
 };
 
-function emptyErrors$2(param) {
+function emptyErrors$3(param) {
   return {
           changePassword: undefined,
           currentPassword: undefined,
@@ -290,7 +311,7 @@ function emptyErrors$2(param) {
         };
 }
 
-function hasErrors$3(errors) {
+function hasErrors$4(errors) {
   if (Belt_Option.isSome(errors.changePassword) || Belt_Option.isSome(errors.currentPassword) || Belt_Option.isSome(errors.newPassword)) {
     return true;
   } else {
@@ -361,8 +382,8 @@ function newPasswordConfirmErrorToString(error) {
 }
 
 var ChangePassword = {
-  emptyErrors: emptyErrors$2,
-  hasErrors: hasErrors$3,
+  emptyErrors: emptyErrors$3,
+  hasErrors: hasErrors$4,
   validateCurrentPassword: validateCurrentPassword,
   validateNewPassword: validateNewPassword,
   validateNewPasswordConfirm: validateNewPasswordConfirm,
@@ -373,7 +394,7 @@ var ChangePassword = {
   newPasswordConfirmErrorToString: newPasswordConfirmErrorToString
 };
 
-function emptyErrors$3(param) {
+function emptyErrors$4(param) {
   return {
           forgotPassword: undefined,
           email: undefined,
@@ -381,7 +402,7 @@ function emptyErrors$3(param) {
         };
 }
 
-function hasErrors$4(errors) {
+function hasErrors$5(errors) {
   if (Belt_Option.isSome(errors.forgotPassword) || Belt_Option.isSome(errors.email)) {
     return true;
   } else {
@@ -439,8 +460,8 @@ function reCaptchaErrorToString$1(error) {
 }
 
 var ForgotPassword = {
-  emptyErrors: emptyErrors$3,
-  hasErrors: hasErrors$4,
+  emptyErrors: emptyErrors$4,
+  hasErrors: hasErrors$5,
   validateEmail: validateEmail$4,
   validateReCaptcha: validateReCaptcha$1,
   validateForgotPassword: validateForgotPassword,
@@ -475,7 +496,7 @@ function refineResetPasswordKeyError(error) {
   }
 }
 
-function hasErrors$5(errors) {
+function hasErrors$6(errors) {
   if (Belt_Option.isSome(errors.resetPassword) || Belt_Option.isSome(errors.password) || Belt_Option.isSome(errors.passwordConfirm)) {
     return true;
   } else {
@@ -542,7 +563,7 @@ var ResetPassword = {
   resetPasswordErrorsToDto: resetPasswordErrorsToDto,
   dtoToResetPasswordErrors: dtoToResetPasswordErrors,
   refineResetPasswordKeyError: refineResetPasswordKeyError,
-  hasErrors: hasErrors$5,
+  hasErrors: hasErrors$6,
   validatePassword: validatePassword$2,
   validatePasswordConfirm: validatePasswordConfirm,
   validateReCaptcha: validateReCaptcha$2,

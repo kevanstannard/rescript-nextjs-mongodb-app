@@ -248,29 +248,46 @@ let resendActivationEmail = (
   client: MongoClient.t,
   resendActivation: Common_User.ResendActivation.resendActivation,
 ) => {
-  client
-  ->findUserByEmail(resendActivation.email)
-  ->Promise.then(user => {
-    switch user {
-    | None => Promise.resolve(Error(#UserNotFound))
-    | Some(user) => {
-        let {_id, isActivated, email, activationKey} = user
-        if isActivated {
-          Promise.resolve(Error(#AlreadyActivated))
-        } else {
-          switch activationKey->Js.Null.toOption {
-          | None => Js.Exn.raiseError("Activation key missing")
-          | Some(activationKey) => {
-              let userId = ObjectId.toString(_id)
-              Server_Email.sendActivationEmail(~userId, ~email, ~activationKey)->Promise.then(_ => {
-                Promise.resolve(Ok())
-              })
+  let errors = Common_User.ResendActivation.validateResendActivation(resendActivation)
+  if Common_User.ResendActivation.hasErrors(errors) {
+    Error(errors)->Promise.resolve
+  } else {
+    client
+    ->findUserByEmail(resendActivation.email)
+    ->Promise.then(user => {
+      switch user {
+      | None => {
+          let errors: Common_User.ResendActivation.errors = {
+            resendActivation: Some(#UserNotFound),
+          }
+          Error(errors)->Promise.resolve
+        }
+      | Some(user) => {
+          let {_id, isActivated, email, activationKey} = user
+          if isActivated {
+            let errors: Common_User.ResendActivation.errors = {
+              resendActivation: Some(#AlreadyActivated),
+            }
+            Error(errors)->Promise.resolve
+          } else {
+            switch activationKey->Js.Null.toOption {
+            | None => Js.Exn.raiseError("Activation key missing")
+            | Some(activationKey) => {
+                let userId = ObjectId.toString(_id)
+                Server_Email.sendActivationEmail(
+                  ~userId,
+                  ~email,
+                  ~activationKey,
+                )->Promise.then(_ => {
+                  Promise.resolve(Ok())
+                })
+              }
             }
           }
         }
       }
-    }
-  })
+    })
+  }
 }
 
 let signup = (client: MongoClient.t, signup: Common_User.Signup.signup) => {
@@ -605,7 +622,8 @@ let forgotPassword = (
           }
           Error(errors)->Promise.resolve
         }
-      | None => client
+      | None =>
+        client
         ->findUserByEmail(forgotPassword.email)
         ->Promise.then(user => {
           switch user {

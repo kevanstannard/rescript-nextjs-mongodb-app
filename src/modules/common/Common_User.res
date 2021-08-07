@@ -141,13 +141,19 @@ module ResendActivation = {
     | #UserNotFound
   ]
 
-  type error = option<resendActivationError>
+  type errors = {resendActivation: option<resendActivationError>}
 
-  type resendActivationResult = {error: error}
+  type resendActivationResult = {errors: errors}
 
   external asResendActivationResult: Js.Json.t => resendActivationResult = "%identity"
 
-  let isError = (error: error): bool => Belt.Option.isSome(error)
+  let emptyErrors = (): errors => {
+    resendActivation: None,
+  }
+
+  let hasErrors = (errors: errors): bool => {
+    Belt.Option.isSome(errors.resendActivation)
+  }
 
   let validateEmail = (email): option<resendActivationError> => {
     let emailTrimmed = String.trim(email)
@@ -160,7 +166,9 @@ module ResendActivation = {
     }
   }
 
-  let validateResendActivation = ({email}: resendActivation): error => validateEmail(email)
+  let validateResendActivation = ({email}: resendActivation): errors => {
+    resendActivation: validateEmail(email),
+  }
 
   let resendError = message => {
     "There was a problem resending the activation email. " ++ message
@@ -173,6 +181,13 @@ module ResendActivation = {
     | #EmailInvalid => resendError("Check the email below is a valid email address.")
     | #AlreadyActivated => resendError("Your account has already been activated.")
     | #UserNotFound => resendError("That email address was not found.")
+    }
+  }
+
+  let errorsToString = (errors: errors) => {
+    switch errors.resendActivation {
+    | Some(error) => resendActivationErrorToString(error)
+    | None => "An unknown error occurred. Please contact us for support."
     }
   }
 }

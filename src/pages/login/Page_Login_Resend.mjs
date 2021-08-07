@@ -30,7 +30,7 @@ function Page_Login_Resend(Props) {
       
     }
   } else {
-    message = Common_User.ResendActivation.resendActivationErrorToString(state._0);
+    message = Common_User.ResendActivation.errorsToString(state._0);
   }
   return React.createElement(Component_AlertMessage.make, {
               type_: "Info",
@@ -46,11 +46,11 @@ function Page_Login_Resend(Props) {
                                   return /* ResendIsResending */1;
                                 }));
                           var onSuccess = function (json) {
-                            var error = json.error;
-                            if (error !== undefined) {
+                            var errors = json.errors;
+                            if (Common_User.ResendActivation.hasErrors(errors)) {
                               return Curry._1(setState, (function (param) {
                                             return /* ResendError */{
-                                                    _0: error
+                                                    _0: errors
                                                   };
                                           }));
                             } else {
@@ -62,18 +62,20 @@ function Page_Login_Resend(Props) {
                           var onError = function (param) {
                             return Curry._1(setState, (function (param) {
                                           return /* ResendError */{
-                                                  _0: "RequestFailed"
+                                                  _0: {
+                                                    resendActivation: "RequestFailed"
+                                                  }
                                                 };
                                         }));
                           };
                           var resendActivation = {
                             email: email
                           };
-                          var error = Common_User.ResendActivation.validateResendActivation(resendActivation);
-                          if (error !== undefined) {
+                          var errors = Common_User.ResendActivation.validateResendActivation(resendActivation);
+                          if (Common_User.ResendActivation.hasErrors(errors)) {
                             return Curry._1(setState, (function (param) {
                                           return /* ResendError */{
-                                                  _0: error
+                                                  _0: errors
                                                 };
                                         }));
                           } else {
