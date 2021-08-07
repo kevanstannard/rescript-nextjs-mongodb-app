@@ -426,7 +426,10 @@ module ChangePassword = {
 }
 
 module ForgotPassword = {
-  type forgotPassword = {email: string}
+  type forgotPassword = {
+    email: string,
+    reCaptcha: option<string>,
+  }
 
   type forgotPasswordError = [
     | #RequestFailed
@@ -436,9 +439,12 @@ module ForgotPassword = {
 
   type emailError = [#EmailEmpty | #EmailInvalid]
 
+  type reCaptchaError = [#ReCaptchaEmpty | #ReCaptchaInvalid]
+
   type errors = {
     forgotPassword: option<forgotPasswordError>,
     email: option<emailError>,
+    reCaptcha: option<reCaptchaError>,
   }
 
   type forgotPasswordResult = {errors: errors}
@@ -448,10 +454,13 @@ module ForgotPassword = {
   let emptyErrors = (): errors => {
     forgotPassword: None,
     email: None,
+    reCaptcha: None,
   }
 
   let hasErrors = (errors: errors): bool => {
-    Belt.Option.isSome(errors.forgotPassword) || Belt.Option.isSome(errors.email)
+    Belt.Option.isSome(errors.forgotPassword) ||
+    Belt.Option.isSome(errors.email) ||
+    Belt.Option.isSome(errors.reCaptcha)
   }
 
   let validateEmail = (email): option<emailError> => {
@@ -465,9 +474,17 @@ module ForgotPassword = {
     }
   }
 
+  let validateReCaptcha = (reCaptcha): option<reCaptchaError> => {
+    switch reCaptcha {
+    | Some(_) => None
+    | None => Some(#ReCaptchaEmpty)
+    }
+  }
+
   let validateForgotPassword = (forgotPassword: forgotPassword): errors => {
     forgotPassword: None,
     email: validateEmail(forgotPassword.email),
+    reCaptcha: validateReCaptcha(forgotPassword.reCaptcha),
   }
 
   let forgotPasswordErrorToString = (error: forgotPasswordError): string => {
@@ -482,6 +499,13 @@ module ForgotPassword = {
     switch error {
     | #EmailEmpty => "Enter an email address"
     | #EmailInvalid => "Enter a valid email address"
+    }
+  }
+
+  let reCaptchaErrorToString = (error: reCaptchaError): string => {
+    switch error {
+    | #ReCaptchaEmpty => "Are you sure you're a robot?"
+    | #ReCaptchaInvalid => "Are you sure you're a robot?"
     }
   }
 }

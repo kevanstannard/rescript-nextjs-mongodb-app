@@ -16,13 +16,17 @@ module ErrorMessage = {
 
 @react.component
 let make = (
+  ~reCaptchaSiteKey,
   ~user,
   ~forgotPasswordError,
   ~email,
-  ~emailError,
   ~isSubmitting,
   ~onEmailChange,
+  ~onReCaptchaChange,
   ~onForgotPasswordClick,
+  ~emailError,
+  ~reCaptchaError,
+  ~attemptCount,
 ) => {
   <Layout_Main user={user}>
     <FormContainer>
@@ -33,6 +37,12 @@ let make = (
         value={email}
         onChange={onEmailChange}
         error={emailError}
+      />
+      <ReCaptchaField
+        key={"recaptcha-" ++ Belt.Int.toString(attemptCount)}
+        reCaptchaSiteKey={reCaptchaSiteKey}
+        onChange={onReCaptchaChange}
+        error={reCaptchaError}
       />
       <div className="mb-6">
         <Button

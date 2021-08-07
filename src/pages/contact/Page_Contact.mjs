@@ -18,8 +18,7 @@ function initialState(param) {
           reCaptcha: undefined,
           errors: Common_Contact.emptyErrors(undefined),
           isSubmitting: false,
-          contactError: undefined,
-          contactAttemptCount: 0
+          attemptCount: 0
         };
 }
 
@@ -32,8 +31,7 @@ function reducer(state, action) {
             reCaptcha: state.reCaptcha,
             errors: state.errors,
             isSubmitting: state.isSubmitting,
-            contactError: state.contactError,
-            contactAttemptCount: state.contactAttemptCount + 1 | 0
+            attemptCount: state.attemptCount + 1 | 0
           };
   }
   switch (action.TAG | 0) {
@@ -45,8 +43,7 @@ function reducer(state, action) {
                 reCaptcha: state.reCaptcha,
                 errors: state.errors,
                 isSubmitting: state.isSubmitting,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     case /* SetEmail */1 :
         return {
@@ -56,8 +53,7 @@ function reducer(state, action) {
                 reCaptcha: state.reCaptcha,
                 errors: state.errors,
                 isSubmitting: state.isSubmitting,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     case /* SetMessage */2 :
         return {
@@ -67,8 +63,7 @@ function reducer(state, action) {
                 reCaptcha: state.reCaptcha,
                 errors: state.errors,
                 isSubmitting: state.isSubmitting,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     case /* SetReCaptcha */3 :
         return {
@@ -78,8 +73,7 @@ function reducer(state, action) {
                 reCaptcha: action._0,
                 errors: state.errors,
                 isSubmitting: state.isSubmitting,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     case /* SetIsSubmitting */4 :
         return {
@@ -89,8 +83,7 @@ function reducer(state, action) {
                 reCaptcha: state.reCaptcha,
                 errors: state.errors,
                 isSubmitting: action._0,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     case /* SetErrors */5 :
         return {
@@ -100,8 +93,7 @@ function reducer(state, action) {
                 reCaptcha: state.reCaptcha,
                 errors: action._0,
                 isSubmitting: state.isSubmitting,
-                contactError: state.contactError,
-                contactAttemptCount: state.contactAttemptCount
+                attemptCount: state.attemptCount
               };
     
   }
@@ -169,7 +161,7 @@ function renderPage(user, clientConfig) {
               TAG: /* SetIsSubmitting */4,
               _0: false
             });
-        return Curry._1(dispatch, /* IncrementContactAttemptCount */0);
+        return Curry._1(dispatch, /* IncrementAttemptCount */0);
       } else {
         router.push(Common_Url.contactSuccess(undefined));
         return ;
@@ -220,7 +212,7 @@ function renderPage(user, clientConfig) {
               onSendClick: onSendClick,
               isSubmitting: state.isSubmitting,
               contactError: contactError,
-              contactAttemptCount: state.contactAttemptCount
+              attemptCount: state.attemptCount
             });
 }
 

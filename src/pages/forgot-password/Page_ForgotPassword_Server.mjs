@@ -2,12 +2,15 @@
 
 import * as Server_Page from "../../modules/server/Server_Page.mjs";
 import * as Server_User from "../../modules/server/Server_User.mjs";
+import * as Server_Config from "../../modules/server/Server_Config.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
 function makeResult(currentUser) {
   var userDto = Server_User.toNullCommonUserDto(currentUser);
+  var clientConfig = Server_Config.getClientConfig(undefined);
   return Server_Page.props({
-              userDto: userDto
+              userDto: userDto,
+              clientConfig: clientConfig
             });
 }
 

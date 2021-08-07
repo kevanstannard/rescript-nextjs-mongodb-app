@@ -24,13 +24,17 @@ var ErrorMessage = {
 };
 
 function Page_ForgotPassword_View(Props) {
+  var reCaptchaSiteKey = Props.reCaptchaSiteKey;
   var user = Props.user;
   var forgotPasswordError = Props.forgotPasswordError;
   var email = Props.email;
-  var emailError = Props.emailError;
   var isSubmitting = Props.isSubmitting;
   var onEmailChange = Props.onEmailChange;
+  var onReCaptchaChange = Props.onReCaptchaChange;
   var onForgotPasswordClick = Props.onForgotPasswordClick;
+  var emailError = Props.emailError;
+  var reCaptchaError = Props.reCaptchaError;
+  var attemptCount = Props.attemptCount;
   return React.createElement(Layout_Main.make, {
               user: user,
               children: React.createElement(Component_Form.FormContainer.make, {
@@ -45,6 +49,11 @@ function Page_ForgotPassword_View(Props) {
                         value: email,
                         onChange: onEmailChange,
                         error: emailError
+                      }), React.createElement(Component_Form.ReCaptchaField.make, {
+                        reCaptchaSiteKey: reCaptchaSiteKey,
+                        onChange: onReCaptchaChange,
+                        error: reCaptchaError,
+                        key: "recaptcha-" + String(attemptCount)
                       }), React.createElement("div", {
                         className: "mb-6"
                       }, React.createElement(Component_Button.Button.make, {

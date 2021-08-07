@@ -596,42 +596,63 @@ function forgotPassword(client, forgotPassword$1) {
                 _0: errors
               });
   } else {
-    return findUserByEmail(client, forgotPassword$1.email).then(function (user) {
-                if (user !== undefined) {
-                  if (user.isActivated) {
-                    var resetPasswordKey = Curry._1(makeResetPasswordKey, undefined);
-                    return setResetPasswordKey(client, user._id, resetPasswordKey).then(function (param) {
-                                var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
-                                return Server_Email.sendForgotPasswordEmail(userId, user.email, resetPasswordKey).then(function (param) {
-                                            return Promise.resolve({
-                                                        TAG: /* Ok */0,
-                                                        _0: undefined
-                                                      });
+    return validateReCaptchaToken(forgotPassword$1.reCaptcha).then(function (reCaptchaError) {
+                if (reCaptchaError === undefined) {
+                  return findUserByEmail(client, forgotPassword$1.email).then(function (user) {
+                              if (user !== undefined) {
+                                if (user.isActivated) {
+                                  var resetPasswordKey = Curry._1(makeResetPasswordKey, undefined);
+                                  return setResetPasswordKey(client, user._id, resetPasswordKey).then(function (param) {
+                                              var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+                                              return Server_Email.sendForgotPasswordEmail(userId, user.email, resetPasswordKey).then(function (param) {
+                                                          return Promise.resolve({
+                                                                      TAG: /* Ok */0,
+                                                                      _0: undefined
+                                                                    });
+                                                        });
+                                            });
+                                }
+                                var init = Common_User.ForgotPassword.emptyErrors(undefined);
+                                var errors_forgotPassword = "AccountNotActivated";
+                                var errors_email = init.email;
+                                var errors_reCaptcha = init.reCaptcha;
+                                var errors = {
+                                  forgotPassword: errors_forgotPassword,
+                                  email: errors_email,
+                                  reCaptcha: errors_reCaptcha
+                                };
+                                return Promise.resolve({
+                                            TAG: /* Error */1,
+                                            _0: errors
                                           });
-                              });
-                  }
-                  var init = Common_User.ForgotPassword.emptyErrors(undefined);
-                  var errors_forgotPassword = "AccountNotActivated";
-                  var errors_email = init.email;
-                  var errors = {
-                    forgotPassword: errors_forgotPassword,
-                    email: errors_email
-                  };
-                  return Promise.resolve({
-                              TAG: /* Error */1,
-                              _0: errors
+                              }
+                              var init$1 = Common_User.ForgotPassword.emptyErrors(undefined);
+                              var errors_forgotPassword$1 = "EmailNotFound";
+                              var errors_email$1 = init$1.email;
+                              var errors_reCaptcha$1 = init$1.reCaptcha;
+                              var errors$1 = {
+                                forgotPassword: errors_forgotPassword$1,
+                                email: errors_email$1,
+                                reCaptcha: errors_reCaptcha$1
+                              };
+                              return Promise.resolve({
+                                          TAG: /* Error */1,
+                                          _0: errors$1
+                                        });
                             });
                 }
-                var init$1 = Common_User.ForgotPassword.emptyErrors(undefined);
-                var errors_forgotPassword$1 = "EmailNotFound";
-                var errors_email$1 = init$1.email;
-                var errors$1 = {
-                  forgotPassword: errors_forgotPassword$1,
-                  email: errors_email$1
+                var init = Common_User.ForgotPassword.emptyErrors(undefined);
+                var errors_forgotPassword = init.forgotPassword;
+                var errors_email = init.email;
+                var errors_reCaptcha = reCaptchaError;
+                var errors = {
+                  forgotPassword: errors_forgotPassword,
+                  email: errors_email,
+                  reCaptcha: errors_reCaptcha
                 };
                 return Promise.resolve({
                             TAG: /* Error */1,
-                            _0: errors$1
+                            _0: errors
                           });
               });
   }

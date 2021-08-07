@@ -376,15 +376,16 @@ var ChangePassword = {
 function emptyErrors$3(param) {
   return {
           forgotPassword: undefined,
-          email: undefined
+          email: undefined,
+          reCaptcha: undefined
         };
 }
 
 function hasErrors$4(errors) {
-  if (Belt_Option.isSome(errors.forgotPassword)) {
+  if (Belt_Option.isSome(errors.forgotPassword) || Belt_Option.isSome(errors.email)) {
     return true;
   } else {
-    return Belt_Option.isSome(errors.email);
+    return Belt_Option.isSome(errors.reCaptcha);
   }
 }
 
@@ -399,10 +400,19 @@ function validateEmail$4(email) {
   }
 }
 
+function validateReCaptcha$1(reCaptcha) {
+  if (reCaptcha !== undefined) {
+    return ;
+  } else {
+    return "ReCaptchaEmpty";
+  }
+}
+
 function validateForgotPassword(forgotPassword) {
   return {
           forgotPassword: undefined,
-          email: validateEmail$4(forgotPassword.email)
+          email: validateEmail$4(forgotPassword.email),
+          reCaptcha: validateReCaptcha$1(forgotPassword.reCaptcha)
         };
 }
 
@@ -424,13 +434,19 @@ function emailErrorToString$3(error) {
   }
 }
 
+function reCaptchaErrorToString$1(error) {
+  return "Are you sure you're a robot?";
+}
+
 var ForgotPassword = {
   emptyErrors: emptyErrors$3,
   hasErrors: hasErrors$4,
   validateEmail: validateEmail$4,
+  validateReCaptcha: validateReCaptcha$1,
   validateForgotPassword: validateForgotPassword,
   forgotPasswordErrorToString: forgotPasswordErrorToString,
-  emailErrorToString: emailErrorToString$3
+  emailErrorToString: emailErrorToString$3,
+  reCaptchaErrorToString: reCaptchaErrorToString$1
 };
 
 function resetPasswordErrorsToDto(errors) {
@@ -484,7 +500,7 @@ function validatePasswordConfirm(password, passwordConfirm) {
   }
 }
 
-function validateReCaptcha$1(reCaptcha) {
+function validateReCaptcha$2(reCaptcha) {
   if (reCaptcha !== undefined) {
     return ;
   } else {
@@ -498,7 +514,7 @@ function validateResetPassword(param) {
           resetPassword: undefined,
           password: validatePassword$2(password),
           passwordConfirm: validatePasswordConfirm(password, param.passwordConfirm),
-          reCaptcha: validateReCaptcha$1(param.reCaptcha)
+          reCaptcha: validateReCaptcha$2(param.reCaptcha)
         };
 }
 
@@ -518,7 +534,7 @@ function passwordConfirmErrorToString(error) {
   }
 }
 
-function reCaptchaErrorToString$1(error) {
+function reCaptchaErrorToString$2(error) {
   return "Are you sure you're a robot?";
 }
 
@@ -529,12 +545,12 @@ var ResetPassword = {
   hasErrors: hasErrors$5,
   validatePassword: validatePassword$2,
   validatePasswordConfirm: validatePasswordConfirm,
-  validateReCaptcha: validateReCaptcha$1,
+  validateReCaptcha: validateReCaptcha$2,
   validateResetPassword: validateResetPassword,
   resetPasswordErrorToString: resetPasswordErrorToString,
   passwordErrorToString: passwordErrorToString$2,
   passwordConfirmErrorToString: passwordConfirmErrorToString,
-  reCaptchaErrorToString: reCaptchaErrorToString$1
+  reCaptchaErrorToString: reCaptchaErrorToString$2
 };
 
 export {

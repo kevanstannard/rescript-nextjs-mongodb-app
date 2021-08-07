@@ -32,7 +32,7 @@ let make = (
   ~onSendClick,
   ~isSubmitting,
   ~contactError,
-  ~contactAttemptCount,
+  ~attemptCount,
 ) => {
   <Layout_Main user={user}>
     <FormContainer>
@@ -44,7 +44,7 @@ let make = (
         label="Your message" value={message} onChange={onMessageChange} error={messageError}
       />
       <ReCaptchaField
-        key={"recaptcha-" ++ Belt.Int.toString(contactAttemptCount)}
+        key={"recaptcha-" ++ Belt.Int.toString(attemptCount)}
         reCaptchaSiteKey={reCaptchaSiteKey}
         onChange={onReCaptchaChange}
         error={reCaptchaError}

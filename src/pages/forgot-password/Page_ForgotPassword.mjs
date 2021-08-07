@@ -12,76 +12,100 @@ import * as Page_ForgotPassword_View from "./Page_ForgotPassword_View.mjs";
 function initialState(param) {
   return {
           email: "",
+          reCaptcha: undefined,
           isSubmitting: false,
-          errors: {
-            forgotPassword: undefined,
-            email: undefined
-          }
+          errors: Common_User.ForgotPassword.emptyErrors(undefined),
+          attemptCount: 0
         };
 }
 
 function reducer(state, action) {
+  if (typeof action === "number") {
+    return {
+            email: state.email,
+            reCaptcha: state.reCaptcha,
+            isSubmitting: state.isSubmitting,
+            errors: state.errors,
+            attemptCount: state.attemptCount + 1 | 0
+          };
+  }
   switch (action.TAG | 0) {
     case /* SetEmail */0 :
         return {
                 email: action._0,
+                reCaptcha: state.reCaptcha,
                 isSubmitting: state.isSubmitting,
-                errors: state.errors
+                errors: state.errors,
+                attemptCount: state.attemptCount
               };
-    case /* SetIsSubmitting */1 :
+    case /* SetReCaptcha */1 :
         return {
                 email: state.email,
+                reCaptcha: action._0,
+                isSubmitting: state.isSubmitting,
+                errors: state.errors,
+                attemptCount: state.attemptCount
+              };
+    case /* SetIsSubmitting */2 :
+        return {
+                email: state.email,
+                reCaptcha: state.reCaptcha,
                 isSubmitting: action._0,
-                errors: state.errors
+                errors: state.errors,
+                attemptCount: state.attemptCount
               };
-    case /* SetErrors */2 :
+    case /* SetErrors */3 :
         return {
                 email: state.email,
+                reCaptcha: state.reCaptcha,
                 isSubmitting: state.isSubmitting,
-                errors: action._0
+                errors: action._0,
+                attemptCount: state.attemptCount
               };
     
   }
 }
 
-function renderPage(user) {
-  var match = React.useReducer(reducer, {
-        email: "",
-        isSubmitting: false,
-        errors: {
-          forgotPassword: undefined,
-          email: undefined
-        }
-      });
+function renderPage(user, clientConfig) {
+  var match = React.useReducer(reducer, initialState(undefined));
   var dispatch = match[1];
   var state = match[0];
   var router = Router.useRouter();
   var onForgotPasswordClick = function (param) {
+    var forgotPassword_email = state.email;
+    var forgotPassword_reCaptcha = state.reCaptcha;
     var forgotPassword = {
-      email: state.email
+      email: forgotPassword_email,
+      reCaptcha: forgotPassword_reCaptcha
     };
-    var forgotPasswordErrors = Common_User.ForgotPassword.validateForgotPassword(forgotPassword);
+    var errors = Common_User.ForgotPassword.validateForgotPassword(forgotPassword);
     Curry._1(dispatch, {
-          TAG: /* SetErrors */2,
-          _0: forgotPasswordErrors
+          TAG: /* SetErrors */3,
+          _0: errors
         });
-    if (Common_User.ForgotPassword.hasErrors(forgotPasswordErrors)) {
+    if (Common_User.ForgotPassword.hasErrors(errors)) {
       return ;
     }
     Curry._1(dispatch, {
-          TAG: /* SetIsSubmitting */1,
+          TAG: /* SetIsSubmitting */2,
           _0: true
         });
     var onError = function (param) {
+      var init = Common_User.ForgotPassword.emptyErrors(undefined);
+      var errors_forgotPassword = "RequestFailed";
+      var errors_email = init.email;
+      var errors_reCaptcha = init.reCaptcha;
+      var errors = {
+        forgotPassword: errors_forgotPassword,
+        email: errors_email,
+        reCaptcha: errors_reCaptcha
+      };
       Curry._1(dispatch, {
-            TAG: /* SetErrors */2,
-            _0: {
-              forgotPassword: "RequestFailed",
-              email: undefined
-            }
+            TAG: /* SetErrors */3,
+            _0: errors
           });
       return Curry._1(dispatch, {
-                  TAG: /* SetIsSubmitting */1,
+                  TAG: /* SetIsSubmitting */2,
                   _0: false
                 });
     };
@@ -89,13 +113,14 @@ function renderPage(user) {
       var errors = json.errors;
       if (Common_User.ForgotPassword.hasErrors(errors)) {
         Curry._1(dispatch, {
-              TAG: /* SetErrors */2,
+              TAG: /* SetErrors */3,
               _0: errors
             });
-        return Curry._1(dispatch, {
-                    TAG: /* SetIsSubmitting */1,
-                    _0: false
-                  });
+        Curry._1(dispatch, {
+              TAG: /* SetIsSubmitting */2,
+              _0: false
+            });
+        return Curry._1(dispatch, /* IncrementAttemptCount */0);
       } else {
         router.push(Common_Url.forgotPasswordSuccess(undefined));
         return ;
@@ -106,11 +131,12 @@ function renderPage(user) {
   };
   var forgotPasswordError = Belt_Option.map(state.errors.forgotPassword, Common_User.ForgotPassword.forgotPasswordErrorToString);
   var emailError = Belt_Option.map(state.errors.email, Common_User.ForgotPassword.emailErrorToString);
+  var reCaptchaError = Belt_Option.map(state.errors.reCaptcha, Common_User.ForgotPassword.reCaptchaErrorToString);
   return React.createElement(Page_ForgotPassword_View.make, {
+              reCaptchaSiteKey: clientConfig.reCaptcha.siteKey,
               user: user,
               forgotPasswordError: forgotPasswordError,
               email: state.email,
-              emailError: emailError,
               isSubmitting: state.isSubmitting,
               onEmailChange: (function (email) {
                   return Curry._1(dispatch, {
@@ -118,12 +144,22 @@ function renderPage(user) {
                               _0: email
                             });
                 }),
-              onForgotPasswordClick: onForgotPasswordClick
+              onReCaptchaChange: (function (reCaptcha) {
+                  return Curry._1(dispatch, {
+                              TAG: /* SetReCaptcha */1,
+                              _0: reCaptcha
+                            });
+                }),
+              onForgotPasswordClick: onForgotPasswordClick,
+              emailError: emailError,
+              reCaptchaError: reCaptchaError,
+              attemptCount: state.attemptCount
             });
 }
 
 function $$default(param) {
-  return renderPage(Common_User.User.fromNullDto(param.userDto));
+  var user = Common_User.User.fromNullDto(param.userDto);
+  return renderPage(user, param.clientConfig);
 }
 
 export {

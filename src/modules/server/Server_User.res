@@ -596,37 +596,48 @@ let forgotPassword = (
   if Common_User.ForgotPassword.hasErrors(errors) {
     Error(errors)->Promise.resolve
   } else {
-    client
-    ->findUserByEmail(forgotPassword.email)
-    ->Promise.then(user => {
-      switch user {
-      | None => {
-          let errors = {
+    validateReCaptchaToken(forgotPassword.reCaptcha)->Promise.then(reCaptchaError => {
+      switch reCaptchaError {
+      | Some(error) => {
+          let errors: Common_User.ForgotPassword.errors = {
             ...Common_User.ForgotPassword.emptyErrors(),
-            forgotPassword: Some(#EmailNotFound),
+            reCaptcha: Some(error),
           }
           Error(errors)->Promise.resolve
         }
-      | Some(user) =>
-        if !user.isActivated {
-          let errors = {
-            ...Common_User.ForgotPassword.emptyErrors(),
-            forgotPassword: Some(#AccountNotActivated),
+      | None => client
+        ->findUserByEmail(forgotPassword.email)
+        ->Promise.then(user => {
+          switch user {
+          | None => {
+              let errors = {
+                ...Common_User.ForgotPassword.emptyErrors(),
+                forgotPassword: Some(#EmailNotFound),
+              }
+              Error(errors)->Promise.resolve
+            }
+          | Some(user) =>
+            if !user.isActivated {
+              let errors = {
+                ...Common_User.ForgotPassword.emptyErrors(),
+                forgotPassword: Some(#AccountNotActivated),
+              }
+              Error(errors)->Promise.resolve
+            } else {
+              let resetPasswordKey = makeResetPasswordKey()
+              setResetPasswordKey(client, user._id, resetPasswordKey)->Promise.then(_ => {
+                let userId = ObjectId.toString(user._id)
+                Server_Email.sendForgotPasswordEmail(
+                  userId,
+                  user.email,
+                  resetPasswordKey,
+                )->Promise.then(_ => {
+                  Promise.resolve(Ok())
+                })
+              })
+            }
           }
-          Error(errors)->Promise.resolve
-        } else {
-          let resetPasswordKey = makeResetPasswordKey()
-          setResetPasswordKey(client, user._id, resetPasswordKey)->Promise.then(_ => {
-            let userId = ObjectId.toString(user._id)
-            Server_Email.sendForgotPasswordEmail(
-              userId,
-              user.email,
-              resetPasswordKey,
-            )->Promise.then(_ => {
-              Promise.resolve(Ok())
-            })
-          })
-        }
+        })
       }
     })
   }

@@ -40,7 +40,7 @@ function Page_Contact_View(Props) {
   var onSendClick = Props.onSendClick;
   var isSubmitting = Props.isSubmitting;
   var contactError = Props.contactError;
-  var contactAttemptCount = Props.contactAttemptCount;
+  var attemptCount = Props.attemptCount;
   return React.createElement(Layout_Main.make, {
               user: user,
               children: React.createElement(Component_Form.FormContainer.make, {
@@ -69,7 +69,7 @@ function Page_Contact_View(Props) {
                         reCaptchaSiteKey: reCaptchaSiteKey,
                         onChange: onReCaptchaChange,
                         error: reCaptchaError,
-                        key: "recaptcha-" + String(contactAttemptCount)
+                        key: "recaptcha-" + String(attemptCount)
                       }), React.createElement(Component_Button.Button.make, {
                         state: isSubmitting ? "Processing" : "Ready",
                         onClick: onSendClick,

@@ -7,8 +7,7 @@ let initialState = (): state => {
   reCaptcha: None,
   errors: Common_Contact.emptyErrors(),
   isSubmitting: false,
-  contactError: None,
-  contactAttemptCount: 0,
+  attemptCount: 0,
 }
 
 let reducer = (state, action) => {
@@ -19,7 +18,7 @@ let reducer = (state, action) => {
   | SetReCaptcha(reCaptcha) => {...state, reCaptcha: Some(reCaptcha)}
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
   | SetErrors(errors) => {...state, errors: errors}
-  | IncrementContactAttemptCount => {...state, contactAttemptCount: state.contactAttemptCount + 1}
+  | IncrementAttemptCount => {...state, attemptCount: state.attemptCount + 1}
   }
 }
 
@@ -56,7 +55,7 @@ let renderPage = (user: option<Common_User.User.t>, clientConfig: Common_ClientC
         if Common_Contact.hasErrors(errors) {
           dispatch(SetErrors(errors))
           dispatch(SetIsSubmitting(false))
-          dispatch(IncrementContactAttemptCount)
+          dispatch(IncrementAttemptCount)
         } else {
           router->Next.Router.push(Common_Url.contactSuccess())
         }
@@ -89,7 +88,7 @@ let renderPage = (user: option<Common_User.User.t>, clientConfig: Common_ClientC
     onReCaptchaChange={reCaptcha => dispatch(SetReCaptcha(reCaptcha))}
     onSendClick
     isSubmitting={state.isSubmitting}
-    contactAttemptCount={state.contactAttemptCount}
+    attemptCount={state.attemptCount}
     contactError
     nameError
     emailError
