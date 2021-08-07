@@ -4,16 +4,22 @@ import * as $$String from "rescript/lib/es6/string.js";
 import * as Validator from "validator";
 import * as Belt_Option from "rescript/lib/es6/belt_Option.js";
 
-function isValid(validation) {
-  if (Belt_Option.isNone(validation.name) && Belt_Option.isNone(validation.email) && Belt_Option.isNone(validation.message)) {
-    return Belt_Option.isNone(validation.reCaptcha);
-  } else {
-    return false;
-  }
+function emptyErrors(param) {
+  return {
+          contact: undefined,
+          name: undefined,
+          email: undefined,
+          message: undefined,
+          reCaptcha: undefined
+        };
 }
 
-function hasErrors(validation) {
-  return !isValid(validation);
+function hasErrors(errors) {
+  if (Belt_Option.isSome(errors.contact) || Belt_Option.isSome(errors.name) || Belt_Option.isSome(errors.email) || Belt_Option.isSome(errors.message)) {
+    return true;
+  } else {
+    return Belt_Option.isSome(errors.reCaptcha);
+  }
 }
 
 function validateEmail(email) {
@@ -53,11 +59,16 @@ function validateReCaptcha(reCaptcha) {
 
 function validateContact(param) {
   return {
+          contact: undefined,
           name: validateName(param.name),
           email: validateEmail(param.email),
           message: validateMessage(param.message),
           reCaptcha: validateReCaptcha(param.reCaptcha)
         };
+}
+
+function contactErrorToString(error) {
+  return "There was a problem sending your message. Please try again.";
 }
 
 function emailErrorToString(error) {
@@ -81,13 +92,14 @@ function reCaptchaErrorToString(error) {
 }
 
 export {
-  isValid ,
+  emptyErrors ,
   hasErrors ,
   validateEmail ,
   validateName ,
   validateMessage ,
   validateReCaptcha ,
   validateContact ,
+  contactErrorToString ,
   emailErrorToString ,
   nameErrorToString ,
   messageErrorToString ,

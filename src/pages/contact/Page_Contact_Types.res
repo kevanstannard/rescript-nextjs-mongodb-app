@@ -9,7 +9,7 @@ type state = {
   email: string,
   message: string,
   reCaptcha: option<string>,
-  validation: Common_Contact.validation,
+  errors: Common_Contact.errors,
   isSubmitting: bool,
   contactError: option<Common_Contact.contactError>,
   contactAttemptCount: int,
@@ -21,6 +21,5 @@ type action =
   | SetMessage(string)
   | SetReCaptcha(string)
   | SetIsSubmitting(bool)
-  | SetContactError(option<Common_Contact.contactError>)
-  | SetValidation(Common_Contact.validation)
+  | SetErrors(Common_Contact.errors)
   | IncrementContactAttemptCount

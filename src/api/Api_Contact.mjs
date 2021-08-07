@@ -2,21 +2,16 @@
 
 import * as Server_Api from "../modules/server/Server_Api.mjs";
 import * as NextConnect from "next-connect";
+import * as Common_Contact from "../modules/common/Common_Contact.mjs";
 import * as Server_Contact from "../modules/server/Server_Contact.mjs";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
 function makePayload(contactResult) {
-  if (contactResult.TAG === /* Ok */0) {
-    return {
-            result: "Ok",
-            validation: contactResult._0
-          };
-  } else {
-    return {
-            result: "Error",
-            validation: contactResult._0
-          };
-  }
+  var errors;
+  errors = contactResult.TAG === /* Ok */0 ? Common_Contact.emptyErrors(undefined) : contactResult._0;
+  return {
+          errors: errors
+        };
 }
 
 function handlePost(req, res) {

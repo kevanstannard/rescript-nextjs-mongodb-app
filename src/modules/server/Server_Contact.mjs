@@ -19,30 +19,36 @@ function validateReCaptchaToken(token) {
 }
 
 function contact(contact$1) {
-  var validation = Common_Contact.validateContact(contact$1);
-  if (Common_Contact.hasErrors(validation)) {
+  var errors = Common_Contact.validateContact(contact$1);
+  if (Common_Contact.hasErrors(errors)) {
     return Promise.resolve({
                 TAG: /* Error */1,
-                _0: validation
+                _0: errors
               });
   } else {
     return validateReCaptchaToken(contact$1.reCaptcha).then(function (reCaptchaError) {
-                var validation = {
-                  name: undefined,
-                  email: undefined,
-                  message: undefined,
+                var init = Common_Contact.emptyErrors(undefined);
+                var errors_contact = init.contact;
+                var errors_name = init.name;
+                var errors_email = init.email;
+                var errors_message = init.message;
+                var errors = {
+                  contact: errors_contact,
+                  name: errors_name,
+                  email: errors_email,
+                  message: errors_message,
                   reCaptcha: reCaptchaError
                 };
-                if (Common_Contact.hasErrors(validation)) {
+                if (Common_Contact.hasErrors(errors)) {
                   return Promise.resolve({
                               TAG: /* Error */1,
-                              _0: validation
+                              _0: errors
                             });
                 } else {
                   return Server_Email.sendContactEmail(contact$1).then(function (param) {
                               return Promise.resolve({
                                           TAG: /* Ok */0,
-                                          _0: validation
+                                          _0: undefined
                                         });
                             });
                 }

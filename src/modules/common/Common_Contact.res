@@ -5,34 +5,39 @@ type contact = {
   reCaptcha: option<string>,
 }
 
-type contactError = [#RequestFailed | #UnknownError]
+type contactError = [#RequestFailed]
 type nameError = [#NameEmpty]
 type emailError = [#EmailEmpty | #EmailInvalid]
 type messageError = [#MessageEmpty]
 type reCaptchaError = [#ReCaptchaEmpty | #ReCaptchaInvalid]
 
-type validation = {
+type errors = {
+  contact: option<contactError>,
   name: option<nameError>,
   email: option<emailError>,
   message: option<messageError>,
   reCaptcha: option<reCaptchaError>,
 }
 
-type contactResult = {
-  result: [#Ok | #Error],
-  validation: validation,
-}
+type contactResult = {errors: errors}
 
 external asContactResult: Js.Json.t => contactResult = "%identity"
 
-let isValid = (validation: validation) => {
-  Belt.Option.isNone(validation.name) &&
-  Belt.Option.isNone(validation.email) &&
-  Belt.Option.isNone(validation.message) &&
-  Belt.Option.isNone(validation.reCaptcha)
+let emptyErrors = () => {
+  contact: None,
+  name: None,
+  email: None,
+  message: None,
+  reCaptcha: None,
 }
 
-let hasErrors = validation => !isValid(validation)
+let hasErrors = (errors: errors) => {
+  Belt.Option.isSome(errors.contact) ||
+  Belt.Option.isSome(errors.name) ||
+  Belt.Option.isSome(errors.email) ||
+  Belt.Option.isSome(errors.message) ||
+  Belt.Option.isSome(errors.reCaptcha)
+}
 
 let validateEmail = (email): option<emailError> => {
   let emailTrimmed = String.trim(email)
@@ -70,11 +75,18 @@ let validateReCaptcha = (reCaptcha): option<reCaptchaError> => {
   }
 }
 
-let validateContact = ({email, name, message, reCaptcha}: contact): validation => {
+let validateContact = ({email, name, message, reCaptcha}: contact): errors => {
+  contact: None,
   email: validateEmail(email),
   name: validateName(name),
   message: validateMessage(message),
   reCaptcha: validateReCaptcha(reCaptcha),
+}
+
+let contactErrorToString = (error: contactError): string => {
+  switch error {
+  | #RequestFailed => "There was a problem sending your message. Please try again."
+  }
 }
 
 let emailErrorToString = (error: emailError): string => {

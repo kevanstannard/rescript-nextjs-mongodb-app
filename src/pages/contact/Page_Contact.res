@@ -5,12 +5,7 @@ let initialState = (): state => {
   email: "",
   message: "",
   reCaptcha: None,
-  validation: {
-    name: None,
-    email: None,
-    message: None,
-    reCaptcha: None,
-  },
+  errors: Common_Contact.emptyErrors(),
   isSubmitting: false,
   contactError: None,
   contactAttemptCount: 0,
@@ -23,8 +18,7 @@ let reducer = (state, action) => {
   | SetMessage(message) => {...state, message: message}
   | SetReCaptcha(reCaptcha) => {...state, reCaptcha: Some(reCaptcha)}
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
-  | SetContactError(contactError) => {...state, contactError: contactError}
-  | SetValidation(validation) => {...state, validation: validation}
+  | SetErrors(errors) => {...state, errors: errors}
   | IncrementContactAttemptCount => {...state, contactAttemptCount: state.contactAttemptCount + 1}
   }
 }
@@ -41,55 +35,47 @@ let renderPage = (user: option<Common_User.User.t>, clientConfig: Common_ClientC
       reCaptcha: state.reCaptcha,
     }
 
-    let validation = Common_Contact.validateContact(contact)
+    let errors = Common_Contact.validateContact(contact)
 
-    dispatch(SetContactError(None))
-    dispatch(SetValidation(validation))
+    dispatch(SetErrors(errors))
 
-    if !Common_Contact.hasErrors(validation) {
+    if !Common_Contact.hasErrors(errors) {
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        dispatch(SetContactError(Some(#RequestFailed)))
+        let errors: Common_Contact.errors = {
+          ...Common_Contact.emptyErrors(),
+          contact: Some(#RequestFailed),
+        }
+        dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let contactResult = json->Common_Contact.asContactResult
-        switch contactResult.result {
-        | #Ok => router->Next.Router.push(Common_Url.contactSuccess())
-        | #Error => {
-            dispatch(SetValidation(contactResult.validation))
-            dispatch(SetContactError(None))
-            dispatch(SetIsSubmitting(false))
-            dispatch(IncrementContactAttemptCount)
-          }
+        let {errors} = json->Common_Contact.asContactResult
+        if Common_Contact.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+          dispatch(IncrementContactAttemptCount)
+        } else {
+          router->Next.Router.push(Common_Url.contactSuccess())
         }
       }
 
-      let _xhr: XmlHttpRequest.t = Client_User.contact(contact, onSuccess, onError)
+      Client_User.contact(contact, onSuccess, onError)->ignore
     }
   }
 
-  let contactError = switch state.contactError {
-  | None => None
-  | Some(contactError) => {
-      let text = switch contactError {
-      | #RequestFailed => "An error occurred when trying to send your message. Please try again."
-      | #UnknownError => "An error occurred when trying to send your message. Please try again."
-      }
-      Some(text)
-    }
-  }
+  let contactError = state.errors.contact->Belt.Option.map(Common_Contact.contactErrorToString)
 
-  let nameError = state.validation.name->Belt.Option.map(Common_Contact.nameErrorToString)
+  let nameError = state.errors.name->Belt.Option.map(Common_Contact.nameErrorToString)
 
-  let emailError = state.validation.email->Belt.Option.map(Common_Contact.emailErrorToString)
+  let emailError = state.errors.email->Belt.Option.map(Common_Contact.emailErrorToString)
 
-  let messageError = state.validation.message->Belt.Option.map(Common_Contact.messageErrorToString)
+  let messageError = state.errors.message->Belt.Option.map(Common_Contact.messageErrorToString)
 
   let reCaptchaError =
-    state.validation.reCaptcha->Belt.Option.map(Common_Contact.reCaptchaErrorToString)
+    state.errors.reCaptcha->Belt.Option.map(Common_Contact.reCaptchaErrorToString)
 
   <Page_Contact_View
     reCaptchaSiteKey={clientConfig.reCaptcha.siteKey}
@@ -101,14 +87,14 @@ let renderPage = (user: option<Common_User.User.t>, clientConfig: Common_ClientC
     onEmailChange={email => dispatch(SetEmail(email))}
     onMessageChange={message => dispatch(SetMessage(message))}
     onReCaptchaChange={reCaptcha => dispatch(SetReCaptcha(reCaptcha))}
+    onSendClick
+    isSubmitting={state.isSubmitting}
+    contactAttemptCount={state.contactAttemptCount}
+    contactError
     nameError
     emailError
     messageError
     reCaptchaError
-    onSendClick
-    isSubmitting={state.isSubmitting}
-    contactError={contactError}
-    contactAttemptCount={state.contactAttemptCount}
   />
 }
 

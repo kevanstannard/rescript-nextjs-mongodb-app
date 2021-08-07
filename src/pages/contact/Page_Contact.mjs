@@ -16,12 +16,7 @@ function initialState(param) {
           email: "",
           message: "",
           reCaptcha: undefined,
-          validation: {
-            name: undefined,
-            email: undefined,
-            message: undefined,
-            reCaptcha: undefined
-          },
+          errors: Common_Contact.emptyErrors(undefined),
           isSubmitting: false,
           contactError: undefined,
           contactAttemptCount: 0
@@ -35,7 +30,7 @@ function reducer(state, action) {
             email: state.email,
             message: state.message,
             reCaptcha: state.reCaptcha,
-            validation: state.validation,
+            errors: state.errors,
             isSubmitting: state.isSubmitting,
             contactError: state.contactError,
             contactAttemptCount: state.contactAttemptCount + 1 | 0
@@ -48,7 +43,7 @@ function reducer(state, action) {
                 email: state.email,
                 message: state.message,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
+                errors: state.errors,
                 isSubmitting: state.isSubmitting,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
@@ -59,7 +54,7 @@ function reducer(state, action) {
                 email: action._0,
                 message: state.message,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
+                errors: state.errors,
                 isSubmitting: state.isSubmitting,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
@@ -70,7 +65,7 @@ function reducer(state, action) {
                 email: state.email,
                 message: action._0,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
+                errors: state.errors,
                 isSubmitting: state.isSubmitting,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
@@ -81,7 +76,7 @@ function reducer(state, action) {
                 email: state.email,
                 message: state.message,
                 reCaptcha: action._0,
-                validation: state.validation,
+                errors: state.errors,
                 isSubmitting: state.isSubmitting,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
@@ -92,29 +87,18 @@ function reducer(state, action) {
                 email: state.email,
                 message: state.message,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
+                errors: state.errors,
                 isSubmitting: action._0,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
               };
-    case /* SetContactError */5 :
+    case /* SetErrors */5 :
         return {
                 name: state.name,
                 email: state.email,
                 message: state.message,
                 reCaptcha: state.reCaptcha,
-                validation: state.validation,
-                isSubmitting: state.isSubmitting,
-                contactError: action._0,
-                contactAttemptCount: state.contactAttemptCount
-              };
-    case /* SetValidation */6 :
-        return {
-                name: state.name,
-                email: state.email,
-                message: state.message,
-                reCaptcha: state.reCaptcha,
-                validation: action._0,
+                errors: action._0,
                 isSubmitting: state.isSubmitting,
                 contactError: state.contactError,
                 contactAttemptCount: state.contactAttemptCount
@@ -139,16 +123,12 @@ function renderPage(user, clientConfig) {
       message: contact_message,
       reCaptcha: contact_reCaptcha
     };
-    var validation = Common_Contact.validateContact(contact);
+    var errors = Common_Contact.validateContact(contact);
     Curry._1(dispatch, {
-          TAG: /* SetContactError */5,
-          _0: undefined
+          TAG: /* SetErrors */5,
+          _0: errors
         });
-    Curry._1(dispatch, {
-          TAG: /* SetValidation */6,
-          _0: validation
-        });
-    if (Common_Contact.hasErrors(validation)) {
+    if (Common_Contact.hasErrors(errors)) {
       return ;
     }
     Curry._1(dispatch, {
@@ -156,9 +136,22 @@ function renderPage(user, clientConfig) {
           _0: true
         });
     var onError = function (param) {
+      var init = Common_Contact.emptyErrors(undefined);
+      var errors_contact = "RequestFailed";
+      var errors_name = init.name;
+      var errors_email = init.email;
+      var errors_message = init.message;
+      var errors_reCaptcha = init.reCaptcha;
+      var errors = {
+        contact: errors_contact,
+        name: errors_name,
+        email: errors_email,
+        message: errors_message,
+        reCaptcha: errors_reCaptcha
+      };
       Curry._1(dispatch, {
-            TAG: /* SetContactError */5,
-            _0: "RequestFailed"
+            TAG: /* SetErrors */5,
+            _0: errors
           });
       return Curry._1(dispatch, {
                   TAG: /* SetIsSubmitting */4,
@@ -166,15 +159,11 @@ function renderPage(user, clientConfig) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
+      var errors = json.errors;
+      if (Common_Contact.hasErrors(errors)) {
         Curry._1(dispatch, {
-              TAG: /* SetValidation */6,
-              _0: json.validation
-            });
-        Curry._1(dispatch, {
-              TAG: /* SetContactError */5,
-              _0: undefined
+              TAG: /* SetErrors */5,
+              _0: errors
             });
         Curry._1(dispatch, {
               TAG: /* SetIsSubmitting */4,
@@ -189,12 +178,11 @@ function renderPage(user, clientConfig) {
     Client_User.contact(contact, onSuccess, onError);
     
   };
-  var contactError = state.contactError;
-  var contactError$1 = contactError !== undefined ? "An error occurred when trying to send your message. Please try again." : undefined;
-  var nameError = Belt_Option.map(state.validation.name, Common_Contact.nameErrorToString);
-  var emailError = Belt_Option.map(state.validation.email, Common_Contact.emailErrorToString);
-  var messageError = Belt_Option.map(state.validation.message, Common_Contact.messageErrorToString);
-  var reCaptchaError = Belt_Option.map(state.validation.reCaptcha, Common_Contact.reCaptchaErrorToString);
+  var contactError = Belt_Option.map(state.errors.contact, Common_Contact.contactErrorToString);
+  var nameError = Belt_Option.map(state.errors.name, Common_Contact.nameErrorToString);
+  var emailError = Belt_Option.map(state.errors.email, Common_Contact.emailErrorToString);
+  var messageError = Belt_Option.map(state.errors.message, Common_Contact.messageErrorToString);
+  var reCaptchaError = Belt_Option.map(state.errors.reCaptcha, Common_Contact.reCaptchaErrorToString);
   return React.createElement(Page_Contact_View.make, {
               reCaptchaSiteKey: clientConfig.reCaptcha.siteKey,
               user: user,
@@ -231,7 +219,7 @@ function renderPage(user, clientConfig) {
               reCaptchaError: reCaptchaError,
               onSendClick: onSendClick,
               isSubmitting: state.isSubmitting,
-              contactError: contactError$1,
+              contactError: contactError,
               contactAttemptCount: state.contactAttemptCount
             });
 }

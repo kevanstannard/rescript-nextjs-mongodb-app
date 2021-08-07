@@ -11,25 +11,21 @@ let validateReCaptchaToken = token => {
   }
 }
 
-let contact = (contact: Common_Contact.contact): Promise.t<
-  result<Common_Contact.validation, Common_Contact.validation>,
-> => {
-  let validation = Common_Contact.validateContact(contact)
-  if Common_Contact.hasErrors(validation) {
-    Promise.resolve(Error(validation))
+let contact = (contact: Common_Contact.contact) => {
+  let errors = Common_Contact.validateContact(contact)
+  if Common_Contact.hasErrors(errors) {
+    Promise.resolve(Error(errors))
   } else {
     validateReCaptchaToken(contact.reCaptcha)->Promise.then(reCaptchaError => {
-      let validation: Common_Contact.validation = {
-        name: None,
-        email: None,
-        message: None,
+      let errors: Common_Contact.errors = {
+        ...Common_Contact.emptyErrors(),
         reCaptcha: reCaptchaError,
       }
-      if Common_Contact.hasErrors(validation) {
-        Promise.resolve(Error(validation))
+      if Common_Contact.hasErrors(errors) {
+        Promise.resolve(Error(errors))
       } else {
         Server_Email.sendContactEmail(contact)->Promise.then(_ => {
-          Promise.resolve(Ok(validation))
+          Promise.resolve(Ok())
         })
       }
     })
