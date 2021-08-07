@@ -273,10 +273,7 @@ module ChangeEmail = {
     email: option<emailError>,
   }
 
-  type changeEmailResult = {
-    result: [#Ok | #Error],
-    errors: changeEmailErrors,
-  }
+  type changeEmailResult = {errors: changeEmailErrors}
 
   external asChangeEmailResult: Js.Json.t => changeEmailResult = "%identity"
 

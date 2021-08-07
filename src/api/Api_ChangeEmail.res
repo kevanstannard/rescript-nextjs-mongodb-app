@@ -1,13 +1,10 @@
 let makePayload = (changeEmailResult): Common_User.ChangeEmail.changeEmailResult => {
-  switch changeEmailResult {
-  | Ok(errors) => {
-      result: #Ok,
-      errors: errors,
-    }
-  | Error(errors) => {
-      result: #Error,
-      errors: errors,
-    }
+  let errors = switch changeEmailResult {
+  | Ok(errors) => errors
+  | Error(errors) => errors
+  }
+  {
+    errors: errors,
   }
 }
 

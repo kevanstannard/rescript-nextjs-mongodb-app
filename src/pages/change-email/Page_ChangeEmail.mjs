@@ -86,10 +86,11 @@ function renderPage(user) {
                 });
     };
     var onSuccess = function (json) {
-      if (json.result === "Error") {
+      var errors = json.errors;
+      if (Common_User.ChangeEmail.hasErrors(errors)) {
         Curry._1(dispatch, {
               TAG: /* SetErrors */2,
-              _0: json.errors
+              _0: errors
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */1,

@@ -43,17 +43,16 @@ let renderPage = (user: Common_User.User.t) => {
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let {result, errors} = json->Common_User.ChangeEmail.asChangeEmailResult
-        switch result {
-        | #Ok => router->Next.Router.push(Common_Url.changeEmailSuccess())
-        | #Error => {
-            dispatch(SetErrors(errors))
-            dispatch(SetIsSubmitting(false))
-          }
+        let {errors} = json->Common_User.ChangeEmail.asChangeEmailResult
+        if Common_User.ChangeEmail.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+        } else {
+          router->Next.Router.push(Common_Url.changeEmailSuccess())
         }
       }
 
-      let _xhr: XmlHttpRequest.t = Client_User.changeEmail(changeEmail, onSuccess, onError)
+      Client_User.changeEmail(changeEmail, onSuccess, onError)->ignore
     }
   }
 

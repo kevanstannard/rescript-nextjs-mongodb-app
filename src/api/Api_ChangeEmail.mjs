@@ -6,17 +6,9 @@ import * as NextConnect from "next-connect";
 import * as Server_Middleware from "../modules/server/Server_Middleware.mjs";
 
 function makePayload(changeEmailResult) {
-  if (changeEmailResult.TAG === /* Ok */0) {
-    return {
-            result: "Ok",
-            errors: changeEmailResult._0
-          };
-  } else {
-    return {
-            result: "Error",
-            errors: changeEmailResult._0
-          };
-  }
+  return {
+          errors: changeEmailResult._0
+        };
 }
 
 function handlePost(req, res) {
