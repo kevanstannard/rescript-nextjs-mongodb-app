@@ -700,7 +700,7 @@ function validateResetPasswordKey(client, userId, resetPasswordKey) {
                 } else {
                   return Promise.resolve({
                               TAG: /* Ok */0,
-                              _0: undefined
+                              _0: user
                             });
                 }
               } else {
@@ -713,19 +713,6 @@ function validateResetPasswordKey(client, userId, resetPasswordKey) {
 }
 
 function resetPassword(client, resetPassword$1) {
-  var userId = MongoDb.ObjectId.fromString(resetPassword$1.userId);
-  if (userId.TAG !== /* Ok */0) {
-    return Promise.resolve({
-                TAG: /* Error */1,
-                _0: {
-                  resetPassword: "ResetPasswordInvalid",
-                  password: undefined,
-                  passwordConfirm: undefined,
-                  reCaptcha: undefined
-                }
-              });
-  }
-  var userId$1 = userId._0;
   var errors = Common_User.ResetPassword.validateResetPassword(resetPassword$1);
   if (Common_User.ResetPassword.hasErrors(errors)) {
     return Promise.resolve({
@@ -737,31 +724,40 @@ function resetPassword(client, resetPassword$1) {
                 if (reCaptchaError === undefined) {
                   return validateResetPasswordKey(client, resetPassword$1.userId, resetPassword$1.resetPasswordKey).then(function (result) {
                               if (result.TAG === /* Ok */0) {
-                                return setPassword(client, userId$1, resetPassword$1.password).then(function (param) {
+                                return setPassword(client, result._0._id, resetPassword$1.password).then(function (param) {
                                             return Promise.resolve({
                                                         TAG: /* Ok */0,
                                                         _0: undefined
                                                       });
                                           });
                               }
-                              var validation_resetPassword = Common_User.ResetPassword.refineResetPasswordKeyError(result._0);
-                              var validation = {
-                                resetPassword: validation_resetPassword,
-                                password: undefined,
-                                passwordConfirm: undefined,
-                                reCaptcha: undefined
+                              var resetPasswordError = Common_User.ResetPassword.refineResetPasswordKeyError(result._0);
+                              var init = Common_User.ResetPassword.emptyErrors(undefined);
+                              var errors_resetPassword = resetPasswordError;
+                              var errors_password = init.password;
+                              var errors_passwordConfirm = init.passwordConfirm;
+                              var errors_reCaptcha = init.reCaptcha;
+                              var errors = {
+                                resetPassword: errors_resetPassword,
+                                password: errors_password,
+                                passwordConfirm: errors_passwordConfirm,
+                                reCaptcha: errors_reCaptcha
                               };
                               return Promise.resolve({
                                           TAG: /* Error */1,
-                                          _0: validation
+                                          _0: errors
                                         });
                             });
                 }
+                var init = Common_User.ResetPassword.emptyErrors(undefined);
+                var errors_resetPassword = init.resetPassword;
+                var errors_password = init.password;
+                var errors_passwordConfirm = init.passwordConfirm;
                 var errors_reCaptcha = reCaptchaError;
                 var errors = {
-                  resetPassword: undefined,
-                  password: undefined,
-                  passwordConfirm: undefined,
+                  resetPassword: errors_resetPassword,
+                  password: errors_password,
+                  passwordConfirm: errors_passwordConfirm,
                   reCaptcha: errors_reCaptcha
                 };
                 return Promise.resolve({

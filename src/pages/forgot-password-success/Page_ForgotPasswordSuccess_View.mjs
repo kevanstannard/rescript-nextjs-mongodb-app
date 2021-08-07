@@ -16,7 +16,7 @@ function Page_ForgotPasswordSuccess_View(Props) {
                   size: "Primary"
                 }), React.createElement("p", {
                   className: "mb-4"
-                }, "If the email address you provided exists, we'll send you an email to reset your password."), React.createElement("p", {
+                }, "We've sent you an email to reset your password."), React.createElement("p", {
                   className: "mb-4"
                 }, React.createElement(Component_Link.make, {
                       href: Common_Url.home(undefined),

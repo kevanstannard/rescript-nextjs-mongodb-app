@@ -686,7 +686,7 @@ let validateResetPasswordKey = (
           } else if userResetPasswordKey != resetPasswordKey {
             Promise.resolve(Error(#ResetPasswordKeyInvalid))
           } else {
-            Promise.resolve(Ok())
+            Promise.resolve(Ok(user))
           }
         }
       }
@@ -698,60 +698,43 @@ let resetPassword = (
   client: MongoDb.MongoClient.t,
   resetPassword: Common_User.ResetPassword.resetPassword,
 ) => {
-  let userId = ObjectId.fromString(resetPassword.userId)
-  switch userId {
-  | Error(_) => {
-      let errors: Common_User.ResetPassword.resetPasswordErrors = {
-        resetPassword: Some(#ResetPasswordInvalid),
-        password: None,
-        passwordConfirm: None,
-        reCaptcha: None,
-      }
-      Promise.resolve(Error(errors))
-    }
-  | Ok(userId) => {
-      let errors = Common_User.ResetPassword.validateResetPassword(resetPassword)
-      if Common_User.ResetPassword.hasErrors(errors) {
-        Promise.resolve(Error(errors))
-      } else {
-        validateReCaptchaToken(resetPassword.reCaptcha)->Promise.then(reCaptchaError => {
-          switch reCaptchaError {
-          | Some(error) => {
-              let errors: Common_User.ResetPassword.resetPasswordErrors = {
-                resetPassword: None,
-                password: None,
-                passwordConfirm: None,
-                reCaptcha: Some(error),
+  let errors = Common_User.ResetPassword.validateResetPassword(resetPassword)
+  if Common_User.ResetPassword.hasErrors(errors) {
+    Error(errors)->Promise.resolve
+  } else {
+    validateReCaptchaToken(resetPassword.reCaptcha)->Promise.then(reCaptchaError => {
+      switch reCaptchaError {
+      | Some(error) => {
+          let errors: Common_User.ResetPassword.errors = {
+            ...Common_User.ResetPassword.emptyErrors(),
+            reCaptcha: Some(error),
+          }
+          Error(errors)->Promise.resolve
+        }
+      | None =>
+        validateResetPasswordKey(
+          client,
+          resetPassword.userId,
+          resetPassword.resetPasswordKey,
+        )->Promise.then(result => {
+          switch result {
+          | Error(resetPasswordError) => {
+              let resetPasswordError = Common_User.ResetPassword.refineResetPasswordKeyError(
+                resetPasswordError,
+              )
+              let errors: Common_User.ResetPassword.errors = {
+                ...Common_User.ResetPassword.emptyErrors(),
+                resetPassword: Some(resetPasswordError),
               }
-              Promise.resolve(Error(errors))
+              Error(errors)->Promise.resolve
             }
-          | None =>
-            validateResetPasswordKey(
-              client,
-              resetPassword.userId,
-              resetPassword.resetPasswordKey,
-            )->Promise.then(result => {
-              switch result {
-              | Error(error) => {
-                  let validation: Common_User.ResetPassword.resetPasswordErrors = {
-                    resetPassword: Some(
-                      Common_User.ResetPassword.refineResetPasswordKeyError(error),
-                    ),
-                    password: None,
-                    passwordConfirm: None,
-                    reCaptcha: None,
-                  }
-                  Promise.resolve(Error(validation))
-                }
-              | Ok() =>
-                setPassword(client, userId, resetPassword.password)->Promise.then(_ => {
-                  Promise.resolve(Ok())
-                })
-              }
+          | Ok(user) =>
+            setPassword(client, user._id, resetPassword.password)->Promise.then(_ => {
+              Promise.resolve(Ok())
             })
           }
         })
       }
-    }
+    })
   }
 }

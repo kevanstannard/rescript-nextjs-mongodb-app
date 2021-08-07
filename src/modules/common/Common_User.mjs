@@ -470,6 +470,15 @@ var ForgotPassword = {
   reCaptchaErrorToString: reCaptchaErrorToString$1
 };
 
+function emptyErrors$5(param) {
+  return {
+          resetPassword: undefined,
+          password: undefined,
+          passwordConfirm: undefined,
+          reCaptcha: undefined
+        };
+}
+
 function resetPasswordErrorsToDto(errors) {
   return {
           resetPassword: Js_null.fromOption(errors.resetPassword),
@@ -489,7 +498,9 @@ function dtoToResetPasswordErrors(errors) {
 }
 
 function refineResetPasswordKeyError(error) {
-  if (error === "ResetPasswordExpired") {
+  if (error === "AccountNotActivated") {
+    return "AccountNotActivated";
+  } else if (error === "ResetPasswordExpired") {
     return "ResetPasswordExpired";
   } else {
     return "ResetPasswordInvalid";
@@ -539,10 +550,6 @@ function validateResetPassword(param) {
         };
 }
 
-function resetPasswordErrorToString(error) {
-  return "There was a problem resetting your password, please try again";
-}
-
 function passwordErrorToString$2(error) {
   return "Enter your new password";
 }
@@ -560,6 +567,7 @@ function reCaptchaErrorToString$2(error) {
 }
 
 var ResetPassword = {
+  emptyErrors: emptyErrors$5,
   resetPasswordErrorsToDto: resetPasswordErrorsToDto,
   dtoToResetPasswordErrors: dtoToResetPasswordErrors,
   refineResetPasswordKeyError: refineResetPasswordKeyError,
@@ -568,7 +576,6 @@ var ResetPassword = {
   validatePasswordConfirm: validatePasswordConfirm,
   validateReCaptcha: validateReCaptcha$2,
   validateResetPassword: validateResetPassword,
-  resetPasswordErrorToString: resetPasswordErrorToString,
   passwordErrorToString: passwordErrorToString$2,
   passwordConfirmErrorToString: passwordConfirmErrorToString,
   reCaptchaErrorToString: reCaptchaErrorToString$2

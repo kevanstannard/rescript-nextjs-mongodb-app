@@ -9,7 +9,7 @@ type props = {
   userDto: Js.Null.t<Common_User.User.dto>,
   userId: string,
   resetPasswordKey: string,
-  resetPasswordErrorsDto: Common_User.ResetPassword.resetPasswordErrorsDto,
+  resetPasswordErrorsDto: Common_User.ResetPassword.errorsDto,
 }
 
 type state = {
@@ -17,7 +17,7 @@ type state = {
   passwordConfirm: string,
   reCaptcha: option<string>,
   isSubmitting: bool,
-  errors: Common_User.ResetPassword.resetPasswordErrors,
+  errors: Common_User.ResetPassword.errors,
 }
 
 type action =
@@ -25,4 +25,4 @@ type action =
   | SetPasswordConfirm(string)
   | SetReCaptcha(string)
   | SetIsSubmitting(bool)
-  | SetErrors(Common_User.ResetPassword.resetPasswordErrors)
+  | SetErrors(Common_User.ResetPassword.errors)

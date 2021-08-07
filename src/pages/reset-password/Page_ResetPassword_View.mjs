@@ -79,6 +79,24 @@ var ResetPasswordExpired = {
   make: Page_ResetPassword_View$ResetPasswordExpired
 };
 
+function Page_ResetPassword_View$ResetPasswordAccountNotActivated(Props) {
+  return React.createElement(React.Fragment, undefined, React.createElement(Component_Title.make, {
+                  text: "Reset Password Account Not Activated",
+                  size: "Primary"
+                }), React.createElement("p", {
+                  className: "mb-4"
+                }, "Your account has not been activated yet."), React.createElement("p", {
+                  className: "mb-4"
+                }, React.createElement(Component_Link.make, {
+                      href: Common_Url.forgotPassword(undefined),
+                      children: "Try Forgot Password again"
+                    })));
+}
+
+var ResetPasswordAccountNotActivated = {
+  make: Page_ResetPassword_View$ResetPasswordAccountNotActivated
+};
+
 function Page_ResetPassword_View$ResetPasswordForm(Props) {
   var password = Props.password;
   var passwordConfirm = Props.passwordConfirm;
@@ -142,8 +160,10 @@ function Page_ResetPassword_View(Props) {
   var onReCaptchaChange = Props.onReCaptchaChange;
   var reCaptchaError = Props.reCaptchaError;
   var body = resetPasswordError !== undefined ? (
-      resetPasswordError === "RequestFailed" || resetPasswordError === "UnknownError" ? React.createElement(Page_ResetPassword_View$ResetPasswordError, {}) : (
-          resetPasswordError === "ResetPasswordExpired" ? React.createElement(Page_ResetPassword_View$ResetPasswordExpired, {}) : React.createElement(Page_ResetPassword_View$ResetPasswordInvalid, {})
+      resetPasswordError === "RequestFailed" ? React.createElement(Page_ResetPassword_View$ResetPasswordError, {}) : (
+          resetPasswordError === "AccountNotActivated" ? React.createElement(Page_ResetPassword_View$ResetPasswordAccountNotActivated, {}) : (
+              resetPasswordError === "ResetPasswordExpired" ? React.createElement(Page_ResetPassword_View$ResetPasswordExpired, {}) : React.createElement(Page_ResetPassword_View$ResetPasswordInvalid, {})
+            )
         )
     ) : React.createElement(Page_ResetPassword_View$ResetPasswordForm, {
           password: password,
@@ -180,6 +200,7 @@ export {
   ResetPasswordError ,
   ResetPasswordInvalid ,
   ResetPasswordExpired ,
+  ResetPasswordAccountNotActivated ,
   ResetPasswordForm ,
   make ,
   

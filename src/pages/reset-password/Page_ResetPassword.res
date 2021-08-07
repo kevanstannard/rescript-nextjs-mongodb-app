@@ -43,33 +43,21 @@ let default = ({userDto, userId, resetPasswordKey, resetPasswordErrorsDto, confi
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        let errors: Common_User.ResetPassword.resetPasswordErrors = {
+        let errors: Common_User.ResetPassword.errors = {
+          ...Common_User.ResetPassword.emptyErrors(),
           resetPassword: Some(#RequestFailed),
-          password: None,
-          passwordConfirm: None,
-          reCaptcha: None,
         }
         dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let resetPasswordResult = json->Common_User.ResetPassword.asResetPasswordResult
-        switch resetPasswordResult.result {
-        | #Ok => router->Next.Router.push(Common_Url.resetPasswordSuccess())
-        | #Error => {
-            let errors: Common_User.ResetPassword.resetPasswordErrors = switch resetPasswordResult.errors {
-            | None => {
-                resetPassword: Some(#UnknownError),
-                password: None,
-                passwordConfirm: None,
-                reCaptcha: None,
-              }
-            | Some(errors) => errors // TODO: Test if any actual errors are present
-            }
-            dispatch(SetErrors(errors))
-            dispatch(SetIsSubmitting(false))
-          }
+        let {errors} = json->Common_User.ResetPassword.asResetPasswordResult
+        if Common_User.ResetPassword.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+        } else {
+          router->Next.Router.push(Common_Url.resetPasswordSuccess())
         }
       }
 
@@ -81,7 +69,7 @@ let default = ({userDto, userId, resetPasswordKey, resetPasswordErrorsDto, confi
         reCaptcha: state.reCaptcha,
       }
 
-      let _xhr: XmlHttpRequest.t = Client_User.resetPassword(resetPassword, onSuccess, onError)
+      Client_User.resetPassword(resetPassword, onSuccess, onError)->ignore
     }
   }
 

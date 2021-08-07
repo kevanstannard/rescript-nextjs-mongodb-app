@@ -1,14 +1,9 @@
 let makePayload = (resetPasswordResult): Common_User.ResetPassword.resetPasswordResult => {
-  switch resetPasswordResult {
-  | Ok() => {
-      result: #Ok,
-      errors: None,
-    }
-  | Error(errors) => {
-      result: #Error,
-      errors: Some(errors),
-    }
+  let errors = switch resetPasswordResult {
+  | Ok() => Common_User.ResetPassword.emptyErrors()
+  | Error(errors) => errors
   }
+  {errors: errors}
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {

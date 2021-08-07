@@ -10,24 +10,20 @@ let getServerSideProps: Next.GetServerSideProps.t<props, params, _> = context =>
 
     let currentUserDto = Server_User.toNullCommonUserDto(currentUser)
 
-    Server_User.validateResetPasswordKey(
-      client,
-      userId,
-      resetPasswordKey,
-    )->Promise.then(validationResult => {
+    client
+    ->Server_User.validateResetPasswordKey(userId, resetPasswordKey)
+    ->Promise.then(validationResult => {
       let resetPasswordError = switch validationResult {
       | Error(error) => {
           let resetPasswordError = Common_User.ResetPassword.refineResetPasswordKeyError(error)
           Some(resetPasswordError)
         }
-      | Ok() => None
+      | Ok(_) => None
       }
 
-      let resetPasswordErrors: Common_User.ResetPassword.resetPasswordErrors = {
+      let resetPasswordErrors: Common_User.ResetPassword.errors = {
+        ...Common_User.ResetPassword.emptyErrors(),
         resetPassword: resetPasswordError,
-        password: None,
-        passwordConfirm: None,
-        reCaptcha: None,
       }
 
       let props: Page_ResetPassword_Types.props = {

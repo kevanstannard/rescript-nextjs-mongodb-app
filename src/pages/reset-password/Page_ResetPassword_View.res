@@ -66,6 +66,20 @@ module ResetPasswordExpired = {
   }
 }
 
+module ResetPasswordAccountNotActivated = {
+  @react.component
+  let make = () => {
+    <>
+      <Title text="Reset Password Account Not Activated" size=#Primary />
+      <p className="mb-4"> {React.string("Your account has not been activated yet.")} </p>
+      <p className="mb-4">
+        <Link href={Common_Url.forgotPassword()}>
+          {"Try Forgot Password again"->React.string}
+        </Link>
+      </p>
+    </>
+  }
+}
 module ResetPasswordForm = {
   @react.component
   let make = (
@@ -132,10 +146,10 @@ let make = (
   let body = switch resetPasswordError {
   | Some(error) =>
     switch error {
-    | #UnknownError => <ResetPasswordError />
     | #RequestFailed => <ResetPasswordError />
     | #ResetPasswordInvalid => <ResetPasswordInvalid />
     | #ResetPasswordExpired => <ResetPasswordExpired />
+    | #AccountNotActivated => <ResetPasswordAccountNotActivated />
     }
   | None =>
     <ResetPasswordForm

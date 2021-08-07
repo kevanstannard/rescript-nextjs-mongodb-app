@@ -535,10 +535,10 @@ module ResetPassword = {
   }
 
   type resetPasswordError = [
-    | #UnknownError
     | #RequestFailed
     | #ResetPasswordInvalid
     | #ResetPasswordExpired
+    | #AccountNotActivated
   ]
 
   type passwordError = [#PasswordEmpty]
@@ -553,35 +553,39 @@ module ResetPassword = {
     | #ReCaptchaInvalid
   ]
 
-  type resetPasswordErrors = {
+  type errors = {
     resetPassword: option<resetPasswordError>,
     password: option<passwordError>,
     passwordConfirm: option<passwordConfirmError>,
     reCaptcha: option<reCaptchaError>,
   }
 
-  type resetPasswordErrorsDto = {
+  type errorsDto = {
     resetPassword: Js.Null.t<resetPasswordError>,
     password: Js.Null.t<passwordError>,
     passwordConfirm: Js.Null.t<passwordConfirmError>,
     reCaptcha: Js.Null.t<reCaptchaError>,
   }
 
-  type resetPasswordResult = {
-    result: [#Ok | #Error],
-    errors: option<resetPasswordErrors>,
-  }
+  type resetPasswordResult = {errors: errors}
 
   external asResetPasswordResult: Js.Json.t => resetPasswordResult = "%identity"
 
-  let resetPasswordErrorsToDto = (errors: resetPasswordErrors): resetPasswordErrorsDto => {
+  let emptyErrors = (): errors => {
+    resetPassword: None,
+    password: None,
+    passwordConfirm: None,
+    reCaptcha: None,
+  }
+
+  let resetPasswordErrorsToDto = (errors: errors): errorsDto => {
     resetPassword: Js.Null.fromOption(errors.resetPassword),
     password: Js.Null.fromOption(errors.password),
     passwordConfirm: Js.Null.fromOption(errors.passwordConfirm),
     reCaptcha: Js.Null.fromOption(errors.reCaptcha),
   }
 
-  let dtoToResetPasswordErrors = (errors: resetPasswordErrorsDto): resetPasswordErrors => {
+  let dtoToResetPasswordErrors = (errors: errorsDto): errors => {
     resetPassword: Js.Null.toOption(errors.resetPassword),
     password: Js.Null.toOption(errors.password),
     passwordConfirm: Js.Null.toOption(errors.passwordConfirm),
@@ -590,17 +594,15 @@ module ResetPassword = {
 
   let refineResetPasswordKeyError = error => {
     switch error {
-    | #UserIdInvalid => #ResetPasswordInvalid
     | #ResetPasswordKeyInvalid => #ResetPasswordInvalid
     | #UserNotFound => #ResetPasswordInvalid
-    | #AccountDisabled => #ResetPasswordInvalid
-    | #AccountNotActivated => #ResetPasswordInvalid
+    | #AccountNotActivated => #AccountNotActivated
     | #ResetPasswordNotRequested => #ResetPasswordInvalid
     | #ResetPasswordExpired => #ResetPasswordExpired
     }
   }
 
-  let hasErrors = (errors: resetPasswordErrors): bool => {
+  let hasErrors = (errors: errors): bool => {
     Belt.Option.isSome(errors.resetPassword) ||
     Belt.Option.isSome(errors.password) ||
     Belt.Option.isSome(errors.passwordConfirm) ||
@@ -632,22 +634,11 @@ module ResetPassword = {
     }
   }
 
-  let validateResetPassword = (
-    {password, passwordConfirm, reCaptcha}: resetPassword,
-  ): resetPasswordErrors => {
+  let validateResetPassword = ({password, passwordConfirm, reCaptcha}: resetPassword): errors => {
     resetPassword: None,
     password: validatePassword(password),
     passwordConfirm: validatePasswordConfirm(password, passwordConfirm),
     reCaptcha: validateReCaptcha(reCaptcha),
-  }
-
-  let resetPasswordErrorToString = (error: resetPasswordError): string => {
-    switch error {
-    | #UnknownError => "There was a problem resetting your password, please try again"
-    | #RequestFailed => "There was a problem resetting your password, please try again"
-    | #ResetPasswordExpired => "There was a problem resetting your password, please try again"
-    | #ResetPasswordInvalid => "There was a problem resetting your password, please try again"
-    }
   }
 
   let passwordErrorToString = (error: passwordError): string => {

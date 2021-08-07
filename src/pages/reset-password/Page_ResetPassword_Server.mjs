@@ -17,11 +17,15 @@ function getServerSideProps(context) {
               return Server_User.validateResetPasswordKey(match.client, userId, resetPasswordKey).then(function (validationResult) {
                           var resetPasswordError;
                           resetPasswordError = validationResult.TAG === /* Ok */0 ? undefined : Common_User.ResetPassword.refineResetPasswordKeyError(validationResult._0);
+                          var init = Common_User.ResetPassword.emptyErrors(undefined);
+                          var resetPasswordErrors_password = init.password;
+                          var resetPasswordErrors_passwordConfirm = init.passwordConfirm;
+                          var resetPasswordErrors_reCaptcha = init.reCaptcha;
                           var resetPasswordErrors = {
                             resetPassword: resetPasswordError,
-                            password: undefined,
-                            passwordConfirm: undefined,
-                            reCaptcha: undefined
+                            password: resetPasswordErrors_password,
+                            passwordConfirm: resetPasswordErrors_passwordConfirm,
+                            reCaptcha: resetPasswordErrors_reCaptcha
                           };
                           var props_resetPasswordErrorsDto = Common_User.ResetPassword.resetPasswordErrorsToDto(resetPasswordErrors);
                           var props = {

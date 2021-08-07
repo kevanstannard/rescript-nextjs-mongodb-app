@@ -98,14 +98,20 @@ function $$default(param) {
           _0: true
         });
     var onError = function (param) {
+      var init = Common_User.ResetPassword.emptyErrors(undefined);
+      var errors_resetPassword = "RequestFailed";
+      var errors_password = init.password;
+      var errors_passwordConfirm = init.passwordConfirm;
+      var errors_reCaptcha = init.reCaptcha;
+      var errors = {
+        resetPassword: errors_resetPassword,
+        password: errors_password,
+        passwordConfirm: errors_passwordConfirm,
+        reCaptcha: errors_reCaptcha
+      };
       Curry._1(dispatch, {
             TAG: /* SetErrors */4,
-            _0: {
-              resetPassword: "RequestFailed",
-              password: undefined,
-              passwordConfirm: undefined,
-              reCaptcha: undefined
-            }
+            _0: errors
           });
       return Curry._1(dispatch, {
                   TAG: /* SetIsSubmitting */3,
@@ -113,26 +119,20 @@ function $$default(param) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
-        var errors = json.errors;
-        var errors$1 = errors !== undefined ? errors : ({
-              resetPassword: "UnknownError",
-              password: undefined,
-              passwordConfirm: undefined,
-              reCaptcha: undefined
-            });
+      var errors = json.errors;
+      if (Common_User.ResetPassword.hasErrors(errors)) {
         Curry._1(dispatch, {
               TAG: /* SetErrors */4,
-              _0: errors$1
+              _0: errors
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */3,
                     _0: false
                   });
+      } else {
+        router.push(Common_Url.resetPasswordSuccess(undefined));
+        return ;
       }
-      router.push(Common_Url.resetPasswordSuccess(undefined));
-      
     };
     var resetPassword_password$1 = state.password;
     var resetPassword_passwordConfirm$1 = state.passwordConfirm;
