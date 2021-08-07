@@ -11,9 +11,9 @@ module User = {
   type t = {
     _id: ObjectId.t,
     email: string,
-    emailChange: Js.Nullable.t<string>, // May be undefined or null
-    emailChangeKey: Js.Nullable.t<string>, // May be undefined or null
-    emailChangeKeyExpiry: Js.Nullable.t<Js.Date.t>, // May be undefined or null
+    emailChange: Js.Null.t<string>,
+    emailChangeKey: Js.Null.t<string>,
+    emailChangeKeyExpiry: Js.Null.t<Js.Date.t>,
     passwordHash: string,
     created: Js.Date.t,
     updated: Js.Date.t,
@@ -83,7 +83,7 @@ module User = {
 let toCommonUser = (user: User.t): Common_User.User.t => {
   id: ObjectId.toString(user._id),
   email: user.email,
-  emailChange: user.emailChange->Js.Nullable.toOption,
+  emailChange: user.emailChange->Js.Null.toOption,
 }
 
 let toCommonUserDto = (user: User.t): Common_User.User.dto => {
@@ -133,9 +133,9 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
     let user: User.t = {
       _id: ObjectId.make(),
       email: signup.email,
-      emailChange: Js.Nullable.null,
-      emailChangeKey: Js.Nullable.null,
-      emailChangeKeyExpiry: Js.Nullable.null,
+      emailChange: Js.Null.empty,
+      emailChangeKey: Js.Null.empty,
+      emailChangeKeyExpiry: Js.Null.empty,
       passwordHash: passwordHash,
       created: now,
       updated: now,
@@ -574,8 +574,8 @@ let changeEmailConfirm = (
     switch user {
     | None => Promise.resolve(Error(#UserNotFound))
     | Some(user) => {
-        let currentEmailChange = Js.Nullable.toOption(user.emailChange)
-        let currentEmailChangeKey = Js.Nullable.toOption(user.emailChangeKey)
+        let currentEmailChange = Js.Null.toOption(user.emailChange)
+        let currentEmailChangeKey = Js.Null.toOption(user.emailChangeKey)
         switch (currentEmailChange, currentEmailChangeKey) {
         | (None, _) => Promise.resolve(Error(#EmailChangeMissing))
         | (_, None) => Promise.resolve(Error(#EmailChangeKeyMissing))

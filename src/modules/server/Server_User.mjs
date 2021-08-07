@@ -93,7 +93,7 @@ function toCommonUser(user) {
   return {
           id: Curry._1(MongoDb.ObjectId.toString, user._id),
           email: user.email,
-          emailChange: Caml_option.nullable_to_opt(user.emailChange)
+          emailChange: Caml_option.null_to_opt(user.emailChange)
         };
 }
 
@@ -568,27 +568,31 @@ function changeEmailConfirm(client, userId, emailChangeKey) {
               }
               var currentEmailChange = user.emailChange;
               var currentEmailChangeKey = user.emailChangeKey;
-              if (currentEmailChange == null) {
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: "EmailChangeMissing"
-                          });
-              } else if (currentEmailChangeKey == null) {
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: "EmailChangeKeyMissing"
-                          });
-              } else if (currentEmailChangeKey === emailChangeKey) {
-                return setEmail(client, user._id, currentEmailChange).then(function (_updateResult) {
-                            return Promise.resolve({
-                                        TAG: /* Ok */0,
-                                        _0: undefined
-                                      });
-                          });
+              if (currentEmailChange !== null) {
+                if (currentEmailChangeKey !== null) {
+                  if (currentEmailChangeKey === emailChangeKey) {
+                    return setEmail(client, user._id, currentEmailChange).then(function (_updateResult) {
+                                return Promise.resolve({
+                                            TAG: /* Ok */0,
+                                            _0: undefined
+                                          });
+                              });
+                  } else {
+                    return Promise.resolve({
+                                TAG: /* Error */1,
+                                _0: "IncorrectEmailChangeKey"
+                              });
+                  }
+                } else {
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: "EmailChangeKeyMissing"
+                            });
+                }
               } else {
                 return Promise.resolve({
                             TAG: /* Error */1,
-                            _0: "IncorrectEmailChangeKey"
+                            _0: "EmailChangeMissing"
                           });
               }
             });
