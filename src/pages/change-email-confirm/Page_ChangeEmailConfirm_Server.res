@@ -8,7 +8,6 @@ let makeResult = (userDto, emailChangeSuccessful): Next.GetServerSideProps.resul
   Server_Page.props(props)
 }
 
-// Security/UX Note: You don't need to be logged in to confirm an email change
 let getServerSideProps: Next.GetServerSideProps.t<props, params, _> = context => {
   let {req, res, params} = context
   let {userId, emailChangeKey} = params
