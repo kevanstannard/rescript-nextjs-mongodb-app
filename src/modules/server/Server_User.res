@@ -592,29 +592,44 @@ let forgotPassword = (
   client: MongoDb.MongoClient.t,
   forgotPassword: Common_User.ForgotPassword.forgotPassword,
 ) => {
-  client
-  ->findUserByEmail(forgotPassword.email)
-  ->Promise.then(user => {
-    switch user {
-    | None => Promise.resolve(Error(#EmailNotFound))
-    | Some(user) =>
-      if !user.isActivated {
-        Promise.resolve(Error(#AccountNotActivated))
-      } else {
-        let resetPasswordKey = makeResetPasswordKey()
-        setResetPasswordKey(client, user._id, resetPasswordKey)->Promise.then(_ => {
-          let userId = ObjectId.toString(user._id)
-          Server_Email.sendForgotPasswordEmail(
-            userId,
-            user.email,
-            resetPasswordKey,
-          )->Promise.then(_ => {
-            Promise.resolve(Ok())
+  let errors = Common_User.ForgotPassword.validateForgotPassword(forgotPassword)
+  if Common_User.ForgotPassword.hasErrors(errors) {
+    Error(errors)->Promise.resolve
+  } else {
+    client
+    ->findUserByEmail(forgotPassword.email)
+    ->Promise.then(user => {
+      switch user {
+      | None => {
+          let errors = {
+            ...Common_User.ForgotPassword.emptyErrors(),
+            forgotPassword: Some(#EmailNotFound),
+          }
+          Error(errors)->Promise.resolve
+        }
+      | Some(user) =>
+        if !user.isActivated {
+          let errors = {
+            ...Common_User.ForgotPassword.emptyErrors(),
+            forgotPassword: Some(#AccountNotActivated),
+          }
+          Error(errors)->Promise.resolve
+        } else {
+          let resetPasswordKey = makeResetPasswordKey()
+          setResetPasswordKey(client, user._id, resetPasswordKey)->Promise.then(_ => {
+            let userId = ObjectId.toString(user._id)
+            Server_Email.sendForgotPasswordEmail(
+              userId,
+              user.email,
+              resetPasswordKey,
+            )->Promise.then(_ => {
+              Promise.resolve(Ok())
+            })
           })
-        })
+        }
       }
-    }
-  })
+    })
+  }
 }
 
 let validateResetPasswordKey = (

@@ -1,21 +1,10 @@
 let makePayload = (forgotPasswordResult): Common_User.ForgotPassword.forgotPasswordResult => {
   // TODO: Consider always returning an OK response, so we don't reveal details about an account's existance
-  switch forgotPasswordResult {
-  | Ok() => {
-      result: #Ok,
-      errors: None,
-    }
-  | Error(errors) => {
-      let errors: Common_User.ForgotPassword.forgotPasswordErrors = {
-        forgotPassword: Some(errors),
-        email: None,
-      }
-      {
-        result: #Error,
-        errors: Some(errors),
-      }
-    }
+  let errors = switch forgotPasswordResult {
+  | Ok() => Common_User.ForgotPassword.emptyErrors()
+  | Error(errors) => errors
   }
+  {errors: errors}
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {

@@ -589,30 +589,52 @@ function setResetPasswordKey(client, userId, resetPasswordKey) {
 }
 
 function forgotPassword(client, forgotPassword$1) {
-  return findUserByEmail(client, forgotPassword$1.email).then(function (user) {
-              if (user === undefined) {
+  var errors = Common_User.ForgotPassword.validateForgotPassword(forgotPassword$1);
+  if (Common_User.ForgotPassword.hasErrors(errors)) {
+    return Promise.resolve({
+                TAG: /* Error */1,
+                _0: errors
+              });
+  } else {
+    return findUserByEmail(client, forgotPassword$1.email).then(function (user) {
+                if (user !== undefined) {
+                  if (user.isActivated) {
+                    var resetPasswordKey = Curry._1(makeResetPasswordKey, undefined);
+                    return setResetPasswordKey(client, user._id, resetPasswordKey).then(function (param) {
+                                var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
+                                return Server_Email.sendForgotPasswordEmail(userId, user.email, resetPasswordKey).then(function (param) {
+                                            return Promise.resolve({
+                                                        TAG: /* Ok */0,
+                                                        _0: undefined
+                                                      });
+                                          });
+                              });
+                  }
+                  var init = Common_User.ForgotPassword.emptyErrors(undefined);
+                  var errors_forgotPassword = "AccountNotActivated";
+                  var errors_email = init.email;
+                  var errors = {
+                    forgotPassword: errors_forgotPassword,
+                    email: errors_email
+                  };
+                  return Promise.resolve({
+                              TAG: /* Error */1,
+                              _0: errors
+                            });
+                }
+                var init$1 = Common_User.ForgotPassword.emptyErrors(undefined);
+                var errors_forgotPassword$1 = "EmailNotFound";
+                var errors_email$1 = init$1.email;
+                var errors$1 = {
+                  forgotPassword: errors_forgotPassword$1,
+                  email: errors_email$1
+                };
                 return Promise.resolve({
                             TAG: /* Error */1,
-                            _0: "EmailNotFound"
+                            _0: errors$1
                           });
-              }
-              if (!user.isActivated) {
-                return Promise.resolve({
-                            TAG: /* Error */1,
-                            _0: "AccountNotActivated"
-                          });
-              }
-              var resetPasswordKey = Curry._1(makeResetPasswordKey, undefined);
-              return setResetPasswordKey(client, user._id, resetPasswordKey).then(function (param) {
-                          var userId = Curry._1(MongoDb.ObjectId.toString, user._id);
-                          return Server_Email.sendForgotPasswordEmail(userId, user.email, resetPasswordKey).then(function (param) {
-                                      return Promise.resolve({
-                                                  TAG: /* Ok */0,
-                                                  _0: undefined
-                                                });
-                                    });
-                        });
-            });
+              });
+  }
 }
 
 function validateResetPasswordKey(client, userId, resetPasswordKey) {

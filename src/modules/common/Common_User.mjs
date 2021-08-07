@@ -373,6 +373,13 @@ var ChangePassword = {
   newPasswordConfirmErrorToString: newPasswordConfirmErrorToString
 };
 
+function emptyErrors$3(param) {
+  return {
+          forgotPassword: undefined,
+          email: undefined
+        };
+}
+
 function hasErrors$4(errors) {
   if (Belt_Option.isSome(errors.forgotPassword)) {
     return true;
@@ -400,7 +407,13 @@ function validateForgotPassword(forgotPassword) {
 }
 
 function forgotPasswordErrorToString(error) {
-  return "There was a problem processing your forgot password request. Please try again.";
+  if (error === "RequestFailed") {
+    return "There was a problem processing your forgot password request. Please try again.";
+  } else if (error === "AccountNotActivated") {
+    return "That account has not been activated. Please contact us for support.";
+  } else {
+    return "No account was found with that email address. Please try again.";
+  }
 }
 
 function emailErrorToString$3(error) {
@@ -412,6 +425,7 @@ function emailErrorToString$3(error) {
 }
 
 var ForgotPassword = {
+  emptyErrors: emptyErrors$3,
   hasErrors: hasErrors$4,
   validateEmail: validateEmail$4,
   validateForgotPassword: validateForgotPassword,

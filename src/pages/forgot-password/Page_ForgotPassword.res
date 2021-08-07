@@ -34,7 +34,7 @@ let renderPage = (user: option<Common_User.User.t>) => {
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        let errors: Common_User.ForgotPassword.forgotPasswordErrors = {
+        let errors: Common_User.ForgotPassword.errors = {
           forgotPassword: Some(#RequestFailed),
           email: None,
         }
@@ -43,24 +43,16 @@ let renderPage = (user: option<Common_User.User.t>) => {
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let forgotPasswordResult = json->Common_User.ForgotPassword.asForgotPasswordResult
-        switch forgotPasswordResult.result {
-        | #Ok => router->Next.Router.push(Common_Url.forgotPasswordSuccess())
-        | #Error => {
-            let errors: Common_User.ForgotPassword.forgotPasswordErrors = switch forgotPasswordResult.errors {
-            | None => {
-                forgotPassword: Some(#UnknownError),
-                email: None,
-              }
-            | Some(errors) => errors
-            }
-            dispatch(SetErrors(errors))
-            dispatch(SetIsSubmitting(false))
-          }
+        let {errors} = json->Common_User.ForgotPassword.asForgotPasswordResult
+        if Common_User.ForgotPassword.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+        } else {
+          router->Next.Router.push(Common_Url.forgotPasswordSuccess())
         }
       }
 
-      let _xhr: XmlHttpRequest.t = Client_User.forgotPassword(forgotPassword, onSuccess, onError)
+      Client_User.forgotPassword(forgotPassword, onSuccess, onError)->ignore
     }
   }
 
@@ -74,16 +66,15 @@ let renderPage = (user: option<Common_User.User.t>) => {
 
   <Page_ForgotPassword_View
     user={user}
-    forgotPasswordError={forgotPasswordError}
     email={state.email}
-    emailError
     isSubmitting={state.isSubmitting}
     onEmailChange={email => dispatch(SetEmail(email))}
     onForgotPasswordClick={onForgotPasswordClick}
+    forgotPasswordError
+    emailError
   />
 }
 
-// TODO: Currently the forgot password page is accessible when logged in, does this matter?
 let default = ({userDto}: props) => {
   let user = Common_User.User.fromNullDto(userDto)
   renderPage(user)

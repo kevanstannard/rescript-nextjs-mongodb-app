@@ -429,26 +429,28 @@ module ForgotPassword = {
   type forgotPassword = {email: string}
 
   type forgotPasswordError = [
-    | #UnknownError
     | #RequestFailed
     | #AccountNotActivated
     | #EmailNotFound
   ]
+
   type emailError = [#EmailEmpty | #EmailInvalid]
 
-  type forgotPasswordErrors = {
+  type errors = {
     forgotPassword: option<forgotPasswordError>,
     email: option<emailError>,
   }
 
-  type forgotPasswordResult = {
-    result: [#Ok | #Error],
-    errors: option<forgotPasswordErrors>,
-  }
+  type forgotPasswordResult = {errors: errors}
 
   external asForgotPasswordResult: Js.Json.t => forgotPasswordResult = "%identity"
 
-  let hasErrors = (errors: forgotPasswordErrors): bool => {
+  let emptyErrors = (): errors => {
+    forgotPassword: None,
+    email: None,
+  }
+
+  let hasErrors = (errors: errors): bool => {
     Belt.Option.isSome(errors.forgotPassword) || Belt.Option.isSome(errors.email)
   }
 
@@ -463,17 +465,16 @@ module ForgotPassword = {
     }
   }
 
-  let validateForgotPassword = (forgotPassword: forgotPassword): forgotPasswordErrors => {
+  let validateForgotPassword = (forgotPassword: forgotPassword): errors => {
     forgotPassword: None,
     email: validateEmail(forgotPassword.email),
   }
 
   let forgotPasswordErrorToString = (error: forgotPasswordError): string => {
     switch error {
-    | #UnknownError => "There was a problem processing your forgot password request. Please try again."
     | #RequestFailed => "There was a problem processing your forgot password request. Please try again."
-    | #EmailNotFound => "There was a problem processing your forgot password request. Please try again."
-    | #AccountNotActivated => "There was a problem processing your forgot password request. Please try again."
+    | #EmailNotFound => "No account was found with that email address. Please try again."
+    | #AccountNotActivated => "That account has not been activated. Please contact us for support."
     }
   }
 

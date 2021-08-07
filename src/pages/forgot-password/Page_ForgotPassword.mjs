@@ -86,24 +86,20 @@ function renderPage(user) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
-        var errors = json.errors;
-        var errors$1 = errors !== undefined ? errors : ({
-              forgotPassword: "UnknownError",
-              email: undefined
-            });
+      var errors = json.errors;
+      if (Common_User.ForgotPassword.hasErrors(errors)) {
         Curry._1(dispatch, {
               TAG: /* SetErrors */2,
-              _0: errors$1
+              _0: errors
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */1,
                     _0: false
                   });
+      } else {
+        router.push(Common_Url.forgotPasswordSuccess(undefined));
+        return ;
       }
-      router.push(Common_Url.forgotPasswordSuccess(undefined));
-      
     };
     Client_User.forgotPassword(forgotPassword, onSuccess, onError);
     
