@@ -1,4 +1,4 @@
-// `props` must only contain valid JSON types (no undefined values)
+// props must only contain valid JSON types (no undefined values)
 type props = {clientConfig: Common_ClientConfig.t}
 
 type state = {

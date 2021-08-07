@@ -1,7 +1,7 @@
-// Important: The props must only contain valid JSON types
+// props must only contain valid JSON types (no undefined values)
 type props = {
   userDto: Js.Null.t<Common_User.User.dto>,
-  clientConfig: Common_ClientConfig.t,
+  clientConfig: Common_ClientConfig.t, // TODO: Rename to DTO
 }
 
 type state = {

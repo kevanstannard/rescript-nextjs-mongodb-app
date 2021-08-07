@@ -3,6 +3,7 @@ type params = {
   resetPasswordKey: string,
 }
 
+// props must only contain valid JSON types (no undefined values)
 type props = {
   config: Common_ClientConfig.t,
   userDto: Js.Null.t<Common_User.User.dto>,
