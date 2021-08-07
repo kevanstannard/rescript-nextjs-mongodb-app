@@ -5,8 +5,7 @@ let initialState = () => {
   newPassword: "",
   newPasswordConfirm: "",
   isSubmitting: false,
-  requestError: None,
-  validation: {
+  errors: {
     changePassword: None,
     currentPassword: None,
     newPassword: None,
@@ -20,8 +19,7 @@ let reducer = (state, action) => {
   | SetNewPassword(newPassword) => {...state, newPassword: newPassword}
   | SetNewPasswordConfirm(newPasswordConfirm) => {...state, newPasswordConfirm: newPasswordConfirm}
   | SetIsSubmitting(isSubmitting) => {...state, isSubmitting: isSubmitting}
-  | SetRequestError(requestError) => {...state, requestError: requestError}
-  | SetValidation(validation) => {...state, validation: validation}
+  | SetErrors(errors) => {...state, errors: errors}
   }
 }
 
@@ -36,27 +34,31 @@ let renderPage = (user: Common_User.User.t) => {
       newPasswordConfirm: state.newPasswordConfirm,
     }
 
-    let changePasswordValidation = Common_User.ChangePassword.validateChangePassword(changePassword)
+    let errors = Common_User.ChangePassword.validateChangePassword(changePassword)
 
-    dispatch(SetRequestError(None))
-    dispatch(SetValidation(changePasswordValidation))
+    dispatch(SetErrors(errors))
 
-    if !Common_User.ChangePassword.hasErrors(changePasswordValidation) {
+    if !Common_User.ChangePassword.hasErrors(errors) {
       dispatch(SetIsSubmitting(true))
 
       let onError = () => {
-        dispatch(SetRequestError(Some(#RequestFailed)))
+        let errors: Common_User.ChangePassword.errors = {
+          changePassword: Some(#RequestFailed),
+          currentPassword: None,
+          newPassword: None,
+          newPasswordConfirm: None,
+        }
+        dispatch(SetErrors(errors))
         dispatch(SetIsSubmitting(false))
       }
 
       let onSuccess = (json: Js.Json.t) => {
-        let changePasswordResult = json->Common_User.ChangePassword.asChangePasswordResult
-        switch changePasswordResult.result {
-        | #Ok => router->Next.Router.push(Common_Url.changePasswordSuccess())
-        | #Error => {
-            dispatch(SetValidation(changePasswordResult.validation))
-            dispatch(SetIsSubmitting(false))
-          }
+        let {errors} = json->Common_User.ChangePassword.asChangePasswordResult
+        if Common_User.ChangePassword.hasErrors(errors) {
+          dispatch(SetErrors(errors))
+          dispatch(SetIsSubmitting(false))
+        } else {
+          router->Next.Router.push(Common_Url.changePasswordSuccess())
         }
       }
 
@@ -64,31 +66,22 @@ let renderPage = (user: Common_User.User.t) => {
     }
   }
 
-  let requestError = switch state.requestError {
-  | Some(requestError) =>
-    switch requestError {
-    | #RequestFailed =>
-      Some("An error occurred when trying to change your password. Please try again.")
-    }
-  | None =>
-    state.validation.changePassword->Belt.Option.map(
-      Common_User.ChangePassword.changePasswordValidationErrorToString,
+  let changePasswordError =
+    state.errors.changePassword->Belt.Option.map(
+      Common_User.ChangePassword.changePasswordErrorToString,
     )
-  }
 
   let currentPasswordError =
-    state.validation.currentPassword->Belt.Option.map(
-      Common_User.ChangePassword.currentPasswordValidationErrorToString,
+    state.errors.currentPassword->Belt.Option.map(
+      Common_User.ChangePassword.currentPasswordErrorToString,
     )
 
   let newPasswordError =
-    state.validation.newPassword->Belt.Option.map(
-      Common_User.ChangePassword.newPasswordValidationErrorToString,
-    )
+    state.errors.newPassword->Belt.Option.map(Common_User.ChangePassword.newPasswordErrorToString)
 
   let newPasswordConfirmError =
-    state.validation.newPasswordConfirm->Belt.Option.map(
-      Common_User.ChangePassword.newPasswordConfirmValidationErrorToString,
+    state.errors.newPasswordConfirm->Belt.Option.map(
+      Common_User.ChangePassword.newPasswordConfirmErrorToString,
     )
 
   <Page_ChangePassword_View
@@ -102,10 +95,10 @@ let renderPage = (user: Common_User.User.t) => {
       dispatch(SetNewPasswordConfirm(newPasswordConfirm))}
     onChangePasswordClick={onChangePasswordClick}
     isSubmitting={state.isSubmitting}
+    changePasswordError
     currentPasswordError
     newPasswordError
     newPasswordConfirmError
-    requestError={requestError}
   />
 }
 

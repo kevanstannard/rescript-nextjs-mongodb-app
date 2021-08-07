@@ -396,56 +396,49 @@ let changePassword = (
   client: MongoClient.t,
   userId: ObjectId.t,
   changePassword: Common_User.ChangePassword.changePassword,
-): Promise.t<
-  result<
-    Common_User.ChangePassword.changePasswordValidation,
-    Common_User.ChangePassword.changePasswordValidation,
-  >,
-> => {
-  let validation: Common_User.ChangePassword.changePasswordValidation = Common_User.ChangePassword.validateChangePassword(
-    changePassword,
-  )
-  if Common_User.ChangePassword.hasErrors(validation) {
-    Promise.resolve(Error(validation))
+) => {
+  let errors = Common_User.ChangePassword.validateChangePassword(changePassword)
+  if Common_User.ChangePassword.hasErrors(errors) {
+    Promise.resolve(Error(errors))
   } else {
     client
     ->findUserByObjectId(userId)
     ->Promise.then(user => {
       switch user {
       | None => {
-          let validation: Common_User.ChangePassword.changePasswordValidation = {
+          let errors: Common_User.ChangePassword.errors = {
             changePassword: Some(#UserNotFound),
             currentPassword: None,
             newPassword: None,
             newPasswordConfirm: None,
           }
-          Promise.resolve(Error(validation))
+          Promise.resolve(Error(errors))
         }
       | Some(user) =>
         if !user.isActivated {
-          let validation: Common_User.ChangePassword.changePasswordValidation = {
+          let errors: Common_User.ChangePassword.errors = {
             changePassword: Some(#AccountNotActivated),
             currentPassword: None,
             newPassword: None,
             newPasswordConfirm: None,
           }
-          Promise.resolve(Error(validation))
+          Promise.resolve(Error(errors))
         } else {
           comparePasswords(
             changePassword.currentPassword,
             user.passwordHash,
           )->Promise.then(compareResult => {
             if !compareResult {
-              let validation: Common_User.ChangePassword.changePasswordValidation = {
+              let errors: Common_User.ChangePassword.errors = {
                 changePassword: Some(#CurrentPasswordInvalid),
                 currentPassword: None,
                 newPassword: None,
                 newPasswordConfirm: None,
               }
-              Promise.resolve(Error(validation))
+              Promise.resolve(Error(errors))
             } else {
               setPassword(client, userId, changePassword.newPassword)->Promise.then(_ => {
-                Promise.resolve(Ok(validation))
+                Promise.resolve(Ok())
               })
             }
           })

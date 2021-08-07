@@ -15,13 +15,12 @@ function initialState(param) {
           newPassword: "",
           newPasswordConfirm: "",
           isSubmitting: false,
-          validation: {
+          errors: {
             changePassword: undefined,
             currentPassword: undefined,
             newPassword: undefined,
             newPasswordConfirm: undefined
-          },
-          requestError: undefined
+          }
         };
 }
 
@@ -33,8 +32,7 @@ function reducer(state, action) {
                 newPassword: state.newPassword,
                 newPasswordConfirm: state.newPasswordConfirm,
                 isSubmitting: state.isSubmitting,
-                validation: state.validation,
-                requestError: state.requestError
+                errors: state.errors
               };
     case /* SetNewPassword */1 :
         return {
@@ -42,8 +40,7 @@ function reducer(state, action) {
                 newPassword: action._0,
                 newPasswordConfirm: state.newPasswordConfirm,
                 isSubmitting: state.isSubmitting,
-                validation: state.validation,
-                requestError: state.requestError
+                errors: state.errors
               };
     case /* SetNewPasswordConfirm */2 :
         return {
@@ -51,8 +48,7 @@ function reducer(state, action) {
                 newPassword: state.newPassword,
                 newPasswordConfirm: action._0,
                 isSubmitting: state.isSubmitting,
-                validation: state.validation,
-                requestError: state.requestError
+                errors: state.errors
               };
     case /* SetIsSubmitting */3 :
         return {
@@ -60,26 +56,15 @@ function reducer(state, action) {
                 newPassword: state.newPassword,
                 newPasswordConfirm: state.newPasswordConfirm,
                 isSubmitting: action._0,
-                validation: state.validation,
-                requestError: state.requestError
+                errors: state.errors
               };
-    case /* SetRequestError */4 :
+    case /* SetErrors */4 :
         return {
                 currentPassword: state.currentPassword,
                 newPassword: state.newPassword,
                 newPasswordConfirm: state.newPasswordConfirm,
                 isSubmitting: state.isSubmitting,
-                validation: state.validation,
-                requestError: action._0
-              };
-    case /* SetValidation */5 :
-        return {
-                currentPassword: state.currentPassword,
-                newPassword: state.newPassword,
-                newPasswordConfirm: state.newPasswordConfirm,
-                isSubmitting: state.isSubmitting,
-                validation: action._0,
-                requestError: state.requestError
+                errors: action._0
               };
     
   }
@@ -91,13 +76,12 @@ function renderPage(user) {
         newPassword: "",
         newPasswordConfirm: "",
         isSubmitting: false,
-        validation: {
+        errors: {
           changePassword: undefined,
           currentPassword: undefined,
           newPassword: undefined,
           newPasswordConfirm: undefined
-        },
-        requestError: undefined
+        }
       });
   var dispatch = match[1];
   var state = match[0];
@@ -111,16 +95,12 @@ function renderPage(user) {
       newPassword: changePassword_newPassword,
       newPasswordConfirm: changePassword_newPasswordConfirm
     };
-    var changePasswordValidation = Common_User.ChangePassword.validateChangePassword(changePassword);
+    var errors = Common_User.ChangePassword.validateChangePassword(changePassword);
     Curry._1(dispatch, {
-          TAG: /* SetRequestError */4,
-          _0: undefined
+          TAG: /* SetErrors */4,
+          _0: errors
         });
-    Curry._1(dispatch, {
-          TAG: /* SetValidation */5,
-          _0: changePasswordValidation
-        });
-    if (Common_User.ChangePassword.hasErrors(changePasswordValidation)) {
+    if (Common_User.ChangePassword.hasErrors(errors)) {
       return ;
     }
     Curry._1(dispatch, {
@@ -129,8 +109,13 @@ function renderPage(user) {
         });
     var onError = function (param) {
       Curry._1(dispatch, {
-            TAG: /* SetRequestError */4,
-            _0: "RequestFailed"
+            TAG: /* SetErrors */4,
+            _0: {
+              changePassword: "RequestFailed",
+              currentPassword: undefined,
+              newPassword: undefined,
+              newPasswordConfirm: undefined
+            }
           });
       return Curry._1(dispatch, {
                   TAG: /* SetIsSubmitting */3,
@@ -138,11 +123,11 @@ function renderPage(user) {
                 });
     };
     var onSuccess = function (json) {
-      var match = json.result;
-      if (match === "Error") {
+      var errors = json.errors;
+      if (Common_User.ChangePassword.hasErrors(errors)) {
         Curry._1(dispatch, {
-              TAG: /* SetValidation */5,
-              _0: json.validation
+              TAG: /* SetErrors */4,
+              _0: errors
             });
         return Curry._1(dispatch, {
                     TAG: /* SetIsSubmitting */3,
@@ -156,19 +141,15 @@ function renderPage(user) {
     Client_User.changePassword(changePassword, onSuccess, onError);
     
   };
-  var requestError = state.requestError;
-  var requestError$1 = requestError !== undefined ? "An error occurred when trying to change your password. Please try again." : Belt_Option.map(state.validation.changePassword, Common_User.ChangePassword.changePasswordValidationErrorToString);
-  var currentPasswordError = Belt_Option.map(state.validation.currentPassword, Common_User.ChangePassword.currentPasswordValidationErrorToString);
-  var newPasswordError = Belt_Option.map(state.validation.newPassword, Common_User.ChangePassword.newPasswordValidationErrorToString);
-  var newPasswordConfirmError = Belt_Option.map(state.validation.newPasswordConfirm, Common_User.ChangePassword.newPasswordConfirmValidationErrorToString);
+  var changePasswordError = Belt_Option.map(state.errors.changePassword, Common_User.ChangePassword.changePasswordErrorToString);
+  var currentPasswordError = Belt_Option.map(state.errors.currentPassword, Common_User.ChangePassword.currentPasswordErrorToString);
+  var newPasswordError = Belt_Option.map(state.errors.newPassword, Common_User.ChangePassword.newPasswordErrorToString);
+  var newPasswordConfirmError = Belt_Option.map(state.errors.newPasswordConfirm, Common_User.ChangePassword.newPasswordConfirmErrorToString);
   return React.createElement(Page_ChangePassword_View.make, {
               user: user,
               currentPassword: state.currentPassword,
               newPassword: state.newPassword,
               newPasswordConfirm: state.newPasswordConfirm,
-              currentPasswordError: currentPasswordError,
-              newPasswordError: newPasswordError,
-              newPasswordConfirmError: newPasswordConfirmError,
               onCurrentPasswordChange: (function (currentPassword) {
                   return Curry._1(dispatch, {
                               TAG: /* SetCurrentPassword */0,
@@ -188,8 +169,11 @@ function renderPage(user) {
                             });
                 }),
               onChangePasswordClick: onChangePasswordClick,
-              requestError: requestError$1,
-              isSubmitting: state.isSubmitting
+              isSubmitting: state.isSubmitting,
+              changePasswordError: changePasswordError,
+              currentPasswordError: currentPasswordError,
+              newPasswordError: newPasswordError,
+              newPasswordConfirmError: newPasswordConfirmError
             });
 }
 

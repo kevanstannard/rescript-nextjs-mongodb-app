@@ -281,11 +281,20 @@ var ChangeEmail = {
   emailErrorToString: emailErrorToString$2
 };
 
-function hasErrors$3(validation) {
-  if (Belt_Option.isSome(validation.changePassword) || Belt_Option.isSome(validation.currentPassword) || Belt_Option.isSome(validation.newPassword)) {
+function emptyErrors$2(param) {
+  return {
+          changePassword: undefined,
+          currentPassword: undefined,
+          newPassword: undefined,
+          newPasswordConfirm: undefined
+        };
+}
+
+function hasErrors$3(errors) {
+  if (Belt_Option.isSome(errors.changePassword) || Belt_Option.isSome(errors.currentPassword) || Belt_Option.isSome(errors.newPassword)) {
     return true;
   } else {
-    return Belt_Option.isSome(validation.newPasswordConfirm);
+    return Belt_Option.isSome(errors.newPasswordConfirm);
   }
 }
 
@@ -323,23 +332,27 @@ function validateChangePassword(param) {
         };
 }
 
-function changePasswordValidationErrorToString(error) {
-  if (error === "UserNotFound" || error !== "CurrentPasswordInvalid") {
-    return "An error occurred when trying to change your password. Please try again.";
-  } else {
+function changePasswordErrorToString(error) {
+  if (error === "UserNotFound") {
+    return "An error occurred when trying to change your password. The account was not found. Please contact us for support.";
+  } else if (error === "CurrentPasswordInvalid") {
     return "The current password you entered is not correct. Please try again.";
+  } else if (error === "AccountNotActivated") {
+    return "An error occurred when trying to change your password. The account is not activated. Please contact us for support.";
+  } else {
+    return "An error occurred when trying to change your password. Please try again.";
   }
 }
 
-function currentPasswordValidationErrorToString(error) {
+function currentPasswordErrorToString(error) {
   return "Enter your current password";
 }
 
-function newPasswordValidationErrorToString(error) {
+function newPasswordErrorToString(error) {
   return "Enter your new password";
 }
 
-function newPasswordConfirmValidationErrorToString(error) {
+function newPasswordConfirmErrorToString(error) {
   if (error === "NewPasswordConfirmEmpty") {
     return "Re-enter your new password";
   } else {
@@ -348,15 +361,16 @@ function newPasswordConfirmValidationErrorToString(error) {
 }
 
 var ChangePassword = {
+  emptyErrors: emptyErrors$2,
   hasErrors: hasErrors$3,
   validateCurrentPassword: validateCurrentPassword,
   validateNewPassword: validateNewPassword,
   validateNewPasswordConfirm: validateNewPasswordConfirm,
   validateChangePassword: validateChangePassword,
-  changePasswordValidationErrorToString: changePasswordValidationErrorToString,
-  currentPasswordValidationErrorToString: currentPasswordValidationErrorToString,
-  newPasswordValidationErrorToString: newPasswordValidationErrorToString,
-  newPasswordConfirmValidationErrorToString: newPasswordConfirmValidationErrorToString
+  changePasswordErrorToString: changePasswordErrorToString,
+  currentPasswordErrorToString: currentPasswordErrorToString,
+  newPasswordErrorToString: newPasswordErrorToString,
+  newPasswordConfirmErrorToString: newPasswordConfirmErrorToString
 };
 
 function hasErrors$4(errors) {

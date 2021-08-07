@@ -414,11 +414,11 @@ function setPassword(client, userId, password) {
 }
 
 function changePassword(client, userId, changePassword$1) {
-  var validation = Common_User.ChangePassword.validateChangePassword(changePassword$1);
-  if (Common_User.ChangePassword.hasErrors(validation)) {
+  var errors = Common_User.ChangePassword.validateChangePassword(changePassword$1);
+  if (Common_User.ChangePassword.hasErrors(errors)) {
     return Promise.resolve({
                 TAG: /* Error */1,
-                _0: validation
+                _0: errors
               });
   } else {
     return findUserByObjectId(client, userId).then(function (user) {
@@ -429,7 +429,7 @@ function changePassword(client, userId, changePassword$1) {
                                   return setPassword(client, userId, changePassword$1.newPassword).then(function (param) {
                                               return Promise.resolve({
                                                           TAG: /* Ok */0,
-                                                          _0: validation
+                                                          _0: undefined
                                                         });
                                             });
                                 } else {

@@ -20,20 +20,20 @@ let make = (
   ~currentPassword,
   ~newPassword,
   ~newPasswordConfirm,
-  ~currentPasswordError,
-  ~newPasswordError,
-  ~newPasswordConfirmError,
   ~onCurrentPasswordChange,
   ~onNewPasswordChange,
   ~onNewPasswordConfirmChange,
   ~onChangePasswordClick,
-  ~requestError,
   ~isSubmitting,
+  ~changePasswordError,
+  ~currentPasswordError,
+  ~newPasswordError,
+  ~newPasswordConfirmError,
 ) => {
   <Layout_Main user={Some(user)}>
     <FormContainer>
       <Title text="Change Password" size=#Primary />
-      <ErrorMessage error={requestError} />
+      <ErrorMessage error={changePasswordError} />
       <PasswordField
         label="Current password"
         value={currentPassword}

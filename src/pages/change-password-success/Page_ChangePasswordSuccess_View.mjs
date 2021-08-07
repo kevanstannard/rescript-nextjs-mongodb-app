@@ -19,8 +19,8 @@ function Page_ChangePasswordSuccess_View(Props) {
                 }, "Your password has been changed."), React.createElement("p", {
                   className: "mb-4"
                 }, React.createElement(Component_Link.make, {
-                      href: Common_Url.home(undefined),
-                      children: "Return to home"
+                      href: Common_Url.account(undefined),
+                      children: "Return to the Account page"
                     })));
 }
 

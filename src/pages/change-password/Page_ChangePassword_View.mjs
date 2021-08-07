@@ -28,15 +28,15 @@ function Page_ChangePassword_View(Props) {
   var currentPassword = Props.currentPassword;
   var newPassword = Props.newPassword;
   var newPasswordConfirm = Props.newPasswordConfirm;
-  var currentPasswordError = Props.currentPasswordError;
-  var newPasswordError = Props.newPasswordError;
-  var newPasswordConfirmError = Props.newPasswordConfirmError;
   var onCurrentPasswordChange = Props.onCurrentPasswordChange;
   var onNewPasswordChange = Props.onNewPasswordChange;
   var onNewPasswordConfirmChange = Props.onNewPasswordConfirmChange;
   var onChangePasswordClick = Props.onChangePasswordClick;
-  var requestError = Props.requestError;
   var isSubmitting = Props.isSubmitting;
+  var changePasswordError = Props.changePasswordError;
+  var currentPasswordError = Props.currentPasswordError;
+  var newPasswordError = Props.newPasswordError;
+  var newPasswordConfirmError = Props.newPasswordConfirmError;
   return React.createElement(Layout_Main.make, {
               user: user,
               children: React.createElement(Component_Form.FormContainer.make, {
@@ -45,7 +45,7 @@ function Page_ChangePassword_View(Props) {
                         text: "Change Password",
                         size: "Primary"
                       }), React.createElement(Page_ChangePassword_View$ErrorMessage, {
-                        error: requestError
+                        error: changePasswordError
                       }), React.createElement(Component_Form.PasswordField.make, {
                         label: "Current password",
                         value: currentPassword,

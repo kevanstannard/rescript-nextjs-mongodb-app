@@ -1,15 +1,12 @@
 // props must only contain valid JSON types (no undefined values)
 type props = {userDto: Common_User.User.dto}
 
-type requestError = [#RequestFailed]
-
 type state = {
   currentPassword: string,
   newPassword: string,
   newPasswordConfirm: string,
   isSubmitting: bool,
-  validation: Common_User.ChangePassword.changePasswordValidation,
-  requestError: option<requestError>,
+  errors: Common_User.ChangePassword.errors,
 }
 
 type action =
@@ -17,5 +14,4 @@ type action =
   | SetNewPassword(string)
   | SetNewPasswordConfirm(string)
   | SetIsSubmitting(bool)
-  | SetRequestError(option<requestError>)
-  | SetValidation(Common_User.ChangePassword.changePasswordValidation)
+  | SetErrors(Common_User.ChangePassword.errors)
