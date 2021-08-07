@@ -4,26 +4,19 @@ import * as Server_Page from "../../modules/server/Server_Page.mjs";
 import * as Server_Config from "../../modules/server/Server_Config.mjs";
 import * as Server_Middleware from "../../modules/server/Server_Middleware.mjs";
 
-function makeResult(currentUser) {
-  if (currentUser !== undefined) {
-    return Server_Page.redirectHome(undefined);
-  } else {
-    return Server_Page.props({
-                clientConfig: Server_Config.getClientConfig(undefined)
-              });
-  }
-}
-
 function getServerSideProps(context) {
   var req = context.req;
   return Server_Middleware.runAll(req, context.res).then(function (param) {
-              var match = Server_Middleware.getRequestData(req);
-              return makeResult(match.currentUser);
+              return Server_Page.withNotAuthenticated(req, (function (param) {
+                            var props = {
+                              clientConfig: Server_Config.getClientConfig(undefined)
+                            };
+                            return Promise.resolve(Server_Page.props(props));
+                          }));
             });
 }
 
 export {
-  makeResult ,
   getServerSideProps ,
   
 }

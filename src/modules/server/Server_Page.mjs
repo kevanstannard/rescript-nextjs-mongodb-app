@@ -63,6 +63,15 @@ function withAuthentication(req, next) {
             });
 }
 
+function withNotAuthenticated(req, next) {
+  var match = Server_Middleware.getRequestData(req);
+  if (match.currentUser !== undefined) {
+    return Promise.resolve(redirectHome(undefined));
+  } else {
+    return Curry._1(next, undefined);
+  }
+}
+
 export {
   props ,
   noProps ,
@@ -70,6 +79,7 @@ export {
   redirectHome ,
   redirectLogin ,
   withAuthentication ,
+  withNotAuthenticated ,
   
 }
 /* Server_Middleware Not a pure module */

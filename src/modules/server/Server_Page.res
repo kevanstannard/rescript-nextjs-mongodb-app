@@ -47,3 +47,11 @@ let withAuthentication = (req, next) => {
     }
   }
 }
+
+let withNotAuthenticated = (req, next) => {
+  let {currentUser} = Server_Middleware.getRequestData(req)
+  switch currentUser {
+  | None => next()
+  | Some(_) => redirectHome()->Promise.resolve
+  }
+}
