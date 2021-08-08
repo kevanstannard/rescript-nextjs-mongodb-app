@@ -14,22 +14,30 @@ let unset = (req, key) => {
   NextIronSession.save(req)
 }
 
-let setUserId = (req: Next.Req.t, userId: option<string>): Promise.t<unit> => {
-  switch userId {
-  | None => unset(req, "userId")
-  | Some(userId) => setString(req, "userId", userId)
+module UserId = {
+  let key = "userId"
+
+  let set = (req: Next.Req.t, userId: option<string>): Promise.t<unit> => {
+    switch userId {
+    | None => unset(req, key)
+    | Some(userId) => setString(req, key, userId)
+    }
   }
+
+  let get = (req: Next.Req.t): option<string> => getString(req, key)->Js.Nullable.toOption
 }
 
-let getUserId = (req: Next.Req.t): option<string> => getString(req, "userId")->Js.Nullable.toOption
+module NextUrl = {
+  let key = "nextUrl"
 
-let setNextUrl = (req: Next.Req.t, nextUrl: option<string>): Promise.t<unit> => {
-  switch nextUrl {
-  | None => unset(req, "nextUrl")
-  | Some(nextUrl) => setString(req, "nextUrl", nextUrl)
+  let set = (req: Next.Req.t, nextUrl: option<string>): Promise.t<unit> => {
+    switch nextUrl {
+    | None => unset(req, key)
+    | Some(nextUrl) => setString(req, key, nextUrl)
+    }
   }
-}
 
-let getNextUrl = (req: Next.Req.t): option<string> => {
-  getString(req, "nextUrl")->Js.Nullable.toOption
+  let get = (req: Next.Req.t): option<string> => {
+    getString(req, key)->Js.Nullable.toOption
+  }
 }

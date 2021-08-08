@@ -41,7 +41,7 @@ let withAuthentication = (req, next) => {
   | Some(user) => next(user)
   | None => {
       let url = Next.Req.url(req)
-      Server_Session.setNextUrl(req, Some(url))->Promise.thenResolve(_ => {
+      Server_Session.NextUrl.set(req, Some(url))->Promise.thenResolve(_ => {
         redirectLogin()
       })
     }

@@ -47,25 +47,11 @@ module Session = {
 
 module User = {
   let userKey = "user"
-  let userIdKey = "userId"
 
   let setUser = (req: Next.Req.t, value: option<Server_User.User.t>): unit =>
     Server_Request.set(req, userKey, value)
 
   let getUser = (req: Next.Req.t): option<Server_User.User.t> => Server_Request.get(req, userKey)
-
-  let setUserId = (req: Next.Req.t, value: option<MongoDb.ObjectId.t>): unit =>
-    Server_Request.set(req, userIdKey, value)
-
-  let getUserId = (req: Next.Req.t): option<MongoDb.ObjectId.t> =>
-    Server_Request.get(req, userIdKey)
-
-  let get = (req: Next.Req.t): option<(MongoDb.ObjectId.t, Server_User.User.t)> => {
-    switch (getUserId(req), getUser(req)) {
-    | (Some(userId), Some(user)) => Some(userId, user)
-    | _ => None
-    }
-  }
 
   let middlewareAsync = (
     (),
@@ -73,11 +59,10 @@ module User = {
     _res: Next.Res.t,
     next: unit => Promise.t<unit>,
   ): Promise.t<unit> => {
-    let userId: option<string> = Server_Session.getUserId(req)
+    let userId: option<string> = Server_Session.UserId.get(req)
     switch userId {
     | None => {
         setUser(req, None)
-        setUserId(req, None)
         Promise.resolve()
       }
     | Some(userId) => {
@@ -89,7 +74,6 @@ module User = {
           ->Server_User.findUserByObjectId(userId)
           ->Promise.then(user => {
             setUser(req, user)
-            setUserId(req, Some(userId))
             Promise.resolve()
           })
         }
@@ -111,20 +95,14 @@ let runAll = (req: Next.Req.t, res: Next.Res.t) => all()->run(req, res)
 
 type requestData = {
   client: MongoDb.MongoClient.t,
-  currentUserId: option<MongoDb.ObjectId.t>,
-  currentUserIdString: option<string>,
   currentUser: option<Server_User.User.t>,
 }
 
 let getRequestData = req => {
   let client = Mongo.getClient(req)
   let user = User.getUser(req)
-  let userId = User.getUserId(req)
-  let userIdString = userId->Belt.Option.map(MongoDb.ObjectId.toString)
   let requestData: requestData = {
     client: client,
-    currentUserId: userId,
-    currentUserIdString: userIdString,
     currentUser: user,
   }
   requestData
