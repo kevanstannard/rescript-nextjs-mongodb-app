@@ -20,5 +20,9 @@ temp
 .env
 .env.local
 
+*.mjs
+*.bs.js
+
+
 
 
