@@ -8,7 +8,7 @@ let makePayload = (result): Common_User.ResendActivation.resendActivationResult 
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
   open Common_User.ResendActivation
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     let resendActivation = Codec.decode(body)
     switch resendActivation {
     | Error(reason) => {

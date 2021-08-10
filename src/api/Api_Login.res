@@ -23,7 +23,7 @@ let handleError = (res, errors) => {
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     let login = Common_User.Login.Codec.decode(body)
     switch login {
     | Error(reason) => {

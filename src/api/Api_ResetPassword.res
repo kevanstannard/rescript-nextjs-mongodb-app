@@ -7,7 +7,7 @@ let makePayload = (resetPasswordResult): Common_User.ResetPassword.resetPassword
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     let resetPassword = Common_User.ResetPassword.Codec.decode(body)
     switch resetPassword {
     | Error(reason) => {

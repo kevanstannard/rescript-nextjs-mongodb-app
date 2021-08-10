@@ -18,12 +18,10 @@ let sendSuccess = (res: Next.Res.t, payload: 'a) => {
   sendJson(res, #Success, payload->Common_Json.asJson)
 }
 
-let withBodyAsJson = (
-  req: Next.Req.t,
-  res: Next.Res.t,
-  next: Js.Json.t => Promise.t<unit>,
-): Promise.t<unit> => {
-  let body = Server_Middleware.NextRequest.getBodyAsJson(req)
+let withBody = (req: Next.Req.t, res: Next.Res.t, next: Js.Json.t => Promise.t<unit>): Promise.t<
+  unit,
+> => {
+  let body = Server_Middleware.NextRequest.getBody(req)
   switch body {
   | None => {
       sendError(res, #BadRequest, "Body is missing from request")

@@ -9,7 +9,7 @@ let makePayload = (changeEmailResult): Common_User.ChangeEmail.changeEmailResult
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     Server_Api.withCurrentUser(req, res, currentUser => {
       let changeEmail = Common_User.ChangeEmail.Codec.decode(body)
       switch changeEmail {

@@ -1,6 +1,6 @@
 // Default Next.js middleware helpers
 module NextRequest = {
-  let getBodyAsJson = (req: Next.Req.t) => {
+  let getBody = (req: Next.Req.t) => {
     req->Next.Req.bodyAsJson->Js.Nullable.toOption
   }
 }

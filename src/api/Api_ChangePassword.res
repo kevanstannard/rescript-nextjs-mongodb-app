@@ -7,7 +7,7 @@ let makePayload = (changePasswordResult): Common_User.ChangePassword.changePassw
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     Server_Api.withCurrentUser(req, res, currentUser => {
       let changePassword = Common_User.ChangePassword.Codec.decode(body)
       switch changePassword {

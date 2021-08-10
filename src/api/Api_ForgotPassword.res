@@ -8,7 +8,7 @@ let makePayload = (forgotPasswordResult): Common_User.ForgotPassword.forgotPassw
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBodyAsJson(req, res, body => {
+  Server_Api.withBody(req, res, body => {
     let forgotPassword = Common_User.ForgotPassword.Codec.decode(body)
     switch forgotPassword {
     | Error(reason) => {
