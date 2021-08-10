@@ -7,17 +7,25 @@ let makePayload = (changePasswordResult): Common_User.ChangePassword.changePassw
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBody(req, res, body => {
+  Server_Api.withBodyAsJson(req, res, body => {
     Server_Api.withCurrentUser(req, res, currentUser => {
-      let changePassword: Common_User.ChangePassword.changePassword = body
-      let {client} = Server_Middleware.getRequestData(req)
-      client
-      ->Server_User.changePassword(currentUser._id, changePassword)
-      ->Promise.then(changePasswordResult => {
-        let payload = makePayload(changePasswordResult)
-        Server_Api.sendSuccess(res, payload)
-        Promise.resolve()
-      })
+      let changePassword = Common_User.ChangePassword.Codec.decode(body)
+      switch changePassword {
+      | Error(reason) => {
+          Server_Api.sendError(res, #BadRequest, reason)
+          Promise.resolve()
+        }
+      | Ok(changePassword) => {
+          let {client} = Server_Middleware.getRequestData(req)
+          client
+          ->Server_User.changePassword(currentUser._id, changePassword)
+          ->Promise.then(changePasswordResult => {
+            let payload = makePayload(changePasswordResult)
+            Server_Api.sendSuccess(res, payload)
+            Promise.resolve()
+          })
+        }
+      }
     })
   })
 }

@@ -447,6 +447,30 @@ module ChangePassword = {
     | #NewPasswordConfirmMismatch => "This does not match the password above"
     }
   }
+
+  module Codec = {
+    let toFields = ({currentPassword, newPassword, newPasswordConfirm}: changePassword) => (
+      currentPassword,
+      newPassword,
+      newPasswordConfirm,
+    )
+    let fromFields = ((currentPassword, newPassword, newPasswordConfirm)) =>
+      {
+        currentPassword: currentPassword,
+        newPassword: newPassword,
+        newPasswordConfirm: newPasswordConfirm,
+      }->Ok
+    let codec = Jzon.object3(
+      toFields,
+      fromFields,
+      Jzon.field("currentPassword", Jzon.string),
+      Jzon.field("newPassword", Jzon.string),
+      Jzon.field("newPasswordConfirm", Jzon.string),
+    )
+
+    let encode = (changePassword: changePassword) => codec->Jzon.encode(changePassword)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module ForgotPassword = {
