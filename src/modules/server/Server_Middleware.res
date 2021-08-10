@@ -1,10 +1,5 @@
 // Default Next.js middleware helpers
 module NextRequest = {
-  @deprecated("Use getBodyAsJson")
-  let getBody = (req: Next.Req.t) => {
-    req->Next.Req.body->Js.Nullable.toOption
-  }
-
   let getBodyAsJson = (req: Next.Req.t) => {
     req->Next.Req.bodyAsJson->Js.Nullable.toOption
   }

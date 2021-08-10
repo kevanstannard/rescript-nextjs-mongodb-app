@@ -18,18 +18,6 @@ let sendSuccess = (res: Next.Res.t, payload: 'a) => {
   sendJson(res, #Success, payload->Common_Json.asJson)
 }
 
-@deprecated("Use withBodyAsJson")
-let withBody = (req: Next.Req.t, res: Next.Res.t, next): Promise.t<unit> => {
-  let body = Server_Middleware.NextRequest.getBody(req)
-  switch body {
-  | None => {
-      sendError(res, #BadRequest, "Body is missing from request")
-      Promise.resolve()
-    }
-  | Some(body) => next(body)
-  }
-}
-
 let withBodyAsJson = (
   req: Next.Req.t,
   res: Next.Res.t,
