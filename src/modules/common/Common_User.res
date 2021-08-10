@@ -190,6 +190,15 @@ module ResendActivation = {
     | None => "An unknown error occurred. Please contact us for support."
     }
   }
+
+  module Codec = {
+    let toFields = ({email}: resendActivation) => email
+    let fromFields = email => {email: email}->Ok
+    let codec = Jzon.object1(toFields, fromFields, Jzon.field("email", Jzon.string))
+
+    let encode = (resendActivation: resendActivation) => codec->Jzon.encode(resendActivation)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module Login = {
