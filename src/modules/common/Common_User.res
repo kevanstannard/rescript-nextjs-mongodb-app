@@ -264,6 +264,24 @@ module Login = {
     | #PasswordEmpty => "Enter a password"
     }
   }
+
+  module Codec = {
+    let toFields = ({email, password}: login) => (email, password)
+    let fromFields = ((email, password)) =>
+      {
+        email: email,
+        password: password,
+      }->Ok
+    let codec = Jzon.object2(
+      toFields,
+      fromFields,
+      Jzon.field("email", Jzon.string),
+      Jzon.field("password", Jzon.string),
+    )
+
+    let encode = (login: login) => codec->Jzon.encode(login)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module Logout = {

@@ -23,17 +23,25 @@ let handleError = (res, errors) => {
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBody(req, res, body => {
-    let login: Common_User.Login.login = body
-    let {client} = Server_Middleware.getRequestData(req)
-    client
-    ->Server_User.login(login)
-    ->Promise.then(loginResult => {
-      switch loginResult {
-      | Ok(user) => handleOK(req, res, user)
-      | Error(errors) => handleError(res, errors)
+  Server_Api.withBodyAsJson(req, res, body => {
+    let login = Common_User.Login.Codec.decode(body)
+    switch login {
+    | Error(reason) => {
+        Server_Api.sendError(res, #BadRequest, reason)
+        Promise.resolve()
       }
-    })
+    | Ok(login) => {
+        let {client} = Server_Middleware.getRequestData(req)
+        client
+        ->Server_User.login(login)
+        ->Promise.then(loginResult => {
+          switch loginResult {
+          | Ok(user) => handleOK(req, res, user)
+          | Error(errors) => handleError(res, errors)
+          }
+        })
+      }
+    }
   })
 }
 
