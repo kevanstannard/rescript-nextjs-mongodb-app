@@ -556,6 +556,24 @@ module ForgotPassword = {
     | #ReCaptchaInvalid => "Are you sure you're a robot?"
     }
   }
+
+  module Codec = {
+    let toFields = ({email, reCaptcha}: forgotPassword) => (email, reCaptcha)
+    let fromFields = ((email, reCaptcha)) =>
+      {
+        email: email,
+        reCaptcha: reCaptcha,
+      }->Ok
+    let codec = Jzon.object2(
+      toFields,
+      fromFields,
+      Jzon.field("email", Jzon.string),
+      Jzon.field("reCaptcha", Jzon.string)->Jzon.optional,
+    )
+
+    let encode = (forgotPassword: forgotPassword) => codec->Jzon.encode(forgotPassword)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module ResetPassword = {
