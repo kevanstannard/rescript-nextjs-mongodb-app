@@ -114,3 +114,23 @@ let reCaptchaErrorToString = (error: reCaptchaError): string => {
   | #ReCaptchaInvalid => "Are you sure you're a robot?"
   }
 }
+
+module Codec = {
+  let toFields = ({name, email, message, reCaptcha}: contact) => (name, email, message, reCaptcha)
+
+  let fromFields = ((name, email, message, reCaptcha)) =>
+    {name: name, email: email, message: message, reCaptcha: reCaptcha}->Ok
+
+  let codec = Jzon.object4(
+    toFields,
+    fromFields,
+    Jzon.field("name", Jzon.string),
+    Jzon.field("email", Jzon.string),
+    Jzon.field("message", Jzon.string),
+    Jzon.field("reCaptcha", Jzon.string)->Jzon.optional,
+  )
+
+  let encode = (contact: contact) => codec->Jzon.encode(contact)
+
+  let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+}
