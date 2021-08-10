@@ -4,7 +4,8 @@ module Req = {
   @set_index external set: (t, string, 'a) => unit = ""
   @get_index external get: (t, string) => Js.Nullable.t<'a> = ""
   @get_index external get_UNSAFE: (t, string) => 'a = ""
-  @get external body: t => Js.Nullable.t<'a> = "body"
+  @deprecated("Use bodyAsJson") @get external body: t => Js.Nullable.t<'a> = "body"
+  @get external bodyAsJson: t => Js.Nullable.t<Js.Json.t> = "body"
   @get external url: t => string = "url"
 }
 

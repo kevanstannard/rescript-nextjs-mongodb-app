@@ -4,6 +4,10 @@
   "sources": [{ "dir": "src", "subdirs": true }],
   "package-specs": { "module": "es6", "in-source": true },
   "suffix": ".mjs",
-  "bs-dependencies": ["@rescript/react", "@ryyppy/rescript-promise"],
+  "bs-dependencies": [
+    "@rescript/react",
+    "@ryyppy/rescript-promise",
+    "rescript-jzon"
+  ],
   "reason": { "react-jsx": 3 }
 }

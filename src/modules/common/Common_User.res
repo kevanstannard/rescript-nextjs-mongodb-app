@@ -330,6 +330,15 @@ module ChangeEmail = {
     | #EmailInvalid => "Enter a valid email address"
     }
   }
+
+  module Codec = {
+    let toFields = ({email}: changeEmail) => email
+    let fromFields = email => {email: email}->Ok
+    let codec = Jzon.object1(toFields, fromFields, Jzon.field("email", Jzon.string))
+
+    let encode = (changeEmail: changeEmail) => codec->Jzon.encode(changeEmail)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module ChangePassword = {
