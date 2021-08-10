@@ -128,6 +128,26 @@ module Signup = {
     | #ReCaptchaInvalid => "Are you sure you're a robot?"
     }
   }
+
+  module Codec = {
+    let toFields = ({email, password, reCaptcha}: signup) => (email, password, reCaptcha)
+    let fromFields = ((email, password, reCaptcha)) =>
+      {
+        email: email,
+        password: password,
+        reCaptcha: reCaptcha,
+      }->Ok
+    let codec = Jzon.object3(
+      toFields,
+      fromFields,
+      Jzon.field("email", Jzon.string),
+      Jzon.field("password", Jzon.string),
+      Jzon.field("reCaptcha", Jzon.string)->Jzon.optional,
+    )
+
+    let encode = (signup: signup) => codec->Jzon.encode(signup)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
 
 module ResendActivation = {

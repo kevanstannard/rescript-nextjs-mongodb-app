@@ -7,16 +7,24 @@ let makePayload = (signupResult): Common_User.Signup.signupResult => {
 }
 
 let handlePost = (req: Next.Req.t, res: Next.Res.t) => {
-  Server_Api.withBody(req, res, body => {
-    let signup: Common_User.Signup.signup = body
-    let {client} = Server_Middleware.getRequestData(req)
-    client
-    ->Server_User.signup(signup)
-    ->Promise.then(signupResult => {
-      let payload = makePayload(signupResult)
-      Server_Api.sendSuccess(res, payload)
-      Promise.resolve()
-    })
+  Server_Api.withBodyAsJson(req, res, body => {
+    let signup = Common_User.Signup.Codec.decode(body)
+    switch signup {
+    | Error(reason) => {
+        Server_Api.sendError(res, #BadRequest, reason)
+        Promise.resolve()
+      }
+    | Ok(signup) => {
+        let {client} = Server_Middleware.getRequestData(req)
+        client
+        ->Server_User.signup(signup)
+        ->Promise.then(signupResult => {
+          let payload = makePayload(signupResult)
+          Server_Api.sendSuccess(res, payload)
+          Promise.resolve()
+        })
+      }
+    }
   })
 }
 
