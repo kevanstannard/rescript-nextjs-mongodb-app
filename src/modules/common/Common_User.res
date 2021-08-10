@@ -738,4 +738,30 @@ module ResetPassword = {
     | #ReCaptchaInvalid => "Are you sure you're a robot?"
     }
   }
+
+  module Codec = {
+    let toFields = (
+      {userId, resetPasswordKey, password, passwordConfirm, reCaptcha}: resetPassword,
+    ) => (userId, resetPasswordKey, password, passwordConfirm, reCaptcha)
+    let fromFields = ((userId, resetPasswordKey, password, passwordConfirm, reCaptcha)) =>
+      {
+        userId: userId,
+        resetPasswordKey: resetPasswordKey,
+        password: password,
+        passwordConfirm: passwordConfirm,
+        reCaptcha: reCaptcha,
+      }->Ok
+    let codec = Jzon.object5(
+      toFields,
+      fromFields,
+      Jzon.field("userId", Jzon.string),
+      Jzon.field("resetPasswordKey", Jzon.string),
+      Jzon.field("password", Jzon.string),
+      Jzon.field("passwordConfirm", Jzon.string),
+      Jzon.field("reCaptcha", Jzon.string)->Jzon.optional,
+    )
+
+    let encode = (resetPassword: resetPassword) => codec->Jzon.encode(resetPassword)
+    let decode = (json: Js.Json.t) => codec->Common_Codec.decodeWithErrorAsString(json)
+  }
 }
