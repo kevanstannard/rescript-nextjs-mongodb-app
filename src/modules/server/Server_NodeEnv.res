@@ -1,8 +1,3 @@
-let isProduction = () => {
-  switch Server_Env.getNodeEnv() {
-  | "production" => true
-  | "development" => false
-  | "test" => false
-  | _ => Js.Exn.raiseError("Unknown environment")
-  }
-}
+let isProduction = () => Server_Env.getNodeEnv() === "production"
+
+let isDevelopment = () => Server_Env.getNodeEnv() === "development"

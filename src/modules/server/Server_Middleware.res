@@ -82,8 +82,41 @@ module User = {
   }
 }
 
+module Security = {
+  module ScriptSrc = {
+    // The default "script-src" directive in Helmet is 'self'.
+    let selfScriptSrc = ["'self'"]
+
+    // Google Captcha requires access some Google domains.
+    let googleScriptSrc = ["https://www.google.com", "https://www.gstatic.com"]
+
+    // Hot module reloading is used in a local development environment which makes use of `eval()`.
+    // To allow `eval()` we need enable 'unsafe-eval'
+    let hmrScriptSrc = Server_NodeEnv.isDevelopment() ? ["'unsafe-eval'"] : []
+
+    let makeScriptSrc = () => selfScriptSrc->Js.Array2.concat(hmrScriptSrc)
+
+    let makeScriptSrcElem = () => selfScriptSrc->Js.Array2.concat(googleScriptSrc)
+
+    let makeFrameSrc = () => selfScriptSrc->Js.Array2.concat(googleScriptSrc)
+  }
+
+  let scriptSrc = ScriptSrc.makeScriptSrc()
+  let scriptSrcElem = ScriptSrc.makeScriptSrcElem()
+  let frameSrc = ScriptSrc.makeFrameSrc()
+
+  let helmetMiddleware = Helmet.middleware({
+    scriptSrc: Some(scriptSrc),
+    scriptSrcElem: Some(scriptSrcElem),
+    frameSrc: Some(frameSrc),
+  })
+
+  let middleware = () => helmetMiddleware
+}
+
 let all = () => {
   NextConnect.nc()
+  ->NextConnect.useMiddleware(Security.middleware())
   ->NextConnect.useMiddlewareAsync(Mongo.middlewareAsync())
   ->NextConnect.useMiddlewareAsync(Session.middlewareAsync())
   ->NextConnect.useMiddlewareAsync(User.middlewareAsync())

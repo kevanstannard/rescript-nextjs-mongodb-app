@@ -52,8 +52,6 @@ In another tab, run the Next dev server:
 npm run dev
 ```
 
-## Notes
+## Security
 
-### Can this template be used in production?
-
-Treat this template as experimental code for now.
+This project uses [Helmet](https://helmetjs.github.io/) middleware which adds some security header to responses. The default settings are restrictive and will cause most requests for content that is hosted on other domains to be bblocked. You may need to add those domains to the content security policy. See the `Server_Middleware.Security` module for more details.
