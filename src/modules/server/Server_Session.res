@@ -30,11 +30,28 @@ module UserId = {
 module NextUrl = {
   let key = "nextUrl"
 
-  let set = (req: Next.Req.t, nextUrl: option<string>): Promise.t<unit> => {
+  let getRequestUrl = req => {
+    // When navigating using <Next.Link />, for some reason here we see
+    // requests with URLs starting with `/_next`. We don't want to store
+    // these URLs for redirecting to on the next login, so we detect them here.
+    let url = Next.Req.url(req)
+    if Js.String2.startsWith(url, "/_next/") {
+      None
+    } else {
+      Some(url)
+    }
+  }
+
+  let set = (req: Next.Req.t): Promise.t<unit> => {
+    let nextUrl = getRequestUrl(req)
     switch nextUrl {
     | None => unset(req, key)
     | Some(nextUrl) => setString(req, key, nextUrl)
     }
+  }
+
+  let clear = (req: Next.Req.t): Promise.t<unit> => {
+    unset(req, key)
   }
 
   let get = (req: Next.Req.t): option<string> => {

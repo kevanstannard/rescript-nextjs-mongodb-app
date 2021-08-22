@@ -2,7 +2,7 @@ let handleOK = (req, res, user: Server_User.User.t) => {
   let nextUrl = Server_Session.NextUrl.get(req)
   let userId = MongoDb.ObjectId.toString(user._id)
   Server_Session.UserId.set(req, Some(userId))->Promise.then(_ => {
-    Server_Session.NextUrl.set(req, None)->Promise.then(_ => {
+    Server_Session.NextUrl.clear(req)->Promise.then(_ => {
       let payload: Common_User.Login.loginResult = {
         nextUrl: nextUrl,
         errors: Common_User.Login.emptyErrors(),

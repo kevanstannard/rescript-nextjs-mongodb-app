@@ -39,12 +39,9 @@ let withAuthentication = (req, next) => {
   let {currentUser} = Server_Middleware.getRequestData(req)
   switch currentUser {
   | Some(user) => next(user)
-  | None => {
-      let url = Next.Req.url(req)
-      Server_Session.NextUrl.set(req, Some(url))->Promise.thenResolve(_ => {
-        redirectLogin()
-      })
-    }
+  | None => Server_Session.NextUrl.set(req)->Promise.thenResolve(_ => {
+      redirectLogin()
+    })
   }
 }
 
