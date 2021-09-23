@@ -76,7 +76,7 @@ module Collection = {
   @send external createIndexWithOptions: (t, {..}, {..}) => Promise.t<indexName> = "createIndex"
   @send external find: (t, {..}) => Cursor.t = "find"
   @send external findWithOptions: (t, {..}, {..}) => Cursor.t = "find"
-  @send external findOne: (t, {..}) => Js.Promise.t<Js.Undefined.t<'a>> = "findOne"
+  @send external findOne: (t, {..}) => Js.Promise.t<Js.Null.t<'a>> = "findOne"
   @send external insertOne: (t, 'a) => Js.Promise.t<insertOneResult> = "insertOne"
   @send external updateOne_INTERNAL: (t, {..}, {..}) => Js.Promise.t<updateOneResult> = "updateOne"
 

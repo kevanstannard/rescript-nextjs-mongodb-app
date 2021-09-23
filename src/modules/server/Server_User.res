@@ -1,3 +1,4 @@
+module MongoQuery = Server_MongoQuery
 open MongoDb
 
 // TODO: Update `updated` field on all queries that change user data
@@ -23,61 +24,23 @@ module User = {
     resetPasswordExpiry: Js.Null.t<Js.Date.t>,
   }
 
-  let idField = (id: ObjectId.t) => {"_id": id}
-
-  let emailField = (email: string) => {"email": email}
-
-  let emailQuery = (email: string) =>
-    {
-      "$or": [opaque({"email": email}), opaque({"emailChange": email})],
-    }
-
-  let activationFields = (~isActivated: bool, ~activationKey: Js.Null.t<string>) =>
-    {
-      "isActivated": isActivated,
-      "activationKey": activationKey,
-    }
-
-  let resetPasswordFields = (~resetPasswordKey: string, ~resetPasswordExpiry: Js.Date.t) =>
-    {
-      "resetPasswordKey": resetPasswordKey,
-      "resetPasswordExpiry": resetPasswordExpiry,
-    }
-
-  let passwordFields = (
-    ~passwordHash: string,
-    ~resetPasswordKey: Js.Null.t<string>,
-    ~resetPasswordExpiry: Js.Null.t<Js.Date.t>,
-  ) =>
-    {
-      "passwordHash": passwordHash,
-      "resetPasswordKey": resetPasswordKey,
-      "resetPasswordExpiry": resetPasswordExpiry,
-    }
-
-  let emailChangeFields = (
-    ~emailChange: string,
-    ~emailChangeKey: string,
-    ~emailChangeKeyExpiry: Js.Date.t,
-  ) =>
-    {
-      "emailChange": emailChange,
-      "emailChangeKey": emailChangeKey,
-      "emailChangeKeyExpiry": emailChangeKeyExpiry,
-    }
-
-  let emailFields = (
-    ~email: string,
-    ~emailChange: Js.Null.t<string>,
-    ~emailChangeKey: Js.Null.t<string>,
-    ~emailChangeKeyExpiry: Js.Null.t<Js.Date.t>,
-  ) =>
-    {
-      "email": email,
-      "emailChange": emailChange,
-      "emailChangeKey": emailChangeKey,
-      "emailChangeKeyExpiry": emailChangeKeyExpiry,
-    }
+  module Field = {
+    let id = (id: ObjectId.t) => {"_id": id}
+    let email = (email: string) => {"email": email}
+    let emailChange = (emailChange: Js.Null.t<string>) => {"emailChange": emailChange}
+    let emailChangeKey = (emailChangeKey: Js.Null.t<string>) => {"emailChangeKey": emailChangeKey}
+    let emailChangeKeyExpiry = (emailChangeKeyExpiry: Js.Null.t<Js.Date.t>) =>
+      {"emailChangeKeyExpiry": emailChangeKeyExpiry}
+    let passwordHash = (passwordHash: string) => {"passwordHash": passwordHash}
+    let created = (created: Js.Date.t) => {"created": created}
+    let updated = (updated: Js.Date.t) => {"updated": updated}
+    let activationKey = (activationKey: Js.Null.t<string>) => {"activationKey": activationKey}
+    let isActivated = (isActivated: bool) => {"isActivated": isActivated}
+    let resetPasswordKey = (resetPasswordKey: Js.Null.t<string>) =>
+      {"resetPasswordKey": resetPasswordKey}
+    let resetPasswordExpiry = (resetPasswordExpiry: Js.Null.t<Js.Date.t>) =>
+      {"resetPasswordExpiry": resetPasswordExpiry}
+  }
 }
 
 let toCommonUser = (user: User.t): Common_User.User.t => {
@@ -149,8 +112,8 @@ let signupToUser = (signup: Common_User.Signup.signup): Promise.t<User.t> => {
 }
 
 let findUserByObjectId = (client: MongoClient.t, userId: ObjectId.t): Promise.t<option<User.t>> => {
-  let query = User.idField(userId)
-  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Undefined.toOption)
+  let query = User.Field.id(userId)
+  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Null.toOption)
 }
 
 let findUserByStringId = (client: MongoClient.t, userId: string): Promise.t<option<User.t>> => {
@@ -177,13 +140,14 @@ let insertUser = (client: MongoClient.t, user: User.t) => {
 }
 
 let findUserByEmail = (client: MongoClient.t, email: string): Js.Promise.t<option<User.t>> => {
-  let query = User.emailField(email)
-  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Undefined.toOption)
+  let query = User.Field.email(email)
+  getCollection(client)->Collection.findOne(query)->Promise.thenResolve(Js.Null.toOption)
 }
 
 let checkIfEmailIsTaken = (client: MongoClient.t, email: string) => {
+  let query = MongoQuery.or(User.Field.email(email), User.Field.emailChange(Js.Null.return(email)))
   getCollection(client)
-  ->Collection.find(User.emailQuery(email))
+  ->Collection.find(query)
   ->Cursor.toArray
   ->Promise.then((users: array<User.t>) => {
     let exists = Js.Array2.length(users) > 0
@@ -364,7 +328,10 @@ let login = (client: MongoClient.t, login: Common_User.Login.login) => {
 }
 
 let setIsActivated = (client: MongoClient.t, userId: ObjectId.t) => {
-  let update = User.activationFields(~isActivated=true, ~activationKey=Js.Null.empty)
+  let update = MongoQuery.merge(
+    User.Field.isActivated(true),
+    User.Field.activationKey(Js.Null.empty),
+  )
   getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
 
@@ -400,10 +367,10 @@ let setPassword = (client: MongoClient.t, userId: ObjectId.t, password: string) 
   password
   ->hashPassword
   ->Promise.then(passwordHash => {
-    let update = User.passwordFields(
-      ~passwordHash,
-      ~resetPasswordKey=Js.Null.empty,
-      ~resetPasswordExpiry=Js.Null.empty,
+    let update = MongoQuery.merge3(
+      User.Field.passwordHash(passwordHash),
+      User.Field.resetPasswordKey(Js.Null.empty),
+      User.Field.resetPasswordExpiry(Js.Null.empty),
     )
     getCollection(client)->Collection.updateOneWithSet(userId, update)
   })
@@ -471,10 +438,10 @@ let setEmailChange = (
   emailChange: string,
   emailChangeKey: string,
 ) => {
-  let update = User.emailChangeFields(
-    ~emailChange,
-    ~emailChangeKey,
-    ~emailChangeKeyExpiry=makeEmailChangeKeyExpiry(),
+  let update = MongoQuery.merge3(
+    User.Field.emailChange(Js.Null.return(emailChange)),
+    User.Field.emailChangeKey(Js.Null.return(emailChangeKey)),
+    User.Field.emailChangeKeyExpiry(Js.Null.return(makeEmailChangeKeyExpiry())),
   )
   getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
@@ -554,11 +521,11 @@ let changeEmail = (
 }
 
 let setEmail = (client: MongoDb.MongoClient.t, userId: MongoDb.ObjectId.t, email: string) => {
-  let update = User.emailFields(
-    ~email,
-    ~emailChange=Js.Null.empty,
-    ~emailChangeKey=Js.Null.empty,
-    ~emailChangeKeyExpiry=Js.Null.empty,
+  let update = MongoQuery.merge4(
+    User.Field.email(email),
+    User.Field.emailChange(Js.Null.empty),
+    User.Field.emailChangeKey(Js.Null.empty),
+    User.Field.emailChangeKeyExpiry(Js.Null.empty),
   )
   getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
@@ -601,7 +568,10 @@ let setResetPasswordKey = (
   resetPasswordKey: string,
 ) => {
   let resetPasswordExpiry = makeResetPasswordExpiry()
-  let update = User.resetPasswordFields(~resetPasswordKey, ~resetPasswordExpiry)
+  let update = MongoQuery.merge(
+    User.Field.resetPasswordKey(Js.Null.return(resetPasswordKey)),
+    User.Field.resetPasswordExpiry(Js.Null.return(resetPasswordExpiry)),
+  )
   getCollection(client)->Collection.updateOneWithSet(userId, update)
 }
 
