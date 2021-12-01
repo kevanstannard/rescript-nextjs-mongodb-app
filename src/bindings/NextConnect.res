@@ -6,7 +6,7 @@ type middlewareAsync = (Next.Req.t, Next.Res.t, unit => Promise.t<unit>) => Prom
 type methodHandler = (Next.Req.t, Next.Res.t) => unit
 type methodHandlerAsync = (Next.Req.t, Next.Res.t) => Promise.t<unit>
 
-@module external nc: unit => handler = "next-connect"
+@module("next-connect") external nc: unit => handler = "default"
 
 @send external useMiddleware: (handler, middleware) => handler = "use"
 @send external useMiddlewareAsync: (handler, middlewareAsync) => handler = "use"

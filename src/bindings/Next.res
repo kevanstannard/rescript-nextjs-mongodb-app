@@ -166,6 +166,12 @@ module Head = {
   external make: (~children: React.element) => React.element = "default"
 }
 
+// https://nextjs.org/docs/basic-features/script
+module Script = {
+  @module("next/script") @react.component
+  external make: (~src: string) => React.element = "default"
+}
+
 // https://nextjs.org/docs/advanced-features/custom-error-page#reusing-the-built-in-error-page
 module Error = {
   @module("next/error") @react.component

@@ -1,2 +1,2 @@
-@module
-external parse: string => string = "marked"
+@module("marked") @scope("marked")
+external parse: string => string = "parse"
